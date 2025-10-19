@@ -219,7 +219,7 @@
                   (input)="resize(textarea)"
         ></textarea>
         </div>
-        <div style="" *ngIf="form['type'] == 'richtext'" [froalaEditor]="_share.getFroalaOption('full',this.table_info.table, this.IS_PUBLIC_FORM ? 'iframe-form' : '.app-body')"
+        <div style="" *ngIf="form['type'] == 'richtext'" [froalaEditor]="getFroalaOptionWithPopupFix()"
              [(froalaModel)]="value" (froalaModelChange)="onChangeRichText($event)"></div>
         <ng-container
             *ngIf="['select','select_other_table','table','fields','notify_target_fields','email_fields','file_fields','table_filter'].indexOf(form['type']) >= 0 && option_items && !this.loading">

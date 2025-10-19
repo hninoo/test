@@ -116,5 +116,16 @@ input[type=text], input[type=number] {
 
 ::ng-deep .fr-popup.fr-desktop.fr-ltr.fr-above.fr-active[style="z-index: 5"]{
     left:252px !important; 
+}
+
+/* Fix for link edit popup in mixed single/multi field mode */
+::ng-deep .fr-popup.fr-desktop.fr-ltr.fr-active {
+    position: absolute !important;
+    z-index: 9999 !important;
+}
+
+::ng-deep .fr-popup.fr-desktop.fr-ltr.fr-active .fr-link-insert-layer.fr-layer.fr-active {
+    display: block !important;
+    position: relative !important;
 } 
 
