@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{getModalTitle()}}</h4>
+    <button type="button" class="close" (click)="activeModal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <conditions-form 
+        [table]="table"
+        [default_condition_json]="conditions?.getSearchParamJson()"
+        [output_json]="false"
+        (valueChanged)="onConditionsChanged($event)">
+    </conditions-form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" (click)="save()">保存</button>
+    <button class="btn btn-secondary" (click)="activeModal.dismiss()">キャンセル</button>
+</div>

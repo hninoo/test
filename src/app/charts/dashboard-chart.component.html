@@ -1,0 +1,50 @@
+<div>
+    <div class="dashboard-chart-box ">
+        <div *ngIf="_filter.isChart();else notChart;">
+            <cloud-charts [customFilter]="_filter" [add_link]="true" (onClickDelete)="onClickDelete.emit()" (onClickEdit)="onClickEdit.emit()" [dashboard]="dashboard"></cloud-charts>
+
+        </div>
+        <ng-template #notChart>
+            <div class="card">
+                <div *ngIf="loading_by_filter_id[_filter.id];else NotLoading" class="loader">Loading...</div>
+                <ng-template #NotLoading>
+                    <div class="card-header"><i class="fa fa-list-ol" (click)="goList(_filter)" style="cursor:pointer;"></i>【{{table_label_by_table[_filter.table]}}】 {{_filter.name}}
+
+                        <i *ngIf="dashboard && dashboard.has_edit_grant"
+                           class="fa fa-trash pull-right text-danger trash-icon dashboard-content-icon" (click)="onClickDelete.emit()"></i>
+                        <div class="pull-right mr-2" *ngIf="_filter.id!=null">
+                            <i *ngIf="_filter.editable" class="dashboard-content-icon fa fa-gear" aria-hidden="true"
+                               style="color:gray;"
+                               (click)="onClickEdit.emit()"></i>
+                        </div>
+                        <div class="pull-right mr-3" *ngIf="_filter.id!=null">
+                            <i class=" dashboard-content-icon fa fa-refresh text-primary" aria-hidden="true"
+                               style="cursor: pointer;"
+                               (click)="reload(_filter)"></i>
+                        </div>
+                    </div>
+                    <div class="card-block sticky-table-wrapper p-2" style="overflow: scroll !important;">
+                        <ng-container *ngIf="!data_a_by_filter_id[_filter.id];else FilterDataExist;">
+                            <div class="m-5 text-center">
+                                権限がありません。
+                            </div>
+                        </ng-container>
+                        <ng-template #FilterDataExist>
+                            <admin-table [data_a]="data_a_by_filter_id[_filter.id]" [adminComponent]="parentComponent" [customFilter]="_filter"
+                                         [table]="_filter.table" [isSummarizeMode]="_filter.isSetSummarizeParam()" [hide_scroll]="false"
+                                         [isShowManageCol]="!_filter.isSetSummarizeParam()" [disable_float_management_buttons]="true"
+                                         (viewModallistEvent)="parentComponent.viewmodalopen($event)"
+                                         [sort_params]="sort_params"
+                                         (onClickTableHeader)="sort($event.field)"
+                                         [crossTableHeader]="crossTableHeader_by_filter_id[_filter.id]"></admin-table>
+                        </ng-template>
+                    </div>
+                </ng-template>
+
+            </div>
+
+
+        </ng-template>
+
+    </div>
+</div>

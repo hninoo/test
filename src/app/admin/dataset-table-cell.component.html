@@ -1,0 +1,68 @@
+<!-- <div style="position: relative" [ngStyle]="form.getCellStyle()"> -->
+<!-- ngStyle is causing issues since forms property is missing from table_info, as far as i know.-->
+
+<ng-conainer *ngIf="loading;else NotLoading;">
+    <div *ngIf="loading" class="loader">Loading...</div>
+
+</ng-conainer>
+<ng-template #NotLoading>
+
+    <div style="position: relative;;width:100%;" class="style-container">
+        <ng-container *ngIf="isShowEditForm;else NotIsShowEditForm;">
+            <ng-container *ngIf="isAutoFillField();else notAutoFill">
+                <span *ngIf="this.data.raw_data['id'] != null;else NoAutoId">
+                    {{this.data.view_data[field["Field"]]}}
+                </span>
+                <ng-template #NoAutoId>
+                    (自動挿入)
+                </ng-template>
+
+            </ng-container>
+            <ng-template #notAutoFill>
+                <ng-container *ngIf="form.is_show_by_condition;notShow">
+                    <admin-forms-field (contextmenu)="$event.stopPropagation()"
+                                       *ngIf="!['textarea', 'richtext'].includes(dataType)" [table_info]="table_info" [data]="data"
+                                       [default_value]="data.getRawData(field['Field'])"
+                                       [thumbnail_file_info]="getImageThumbnail(field['Field'])" [grant_menu_a]="grant_menu_a"
+                                       (valueChanged)="onValueChange($event)" [field_name]="field['Field']" [focus]="true" [selectOptionitemsFilter]="selectOptionItemsFilter"
+                                       [cellMode]="true"
+                                       [isEditMode]="isEditMode">
+                    </admin-forms-field>
+                </ng-container>
+                <ng-template #notShow>
+                    -
+                </ng-template>
+            </ng-template>
+        </ng-container>
+        <ng-template #NotIsShowEditForm>
+            <ng-container *ngIf="isEditMode && isAutoFillField() && form.original_type!='calc';else notAutoFillMulti">
+                <span *ngIf="this.data.raw_data['id'] != null;else NoAutoId2">
+                    {{this.data.view_data[field["Field"]]}}
+                </span>
+                <ng-template #NoAutoId2>
+                    (自動挿入)
+                </ng-template>
+
+            </ng-container>
+            <ng-template #notAutoFillMulti>
+                <div [ngClass]="{'pr-4':isShowEditIcon}" *ngIf="data.view_data[field['Field']]">
+                    <dynamic-data-view [is_view_mode]="false" [table_info]="table_info" [field_name]="field['Field']" [crossTableHeader]="crossTableHeader"
+                                       [dataType]="dataType" [data]="data" [nolink]="isShowEditIcon || embedMode" [update]="update" [customFilter]="customFilter"></dynamic-data-view>
+                </div>
+                <i *ngIf="isShowEditIcon && !isAutoFillField()" (click)="onClick($event)" class="fa fa-pencil-square-o text-warning icon-custom-center"
+                   [ngStyle]="{'top': '5px'}"></i>
+
+
+            </ng-template>
+
+
+        </ng-template>
+
+    </div>
+    <button [ladda]="zip_downloading"
+            *ngIf="!isShowEditIcon && form && form.original_type==='file' && form.is_multi_value_mode && this.data.raw_data[field['Field']] && this.data.raw_data[field['Field']].length>0"
+            class="btn btn-primary btn-sm btn-zip" type="button" style="border: 1px solid #ccc;"
+            (click)="zip_download()"
+    ><i class="fa fa-file-archive-o pr-1"></i>zip
+    </button>
+</ng-template>

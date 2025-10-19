@@ -1,0 +1,114 @@
+<!-- チャットボタン -->
+<div class="chat-button" [class.open]="isChatOpen" (click)="toggleChat()">
+    <i class="fa" [ngClass]="{'fa-comments': !isChatOpen, 'fa-times': isChatOpen}"></i>
+</div>
+
+<!-- チャットボックス -->
+<div class="chat-box" [class.open]="isChatOpen" [class.open-no-animation]="isOpenFromUrl">
+    <div class="chat-box-header">
+        <div class="chat-title">PIgeon AI Chat</div>
+        <div class="close-button" (click)="toggleChat()">
+            <i class="fa fa-times"></i>
+        </div>
+    </div>
+
+    <div class="chat-box-body" #chatBody>
+        <div class="chat-messages">
+            <div *ngFor="let message of messages" class="chat-bot-message" [ngClass]="{'chat-bot-user-message': message.type === 'user', 'chat-bot-ai-message': message.type === 'bot'}">
+                <div class="chat-bot-message-icon">
+                    <img *ngIf="message.type === 'bot'" src="assets/pigeon_RGB_small.png" alt="AI" class="bot-icon">
+                    <i *ngIf="message.type === 'user'" class="fa fa-user user-icon"></i>
+                </div>
+                <div class="chat-bot-message-content">
+                    <div [innerHTML]="message.content | safeHtml"></div>
+
+                    <!-- ファイル検索結果の追加アクション（ファイルダウンロード、レコード遷移） -->
+                    <div *ngIf="message.source_files && message.source_files.length > 0 && message.type === 'bot'" class="chat-file-actions">
+                        <div class="chat-file-actions-title">参照元ファイル:</div>
+                        <div *ngFor="let file of message.source_files" class="chat-file-action-item">
+                            <div class="file-info">
+                                <i class="fa fa-file-alt file-icon"></i>
+                                <span class="file-name">{{ file.file_name || file.name }}</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        (click)="downloadFile(file.file_id, file.file_name || file.name)"
+                                        title="ダウンロード">
+                                    <i class="fa fa-download"></i>
+                                </button>
+                                <button *ngIf="isPdfFile(file.file_name || file.name)"
+                                        class="btn btn-sm btn-outline-info"
+                                        (click)="viewFile(file.file_id, file.file_name || file.name)"
+                                        title="ブラウザで閲覧">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary"
+                                        (click)="navigateToRecord(file.table, file.record_id)">
+                                    <i class="fa fa-external-link-alt"></i> レコードを表示
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ボタンUI要素 -->
+                    <div *ngIf="message.buttons && message.buttons.length > 0 && message === messages[messages.length - 1] && message.type === 'bot'" class="chat-bot-ui-buttons">
+                        <ng-container *ngFor="let button of message.buttons">
+                            <button *ngIf="!button.clicked"
+                                    class="chat-bot-ui-button"
+                                    (click)="handleButtonClick(button, message)">
+                                {{ button.text }}
+                            </button>
+                            <div *ngIf="button.clicked" class="chat-bot-ui-applied">
+                                反映済み
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- チェックボックスUI要素 -->
+                    <div *ngIf="message.checkboxes && message.checkboxes.length > 0" class="chat-bot-ui-checkboxes">
+                        <div *ngFor="let option of message.checkboxes" class="chat-bot-ui-checkbox">
+                            <input type="checkbox" [id]="'checkbox-' + option" (change)="handleCheckboxChange(option, $event.target.checked)">
+                            <label [for]="'checkbox-' + option">{{option}}</label>
+                        </div>
+                    </div>
+
+                    <!-- プルダウンUI要素 -->
+                    <div *ngIf="message.pulldown && message.pulldown.length > 0" class="chat-bot-ui-pulldown">
+                        <select (change)="handlePulldownChange($event.target.value)">
+                            <option value="" disabled selected>選択してください</option>
+                            <option *ngFor="let option of message.pulldown" [value]="option">{{option}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 考え中メッセージをAIバルーンとして表示 -->
+            <div *ngIf="isLoading" class="chat-bot-message chat-bot-ai-message">
+                <div class="chat-bot-message-icon">
+                    <img src="assets/pigeon_RGB_small.png" alt="AI" class="bot-icon">
+                </div>
+                <div class="chat-bot-message-content thinking-bubble">
+                    <i class="fa fa-spinner fa-spin"></i> 考え中です...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-box-footer">
+        <textarea
+            [(ngModel)]="inputMessage"
+            (keyup)="handleKeyUp($event)"
+            (input)="handleInputChange($event)"
+            placeholder="質問・要望を入力（300文字まで）"
+            rows="2"
+            [disabled]="isLoading"
+            maxlength="300"
+        ></textarea>
+        <div class="char-counter">
+            {{ inputMessage.length }}/300
+        </div>
+        <button class="send-button" (click)="sendMessage()" [disabled]="isLoading">
+            <i class="fa" [ngClass]="{'fa-paper-plane': !isLoading, 'fa-spinner fa-spin': isLoading}"></i>
+        </button>
+    </div>
+</div>

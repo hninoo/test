@@ -1,0 +1,246 @@
+<table *ngIf="table_info && data_a" class="table table-striped table-bordered  table-responsive pc-list-view" mat-table
+[ngClass]="{'showing-sticky-table-header':showingStickyTableHeader,'showing-sidebar':_share.sidebar_opened,'crosstable':crossTableHeader}"
+>
+    <thead id="pfc-thead-normal-header" class="normal-header"
+    >
+    <tr mat-header-row *ngIf="crossTableHeader">
+        <th [colSpan]="view_fields.length" style="text-align: center">
+            {{customFilter.summarizeFilter.fields[0].label}}
+        </th>
+        <ng-container *ngFor="let sub_label of crossTableHeader.sub_label_a">
+            <th mat-header-cell> {{sub_label}}</th>
+
+        </ng-container>
+
+        <th mat-header-cell
+            class="table-admin-list__inner-cell">
+            <ng-container *ngIf="customFilter.summarizeFilter.getCrossTableSummaryType()">
+                <a href="javascript:void(0)" [ngStyle]="getHeaderStyle(customFilter.summarizeFilter.summary_a[0].summary_field,true)" (click)="sortField(customFilter.summarizeFilter.summary_a[0].summary_field, null, true)"
+                    class="pc-table-head">
+                    {{_share.getSummaryTypeTextBySummaryType(customFilter.summarizeFilter.getCrossTableSummaryType())}}
+                </a>
+                <span class="sort-asc" *ngIf="customFilter.summarizeFilter.summary_a[0].summary_field == sort_params.field && sort_params.asc_desc=='asc'">
+                    <i class="fa fa-sort-asc text-danger"></i>
+                </span>
+                <span class="sort-desc" *ngIf="customFilter.summarizeFilter.summary_a[0].summary_field == sort_params.field && sort_params.asc_desc=='desc'">
+                    <i class="fa fa-sort-desc text-success"></i>
+                </span>
+
+            </ng-container>
+        </th>
+    </tr>
+    <tr mat-header-row>
+        <th *ngIf="table_info.grant.edit && !isSummarizeMode && !is_relation_table && !crossTableHeader && !embedMode && !isEditMode"
+            class="table-admin-list__checkbox" [ngClass]="{'header_first_child_sticky': stored_cell_left.length >0}" style="    width: 30px !important;"
+        >
+            <!-- checkbox -->
+            <input type="checkbox" (change)="checkboxAllChange($event)" [value]="true">
+
+        </th>
+        <th *ngIf="table_info.menu.is_workflow && !isSummarizeMode"
+            (contextmenu)="rightClick(table_info.table+'_workflow', $event,1)"
+            [ngClass]="{'workflow_header_sticky': stored_cell_left.length >0}"
+            [ngStyle]="{left: workflow_col_left+'px'}"
+            [appResizeColumn]='true'
+        >
+            <span *ngIf="table_info.menu.sortable">
+                <a href="javascript:void(0)"
+                   (click)="sortField('workflow_status')">申請状態</a>
+                <i class="fa fa-sort-asc text-danger"
+                   *ngIf="'workflow_status' == sort_params.field && sort_params.asc_desc=='asc'"></i>
+                <i class="fa fa-sort-desc text-success"
+                   *ngIf="'workflow_status' == sort_params.field && sort_params.asc_desc=='desc'"></i>
+            </span>
+            <span
+                *ngIf="!table_info.menu.sortable">申請状態</span>
+        </th>
+        <th *ngIf="isMovable"
+            class="table-admin-list__order order-th">
+            {{getLabel(this.table_info.order_field)}}
+        </th>
+        <ng-container *ngFor="let field of view_fields; let i = index">
+            <th mat-header-cell
+                #fieldTableHeader
+                style="white-space: nowrap"
+                id="pfc-th-{{field.Field}}"
+                [appResizeColumn]='true'
+                [index]='i'
+                [field]="field.Field" class="table-admin-list__inner-cell pfc-field-headers"
+                [col_style]="getHeaderStyle(field.Field)"
+                [ngStyle]="getHeaderStyle(field.Field)"
+                (contextmenu)="rightClick(field.Field, $event, i )"
+            >
+                <span *ngIf="isSortable(field);else notSortable">
+                    <a href="javascript:void(0)" [ngStyle]="getHeaderStyle(field.Field,true)"
+                       (click)="sortField(field.Field)" class="pc-table-head">
+                       {{getLabel(field.Field)}}
+                        <ng-container *ngIf="_share.debug_mode">
+                           ( {{field.Field}} )
+                       </ng-container>
+                    </a>
+                    <span class="sort-asc"
+                    *ngIf="field.Field == sort_params.field && sort_params.asc_desc=='asc'">
+                        <i class="fa fa-sort-asc text-danger"></i>
+                    </span>
+                    <span class="sort-desc"
+                    *ngIf="field.Field == sort_params.field && sort_params.asc_desc=='desc'">
+                        <i class="fa fa-sort-desc text-success"
+                            ></i>
+                    </span>
+                </span>
+                <ng-template #notSortable>
+                    <span [ngStyle]="getHeaderStyle(field.Field,true)">{{getLabel(field.Field)}}
+                        <ng-container *ngIf="_share.debug_mode">
+                            <span>( {{field.Field}} )</span>
+                        </ng-container>
+                    </span>
+                </ng-template>
+                <ng-container *ngIf="isShowSearchButton(field.Field)">
+                    <i class="fa fa-search" (click)="addDeleteSearchField(field.Field)" style="cursor: pointer;margin-left:5px"></i>
+                    <div *ngIf="isShowSearchField(field.Field)">
+                        <search-field [table_info]="table_info" [form]="table_info.forms.byFieldName(field.Field)" [force_use_textfield]="false" [simple_form_flg]="true"
+                                      (valueChange)="onSearchValueChange($event,field.Field)" [condition]="condition"></search-field>
+                    </div>
+                </ng-container>
+            </th>
+            <!-- 追加ヘッダー -->
+            <ng-container *ngFor="let header of table_info.extend_headers">
+                <th *ngIf="header.name != 'ログイン状態' && header.order_after==getLabel(field.Field)"> {{header.name}}</th>
+                <th *ngIf="header.name === 'ログイン状態' && header.order_after==getLabel(field.Field)">
+                    <a href="javascript:void(0)"
+                        (click)="sortField(field.Field, header)" class="pc-table-head">
+                        {{header.name}}
+                        <span class="sort-asc" *ngIf="sort_params.field == 'is_logged_in' && sort_params.asc_desc=='asc'">
+                            <i class="fa fa-sort-asc text-danger"></i>
+                        </span>
+                        <span class="sort-desc" *ngIf="sort_params.field == 'is_logged_in' && sort_params.asc_desc=='desc'">
+                            <i class="fa fa-sort-desc text-success"></i>
+                        </span>
+                    </a>
+                </th>
+            </ng-container>
+        </ng-container>
+
+        <!-- クロス集計用ヘッダ -->
+        <ng-container *ngIf="crossTableHeader">
+            <ng-container *ngFor="let sub_label of crossTableHeader.sub_label_a;let i=index">
+                <th mat-header-cell class="table-admin-list__inner-cell">
+                    <span *ngIf="!breakdown_flg">{{crossTableHeader.header_summarize_by_sublabel[sub_label]}}</span>
+                </th>
+            </ng-container>
+
+            <th mat-header-cell
+                class="table-admin-list__inner-cell">
+                <span *ngIf="!breakdown_flg">{{crossTableHeader.header_summarize_by_sublabel['sum']}}</span>
+            </th>
+        </ng-container>
+
+        <!-- 追加ヘッダー -->
+        <ng-template [ngIf]="!isSummarizeMode">
+            <ng-container *ngFor="let header of table_info.extend_headers">
+                <th *ngIf="header.order_after==-1">{{header.name}}</th>
+            </ng-container>
+        </ng-template>
+        <!-- 管理ヘッダ -->
+        <th class="pc-list-view__manage d-none d-lg-table-cell manage-col-th"
+            *ngIf="isShowManageCol && !isEditMode">
+            <div [hidden]="hide_scroll" class="table-admin-list__scroll-arrow"><i
+                class="fa fa-arrow-right"></i></div>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngIf="data_a.length==0">
+        <td colspan="100%" style="text-align: center">データはありません</td>
+    </tr>
+
+    <!-- slow -->
+    <tr *ngFor="let data of data_a ; let i = index" [attr.data-index]="i" [ngStyle]="getRowStyle(data)"
+        mat-row
+        dataset-table-row
+        [workflow_cell_left]="workflow_col_left"
+        [is_relation_table]="is_relation_table"
+        [data]="data"
+        [dataset]="dataset"
+        [stored_fields]="stored_cell_left"
+        [stored_width_setting]="stored_width"
+        (dblclick)="dbclick(data.raw_data.id,$event)"
+        (onDblClick)="dbclick($event.id,$event,'test')"
+        [view_fields]="view_fields"
+        [showCRUDControls]="isShowManageCol && ( (!data['__disabled'] || (!table_info.grant.detail && !table_info.grant.edit && !table_info.grant.delete)) && !isSummarizeMode)"
+        [showCheckbox]="row_option['show_checkbox']"
+        [isSummarizeMode]="isSummarizeMode"
+        [is_setting]="!!!table_info.menu['editable']"
+        [child_a]="child_a_by_id?child_a_by_id[data.raw_data['id']]:table_info.child_a"
+        [isEditMode]="isEditMode"
+        [showFormEditModal]="showFormEditModal"
+        [closeFormEditModal]="closeFormEditModal"
+        [table_info]="table_info"
+        [data_index]="i"
+        [isEditModalShown]="isEditModalShown"
+        (valueChanged)="cellDataChanged($event)"
+        [movable]="isMovable"
+        [disable_float_management_buttons]="disable_float_management_buttons"
+        [crossTableHeader]="crossTableHeader"
+        [embedMode]="embedMode"
+        [viewDataMode]="viewDataMode"
+        [customFilter]="customFilter"
+        (onDelete)="openAdminTableDeleteModal(data)"
+        (openBranConProsessTransModal)="onOpenBranConProsessTransModal($event)"
+        (onCheckboxChange)="checkboxChange($event)"
+        (onUpDown)="onUpDown()"
+        (onFormatViewData)="onFormatViewData($event)"
+        (contextmenu)="selectRow($event, i)"
+        (onOpenUnlockModal)="openUnlockModal($event)"
+        (ctrlClickEvent)="ctrlClickEventTable($event)"
+        (onSelectData)="onSelectData.emit($event)"
+        (onForceLogout)="onForceLogout.emit($event)"
+        (onManagementButtonClick)="handleTableManagementClick($event)"
+    ></tr>
+    <!-- slow end -->
+    </tbody>
+</table>
+
+<div bsModal #deleteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-danger" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                <button type="button" class="close" (click)="deleteModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>本当に削除してもよろしいですか？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="deleteModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-danger" (click)="delete(modal_data)">削除する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div *ngIf="showContext" style="position: fixed; cursor:pointer;" [ngStyle]="{'left.px': contextMenuX, 'top.px': contextMenuY}">
+    <div class="list-group">
+        <a class="list-group-item list-group-item-action" (click)="duplicateSelectedRow();">行をコピーする</a>
+        <a class="list-group-item list-group-item-action" (click)="add_selected_to_delete_commit();">行を削除する</a>
+    </div>
+</div>
+
+
+<div
+    style="visibility: hidden; position: fixed"
+    [style.left]="contextMenuPosition.x"
+    [style.top]="contextMenuPosition.y"
+    #clFreezeMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="clFreezeMenu"></div>
+<mat-menu #clFreezeMenu="matMenu">
+    <ng-template matMenuContent let-item="item">
+        <button *ngIf="!clear_fix" mat-menu-item (click)="confirmColFreeze($event)">列を固定する</button>
+        <button *ngIf="clear_fix" mat-menu-item (click)="confirmClearFixColumn()">列の固定解除</button>
+        <button *ngIf="table_info.grant.table_editable && table_info.isDatasetTable()" mat-menu-item (click)="confirmFieldWidthChange()">現在の列の幅を保存する</button>
+    </ng-template>
+</mat-menu>
+

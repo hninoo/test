@@ -1,0 +1,25 @@
+<button class="btn btn-sm btn-success mb-2" (click)="addCondition()"><i class="fa fa-plus mr-1"></i>条件追加</button>
+<div cdkDropList (cdkDropListDropped)="dropCondition($event)" *ngIf="conditions">
+    <ng-container *ngFor="let condition of conditions.condition_a; let cond_i = index;">
+        <div cdkDrag class="row">
+            <div class="col-md-11">
+                <button style="position: relative;z-index: 9;" class="btn btn-danger pull-left btn-sm btn mt-1" (click)="delRelationTableCondition(cond_i)"><i class="fa fa-minus"></i></button>
+                <condition-form [id_prefix]="id_prefix + 'condindex_'+cond_i + '_'" [table_info]="table_info" [default_condition]="condition" (valueChanged)="onConditionChanged(cond_i,$event)"
+                                [index]="cond_i" [ignore_type_a]="ignore_type_a" [ignore_field_name_a]="ignore_field_name_a" [target_form_a]="target_form_a"
+                                [is_grant_condition_form]="is_grant_condition_form"
+                                [grant_permission_type]="grant_permission_type"
+
+                ></condition-form>
+            </div>
+            <div class="col-md-1">
+                <div class="drag-handle pull-right" cdkDragHandle>
+                    <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                        <path d="M0 0h24v24H0z" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+</div>

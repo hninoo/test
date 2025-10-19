@@ -1,0 +1,8 @@
+<ng-container *ngIf="table_info">
+    <div *ngIf="target_table_info">
+        {{ target_table_info.getLabel() }}
+    </div>
+    <div class="data_count">
+        データ件数: {{ block._data_count ?? '-' }}
+    </div>
+</ng-container>

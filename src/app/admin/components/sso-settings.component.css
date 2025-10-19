@@ -1,0 +1,328 @@
+.card {
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    padding-bottom: 0.75rem !important;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    max-width: 300px;
+}
+
+/* ファイルアップロードスタイル */
+.fileStyle {
+    min-height: 80px;
+    margin: auto;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    display: table;
+    background-color: #eee;
+    border: dashed 2px #aaa;
+    color: rgb(131, 130, 130);
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.fileStyle:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+}
+
+.fileUploadIcon {
+    margin-right: 10px;
+    font-size: 30px;
+}
+
+.mediumFont {
+    font-size: medium;
+}
+
+/* Date picker スタイル */
+.date-input-group {
+    max-width: 300px;
+}
+
+.input-group-addon {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-left: 0;
+    padding: 0.375rem 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.info-box {
+    background-color: #e9f5ff;
+    border: 1px solid #b8daff;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.info-box h5 {
+    margin-top: 0;
+    color: #004085;
+}
+
+.info-box p {
+    margin-bottom: 5px;
+}
+
+.info-box code {
+    background-color: #f8f9fa;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.expiry-date {
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.manual-link {
+    margin-bottom: 15px;
+}
+
+.manual-link a {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.required {
+    color: #dc3545;
+}
+
+.btn-primary {
+    margin-top: 10px;
+}
+
+/* コピーボタンのスタイル */
+.info-box p {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.info-box p code {
+    margin-right: 10px;
+}
+
+.btn-sm {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+/* SAML設定ヘッダーのスタイル */
+.card-header .d-flex {
+    align-items: center;
+}
+
+.card-header .text-success {
+    color: #28a745 !important;
+}
+
+.card-header .text-muted {
+    color: #6c757d !important;
+}
+
+/* カスタムスイッチのスタイル */
+.custom-control-label {
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.custom-switch .custom-control-label::before {
+    border-radius: 1rem;
+}
+
+.custom-switch .custom-control-label::after {
+    border-radius: 50%;
+}
+
+/* ステータスアイコンのスタイル */
+.card-header .fa {
+    margin-right: 5px;
+}
+
+.card-header .mr-2 {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Bootstrap 4 Custom Control 基本スタイル */
+.custom-control {
+    position: relative;
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.custom-control-input {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #007bff;
+    background-color: #007bff;
+}
+
+.custom-control-label {
+    position: relative;
+    margin-bottom: 0;
+    vertical-align: top;
+}
+
+.custom-control-label::before {
+    position: absolute;
+    top: 0.25rem;
+    left: -1.5rem;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+    content: "";
+    background-color: #fff;
+    border: #adb5bd solid 1px;
+}
+
+.custom-control-label::after {
+    position: absolute;
+    top: 0.25rem;
+    left: -1.5rem;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    content: "";
+    background: no-repeat 50% / 50% 50%;
+}
+
+/* Bootstrap 4 Custom Switch スタイル */
+.custom-control-custom .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.custom-switch {
+    padding-left: 2.25rem;
+}
+
+.custom-switch .custom-control-label::before {
+    left: -2.25rem;
+    width: 1.75rem;
+    pointer-events: all;
+    border-radius: 0.5rem;
+}
+
+.custom-switch .custom-control-label::after {
+    top: calc(0.25rem + 2px);
+    left: calc(-2.25rem + 2px);
+    width: calc(1rem - 4px);
+    height: calc(1rem - 4px);
+    background-color: #adb5bd;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-transform 0.15s ease-in-out;
+    transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-transform 0.15s ease-in-out;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+    background-color: #fff;
+    -webkit-transform: translateX(0.75rem);
+    transform: translateX(0.75rem);
+}
+
+/* 組織連携トグルのマージン調整 */
+.form-group + .form-group {
+    margin-top: 20px;
+}
+
+/* disabled状態のカスタムスイッチ */
+.custom-control-input:disabled ~ .custom-control-label {
+    color: #6c757d;
+    opacity: 0.6;
+}
+
+.custom-control-input:disabled ~ .custom-control-label::before {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+/* スイッチ設定エリアのスタイル */
+.switch-settings-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.switch-settings-title {
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* 設定情報エリアのスタイル */
+.settings-info-box {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.settings-info-title {
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* スイッチ設定エリア内のフォームグループ調整 */
+.switch-settings-box .form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* 設定フォームのセパレーター */
+.card-body > form {
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}

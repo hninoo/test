@@ -1,0 +1,1719 @@
+
+<ng-template [ngIf]="!hasChildren && table_info!=undefined && grant!=undefined">
+    <div class="" [ngClass]="setClasses()" id="pc-list-view">
+        <ng-container *ngIf="!embedMode">
+            <div class="col-lg-12" *ngIf="before_html!=undefined">
+                <div class="card card-accent-primary">
+                    <div class="card-block" [innerHTML]="before_html | safeHtml"></div>
+                </div>
+            </div>
+            <!-- TOP MEMO -->
+            <memo class="col-lg-12" [table_info]="table_info" [view_name]="'list'" (onOpenClose)="onOpenCloseMemo($event)"></memo>
+            <!-- TOP MEMO END -->
+            <div class="col-lg-12" *ngIf="table_info.menu.use_google_map">
+                <google-map
+                    [data_a]="data_a"
+                    [table_info]="table_info"
+                    [filter]="googleMapFilter[table]">
+                </google-map>
+            </div>
+
+        </ng-container>
+        <div class="col-lg-12 padding-0">
+            <div class="card mb-50-mb" [ngClass]="{'mb-0':isSticky()}">
+                <div class="card-header" id="table-card-header">
+                    <ng-container *ngIf="!embedMode">
+
+                        <button *ngIf="isEditMode" (click)="exitEditMode(false)" type="button"
+                                class="btn btn-sm btn-default p-1 pl-5 pr-5 ml-2 edit_mode_btn">
+                            キャンセル
+                        </button>
+                        <button *ngIf="isEditMode" (click)="exitEditMode(true)" type="button"
+                                class="btn btn-sm btn-primary p-1 pl-5 pr-5 ml-2 edit_mode_btn">
+                            保存
+                        </button>
+                        <ng-container *ngIf="!isEditMode">
+                            <div class="pull-left" style="height: 34px;" *ngIf="isShowMenu()">
+                                <button *ngIf="isInsertable()"
+                                        (click)="add()" type="button" class="btn btn-sm btn-outline-primary pl-2 mr-2">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <div class="btn-group" dropdown>
+                                    <button dropdownToggle type="button"
+                                            class="btn btn-sm btn-outline-primary  dropdown-toggle">
+                                        <i class="fa fa-bars"></i>
+                                    </button>
+                                    <ul *dropdownMenu class="dropdown-menu dropdown-menu-left" role="menu">
+                                        <li role="menuitem" *ngIf="table_info.table==='dataset'"><a class="dropdown-item"
+                                                                                                    href="javascript:void(0)" (click)="this.AdminTsvImport.openTsvImportMenu()"
+                                                                                                    *ngIf="isInsertable()"><i
+                                            class="fa fa-plus"></i> エクセルから追加</a></li>
+                                        <ng-container *ngIf="table!='dataset' && table!='view'">
+                                            <li role="menuitem">
+                                                <a class="dropdown-item" href="javascript:void(0)" (click)="openDlCsvModal()" [ladda]="downloading['csv']"
+                                                    data-spinner-color="#999" *ngIf="grant.csv_download">
+                                                    <i class="fa fa-download"></i>
+                                                    CSVダウンロード
+                                                </a>
+                                            </li>
+                                            <ng-container *ngIf="!isSummarizeMode">
+                                                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                        (click)="openCsvModal()" *ngIf=" grant.csv_upload" [ladda]="downloading['csv-upload']"><i
+                                                            class="fa fa-upload"></i>
+                                                        <ng-container>
+                                                            CSVアップロード
+                                                        </ng-container>
+                                                    </a>
+                                                </li>
+                                                <!--
+                                                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                                       (click)="create_view()" *ngIf="grant.create_view"><i
+                                                    class="fa fa-download"></i>
+                                                    ビュー作成</a></li>
+                                                    -->
+                                                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                                       (click)="download_zip()" [ladda]="downloading['csv']"
+                                                                       *ngIf="hasFileField && (!table_info.is_admin_table) && false"><i
+                                                    class="fa fa-download"></i> ZIPダウンロード</a></li>
+                                                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                                       (click)="openTruncateModal()"
+                                                                       *ngIf="grant.delete && table_info.menu.show_delete_all"><i
+                                                    class="fa fa-trash"></i> 全てのデータを削除</a></li>
+                                            </ng-container>
+                                            <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="openEditFilterModal(true,'table','view',false)">
+                                                    <i class="fa fa-table"></i>ビュー作成</a></li>
+                                            <li role="menuitem" *ngIf="table_info.menu.use_google_map"><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="openGoogleMapView()">
+                                                    <i class="fa fa-map-marker"></i>Googleマップビュー作成</a></li>
+                                            <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                                   (click)="openEditFilterModal(true,'table','mix')" *ngIf="grant.summarize">
+                                                                   <i
+                                                class="fa fa-calculator"></i> 集計</a></li>
+                                            <ng-container *ngIf="!table_info.is_child_form">
+                                                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="openEditFilterModal(true,'chart')">
+                                                        <i class="fa fa-line-chart"></i>
+                                                        チャート</a>
+                                                </li>
+                                                <li role="menuitem" *ngIf="_share.isMasterUser() || table_info.grant.table_editable"><a class="dropdown-item" href="javascript:void(0)"
+                                                        (click)="this.AdminLedgerImport.openImportMenu(this.table)"><i class="fa fa-file-pdf-o"></i>
+                                                        帳票登録</a>
+                                                </li>
+                                                <li role="menuitem" *ngIf="grant.update_all">
+                                                    <a class="dropdown-item" href="javascript:void(0)" (click)="openUpdateAllmodal()">
+                                                        <i class="fa fa-pencil-square-o"></i>
+                                                        一括編集</a>
+                                                </li>
+
+                                                <li role="menuitem" *ngIf="table_info.menu.is_iframe_enabled && !isSummarizeMode"><a class="dropdown-item"
+                                                        href="javascript:void(0)" (click)="showEmbedLink()"><i class="fa fa-plus"></i>
+                                                        埋め込みフォームリンク</a>
+                                                </li>
+                                                <li role="menuitem" *ngIf="table_info.menu.is_public_form_enabled && !isSummarizeMode"><a class="dropdown-item"
+                                                        href="javascript:void(0)" (click)="showPublicFormLink()"><i class="fa fa-external-link"></i>
+                                                        公開フォームリンク</a>
+                                                </li>
+                                                <li role="menuitem"
+                                                    *ngIf="table_info.menu.is_public_form_enabled && !isSummarizeMode && _share.cloud_setting['mail_option'] == 'true'">
+                                                    <a class="dropdown-item" href="javascript:void(0)" (click)="showPublicFormEmailLink()">
+                                                        <i class="fa fa-envelope-o"></i>
+                                                        公開フォームをメール配信</a>
+                                                </li>
+                                            </ng-container>
+                                            <li role="menuitem" *ngIf="hasFileField && grant.zip_upload"><a class="dropdown-item" href="javascript:void(0)"
+                                                                                        (click)="uploadFilesByZip(template)"><i
+                                                class="fa fa-file-archive-o"></i>
+                                                ファイルのzipアップロード</a>
+                                            </li>
+                                        </ng-container>
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                               (click)="add_template()" *ngIf="_share.dataset_add_grant && table=='dataset'"><i
+                                            class="fa fa-plus"></i> テンプレートから追加 </a></li>
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                               (click)="AdminJsonImport.openJSONModal()"
+                                                               *ngIf="_share.dataset_add_grant && table=='dataset'"><i class="fa fa-plus"></i>
+                                            JSONから追加 </a></li>
+                                    </ul>
+                                </div>
+                                <div *ngIf="table_info.is_ledger_active && _share.isMasterUser() || table_info.grant.table_editable" class="btn-group ml-2 hidden-sm-down" dropdown>
+                                    <button dropdownToggle type="button"
+                                            class="btn btn-sm btn-outline-primary  dropdown-toggle">
+                                        帳票
+                                    </button>
+                                    <ul *dropdownMenu class="dropdown-menu dropdown-menu-left" role="menu">
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                                               (click)="this.AdminLedgerImport.openImportMenu(this.table)"><i
+                                            class="fa fa-plus"></i>
+                                            追加</a>
+                                        </li>
+                                        <ng-container *ngFor="let ledger of table_info.ledger_a">
+
+                                            <li role="menuitem" *ngIf="table_info.is_ledger_active"><a class="dropdown-item " href="javascript:void(0)"
+                                                                                                       (click)="this.AdminLedgerImport.openImportMenu(this.table,ledger)"><i
+                                                class="fa fa-gear text-danger"></i>
+                                                【{{ledger.name}}】編集 </a>
+
+                                            </li>
+
+                                            <li role="menuitem" *ngIf="ledger.reflect_field && this.table_info.forms.byFieldName(ledger.reflect_field)"><a class="dropdown-item"
+                                                                                                                                                           href="javascript:void(0)"
+                                                                                                                                                           (click)="exportLedgerConfirm(ledger)"><i
+                                                class="fa fa-file-pdf-o"></i>
+                                                【{{ledger.name}}】帳票一括生成({{this.table_info.forms.byFieldName(ledger.reflect_field).label}}) </a>
+
+                                            </li>
+                                        </ng-container>
+                                    </ul>
+
+                                </div>
+
+                                <button *ngIf="searchable && table_info.table!='dataset'"
+                                        (click)="search(true)" type="button" class="btn btn-sm btn-outline-primary pl-2 ml-2">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                                <button *ngIf="searchable" (click)="load(page)" type="button" [disabled]="loading"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2 only-pc">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+
+                                <ng-container
+                                    *ngIf="table_info.table != 'dataset' && table_info.menu.editable_on_list && this.grant.edit && !this.isSummarizeMode  && !switchCalendarView && !isChartMode()">
+
+                                    <button *ngIf="!isEditMode && isBulkEditable()" (click)="toEditMode()" type="button" [disabled]="loading"
+                                            class="btn btn-sm btn-outline-primary pl-2 ml-2 only-pc">
+                                        編集モード
+                                    </button>
+
+
+                                </ng-container>
+
+                            </div>
+                            <!-- admin-tree.component内へ移行
+                            <div *ngIf="current_url=='/admin/dataset'" style="margin-top: -1px;" class="pull-left">
+                                <button *ngIf="!this.switchGroupEdit" [routerLink]="'/admin/dataset_group/edit/new'"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">グループ追加
+                                </button>
+                                <button *ngIf="!this.switchGroupEdit" (click)="groupEdit()"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">メニュー並び替え
+                                </button>
+                                <button *ngIf="this.switchGroupEdit" (click)="groupEdit()"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">メニュー並び替え終了
+                                </button>
+                            </div>
+                            <div *ngIf="current_url=='/admin/dataset'" style="margin-top: -1px;" class="pull-left">
+                                <button *ngIf="this.switchGroupEdit" (click)="groupEditCancel()"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">キャンセル
+                                </button>
+                            </div>
+                            -->
+                            <div *ngIf="table_info._menu.is_calendar_view_enabled" style="margin-top: -1px;" class="pull-left">
+
+                                <button *ngIf="!this.switchCalendarView" (click)="changeView(true)"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">カレンダー表示
+                                </button>
+                                <button *ngIf="this.switchCalendarView" (click)="changeView(false)"
+                                        class="btn btn-sm btn-outline-primary pl-2 ml-2">リスト表示
+                                </button>
+                            </div>
+                            <div style="margin-top: -1px;" class="pull-left flex" *ngIf="table!='dataset' && !isChartMode() && all_searchable_text">
+                                <form (submit)="searchAll($event)">
+                                    <input #searchInput name="search_input" type="text" id="search_input" (change)="changeAllSearchText($event)"
+                                           class="form-control mr-2 mr-lg-0 pl-1 ml-2 ml-sm-2 mr-sm-0" placeholder="簡易検索">
+                                </form>
+                            </div>
+                            <custom-filter-pulldown (onEditFilter)="openEditFilterModal(false)"
+                                                    (onReset)="resetSearch()"
+                                                    (onSelectFilter)="selectSavedFilter($event)"
+                                                    [table_info]="table_info"
+                                                    [customFilter]="customFilter"
+                                                    [has_filter_params]="has_filter_params"
+                                                    (onDeleteFilter)="openDeleteFilterModal()"
+                                                    (onDuplicateFilter)="openDuplicateFilterModal()"
+                                                    [confirmFilterOverwriteConfirmModal]="confirmFilterOverwriteConfirmModal"
+                                                    class="pull-left"
+                                                    *ngIf="grant.table_author || !table_info.menu.not_display_filter"
+                            ></custom-filter-pulldown>
+
+
+                            <custom-filter-pulldown *ngIf="isDisplayViewFilter() && (grant.table_author || !table_info.menu.not_display_filter_view)"
+                                                    (onEditFilter)="openEditFilterModal(false,'table','view')"
+                                                    (onReset)="resetSearch(false,'view')"
+                                                    (onSelectFilter)="selectSavedFilter($event,'view')"
+                                                    [table_info]="table_info"
+                                                    [customFilter]="customView"
+                                                    [has_filter_params]="has_filter_params"
+                                                    (onDeleteFilter)="openDeleteFilterModal('view')"
+                                                    (onDuplicateFilter)="openDuplicateFilterModal('view')"
+                                                    [confirmFilterOverwriteConfirmModal]="confirmFilterOverwriteConfirmModal"
+                                                    [filter_type]="'view'"
+                                                    class="pull-left"
+                            ></custom-filter-pulldown>
+
+                            <google-filter-pulldown *ngIf="table_info?.menu?.isDisplayGoogleMap()"
+                                [table_info]="table_info"
+                                [googleMapFilter]="googleMapFilter[table]"
+                                [currentTable]="table"
+                                (onSelectFilter)="onGoogleMapFilterSelect($event)"
+                                (onDeleteFilter)="onGoogleMapFilterDelete($event)"
+                                (onEditFilter)="openGoogleMapView($event)"
+                                (onResetFilter)="resetGoogleMapFilter()">
+                            </google-filter-pulldown>
+                            <ng-container *ngIf=" checked_id_a.length>0">
+                                <button class="btn btn-sm btn-danger ml-2" (click)="deleteAll()"
+                                        *ngIf="grant.delete && isAllDataDelable() && table_info.menu.enable_all_delete">
+                                    <i class="fa fa-trash"></i> 一括削除
+                                </button>
+                                <button class="btn btn-sm btn-primary ml-2" (click)="copyAll()"
+                                        *ngIf="table_info.menu.is_set_bulk_copy">
+                                    <i class="fa fa-copy"></i> 一括コピー
+                                </button>
+                                <ng-container *ngFor="let ledger of table_info.ledger_a">
+                                    <button *ngIf="ledger.reflect_field" class="btn btn-sm btn-primary ml-2" (click)="exportCheckedLedger(ledger)">
+                                        <i class="fa fa-file"></i> 帳票生成({{table_info.forms.byFieldName(ledger.reflect_field).label}})
+                                    </button>
+                                </ng-container>
+                                <ng-container *ngFor="let ledger of table_info.ledger_a">
+                                    <button *ngIf="ledger.reflect_field" class="btn btn-sm btn-primary ml-2" (click)="dlCheckedLedger(ledger)" [disabled]="downloadingLedger">
+                                        <i class="fa fa-file"></i>
+                                        <span *ngIf="!downloadingLedger">帳票一括DL({{table_info.forms.byFieldName(ledger.reflect_field).label}})</span>
+                                        <span *ngIf="downloadingLedger">ダウンロード中...</span>
+                                    </button>
+                                </ng-container>
+                                <ng-container *ngIf="table_info.menu.is_workflow">
+                                    <button *ngIf="isAllDataAssigned()" class="btn btn-sm btn-success ml-4" (click)="workflowAll('accepted')"
+                                    >
+                                        <i class="fa fa-check"></i> 一括承認
+                                    </button>
+                                    <button *ngIf="isAllDataAssigned() && table_info.menu.enable_all_reject" class="btn btn-sm btn-danger ml-2" (click)="workflowAll('rejected')"
+                                    >
+                                        <i class="fa fa-times"></i> 一括否認
+                                    </button>
+                                    <button *ngIf="isAllDataMyApplying()" class="btn btn-sm btn-warning ml-2" (click)="workflowAll('withdraw')">
+                                        <i class="fa fa-times"></i> 一括取り下げ
+                                    </button>
+                                </ng-container>
+
+                                <button class="btn btn-sm btn-primary ml-2" (click)="exportAll()" [disabled]='!export_ready'
+                                        *ngIf="grant.edit && dataset_view">
+                                    <i class="fa fa-download"></i> JSONエクスポート
+                                </button>
+                                <button class="btn btn-sm btn-primary ml-2" (click)="archiveTable()"
+                                        *ngIf="grant.edit && dataset_view">
+                                    <i class="fa fa-eye-slash"></i> アーカイブする
+                                </button>
+                                <button class="btn btn-sm btn-primary ml-2" (click)="archiveTable('unarchive')"
+                                        *ngIf="grant.edit && dataset_view && showUnarchiveButton">
+                                    <i class="fa fa-eye"></i> アーカイブを解除
+                                </button>
+                            </ng-container>
+
+                            <div class="pull-left" style="height: 34px;" *ngIf="isShowMenu() && !_share.is_onpremise && !isOem()">
+                                <button *ngIf="(table=='dataset' && this._share.dataset_add_grant) || (this._share.admin_setting && this._share.admin_setting['use_pigeonai']==='true')"
+                                        (click)="openPigeonAi()" class="ml-2 btn-sm btn btn-primary" type="button">
+                                    <i class="fa fa-magic"></i> PigeonAI
+                                </button>
+                            </div>
+                            <!-- 要望項目があるかつ、use_analytics_aiがtrueの場合のみ(OEM用) -->
+                            <div class="pull-left" style="height: 34px;" *ngIf="onAnalyticsAiFlg()">
+                                <button
+                                        (click)="openAnalyticsAi()" class="ml-2 btn-sm btn btn-outline-primary" type="button">
+                                    <i class="fa fa-magic"></i> 分析する
+                                </button>
+                            </div>
+                            <!-- freee 連携 -->
+                            <a *ngIf="_share && _share.useFreee() && table_info.isFreeeMasterTable() && !freee_auth && freee_auth_url" [href]="freee_auth_url" class="ml-2 btn-sm btn btn-primary">
+                                freee API連携する
+                            </a>
+                            <button *ngIf="_share && _share.useFreee() && table_info.isFreeeMasterTable() && freee_auth" (click)="getFreeeMaster(table_type)" class="ml-2 btn-sm btn btn-primary">
+                                freeeからマスタを取得
+                            </button>
+                            <button *ngIf="_share && _share.useFreee() && table_info.isFreeeInvoiceTable() && freee_auth" (click)="postFreeeInvoice(table_type)" class="ml-2 btn-sm btn btn-primary">
+                                {{ checked_id_a.length > 0 ? '選択したレコードを' : '' }}freeeへ取引連携
+                            </button>
+                            <!-- 専用機能2 -->
+                            <div class="pull-left" style="height: 34px;" *ngIf="onSokenshaFtpFlg()">
+                                <button (click)="postFtp()" class="ml-2 btn-sm btn btn-expense" type="button">FTP連携
+                                </button>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-container *ngIf="embedMode && !viewDataMode">
+                        <div style="margin-top: -1px;" class="pull-left flex">
+                            <form (submit)="searchAll($event)">
+                                <input [(ngModel)]="all_search_text" name="search_input" type="text" id="search_input"
+                                       class="form-control mr-2 mr-lg-0 pl-1 ml-4" placeholder="簡易検索">
+                            </form>
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngIf="false">
+                        <a class="btn btn-success" href="javascript:void(0)"
+                           (click)="openDlCsvModal()" [ladda]="downloading['csv']" data-spinner-color="#999"
+                           *ngIf="grant.csv_download &&  !table_info.is_child_form"><i class="fa fa-download"></i>
+                            CSVダウンロード</a>
+                    </ng-container>
+
+
+                    <!--ヘッダーに移動予定-->
+                    <!--<div class="pull-left pl-2">{{page_title}}</div>-->
+                    <div class="pull-right only-pc nav-item dropdown" dropdown placement="bottom right"
+                         *ngIf="table_info.grant.table_editable && (table_info.isDatasetTable() || table_info.table === 'admin') && !embedMode ">
+                        <button type="button" class="btn btn-sm" id="table-setting-btn" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+                            <i class="fa fa-gear"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="simple-dropdown">
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="gotoSetting()">
+                                <i class="fa fa-gear"></i>
+                                テーブル設定</a>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="goToNotiPage(true)">
+                                <i class="fa fa-bell-o"></i>
+                                通知設定</a>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="openTableSettingModal()">
+                                <i class="fa fa-user"></i>
+                                個別通知設定</a>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="openDeleteModal(null, 'dataset')">
+                                <i class="fa fa-trash"></i>
+                                テーブル削除</a>
+                        </div>
+                    </div>
+
+                    <div class="pull-right only-pc" *ngIf="!isChartMode() && !this.switchCalendarView && !loading" style="margin-top: -8px">
+                        <ul style="display:none">
+                            <li *ngFor="let item of numbers | paginate: { itemsPerPage: 1, currentPage: page }">
+                                {{ item }}
+                            </li>
+                        </ul>
+
+                        <!-- custom pagination ui -->
+                        <pagination-template #p="paginationApi" (pageChange)="onPageChange($event)">
+
+                            <ul role="navigation" class="ngx-pagination ng-star-inserted" aria-label="Pagination">
+
+                                <ng-container *ngIf="nouse_page; else USE_PAGE;">
+                                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                                        <a *ngIf="!p.isFirstPage()" (click)="p.previous()"></a>
+                                    </li>
+                                    <!-- ログページ用 -->
+                                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                                        <a *ngIf="!p.isLastPage()" (click)="p.setCurrent(p.getCurrent()+1)"></a>
+                                    </li>
+
+                                </ng-container>
+                                <ng-template #USE_PAGE>
+                                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                                        <a *ngIf="!p.isFirstPage()" (click)="p.previous()"></a>
+                                    </li>
+                                    <li *ngFor="let page of p.pages" [class.current]="p.getCurrent() === page.value">
+                                        <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value">
+                                            <span>{{ page.label }}</span>
+                                        </a>
+                                        <div *ngIf="p.getCurrent() === page.value">
+                                            <span>{{ page.label }}</span>
+                                        </div>
+                                    </li>
+                                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                                        <a *ngIf="!p.isLastPage()" (click)="p.next()"></a>
+                                    </li>
+                                </ng-template>
+
+
+                            </ul>
+
+                        </pagination-template>
+                        <!-- <pagination-controls (pageChange)="onPageChange($event)" [previousLabel]="''" [nextLabel]="''">
+                        </pagination-controls> -->
+                    </div>
+
+                </div>
+                <div>
+                    <ng-container>
+                        <div class="card card-bottom1" *ngIf="customFilter && this.customFilter.isSetSearchParam() && !isChartMode() && !lookupformParam">
+                            <div class="card-body p-3 px-4 clearfix">
+                                <div class="row">
+                                    <div class="col-md-3" (click)="toggleFilterContent()"
+                                        style="display:flex;justify-content: space-between;cursor: pointer;">
+                                        <h5><i class="fa fa-search"></i> 検索内容
+                                            <i *ngIf="this.userTableSetting.toggle_filter_content_area" class="fa fa-chevron-up pull-right"></i>
+                                            <i *ngIf="!this.userTableSetting.toggle_filter_content_area" class="fa fa-chevron-down pull-right"></i>
+                                        </h5>
+
+                                    </div>
+                                    <div class="variable-container p-2 rounded"
+                                         *ngIf="all_search_variables.length>0 && this.userTableSetting.toggle_filter_content_area">
+                                        <!-- 変数の内容入力 -->
+                                        <div class="d-flex flex-wrap">
+                                            <ng-container *ngFor="let variable of all_search_variables">
+                                                <div class="variable-item mr-3 mb-2">
+                                                    <div class="d-flex align-items-center bg-light p-2 rounded shadow-sm">
+                                                        <div class="variable-title text-center px-2 py-1 bg-inverse text-white rounded-left">{{variable.name}}</div>
+                                                        <div class="variable-value px-2">
+                                                            <search-field [table_info]="table_info" [placeholder]="'値'" [value]="variable.default_value||variable.value"
+                                                                        [form]="variable.dummy_form" [is_timing_condition]="false"
+                                                                        (valueChange)="variableChanged($event,variable)" [condition]="condition"></search-field>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <hr style="width:100%" *ngIf="all_search_variables.length > 0">
+
+                                <div class="row" *ngIf="this.userTableSetting.toggle_filter_content_area">
+                                    <!-- 検索内容の表示 -->
+                                    <ng-container
+                                        *ngFor="let and_condition_group of customFilter.conditions.condition_or_group;let cond_i = index">
+                                        <div class="col-md-12 row">
+                                            <div class="col-md-5 ml-1 mb-1"
+                                                 *ngFor="let condition of and_condition_group;let cond_i=index">
+                                                <div class="condition">
+                                                    <app-condition-explain (conditionChanged)="conditionValueChanged($event)" [table_info]="table_info" [condition]="condition"
+                                                                           [customFilter]="customFilter"></app-condition-explain>
+                                                    <i class="fa fa-times-circle-o text-danger delete"
+                                                       (click)="deleteCondition(condition)"></i>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div *ngIf="cond_i!=customFilter.conditions.condition_or_group.length-1"
+                                             class="pt-1 pb-1 col-md-12 row">
+                                            <div class="col-md-5">
+                                                <hr style="width:100%">
+                                            </div>
+                                            <div class="col-md-2 text-center and_or">OR</div>
+                                            <div class="col-md-5">
+                                                <hr style="width:100%">
+                                            </div>
+
+                                        </div>
+                                    </ng-container>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- SEARCH FORM END -->
+                    </ng-container>
+
+                    <div *ngIf="loading;then loading_block else loaded_block"></div>
+                    <ng-template #loading_block>
+                        <div class="loader">Loading...</div>
+                    </ng-template>
+                    <div class="animated fadeIn" *ngIf="!first_loading" [hidden]="loading">
+                        <!--
+                        <div class="l-fixed-btns d-lg-none">
+                            <button class="l-fixed-btns__btn -success"
+                                    [ngClass]="{'t2-border': table_info.table === 'dataset' && tutorial_flag === 'false' ? true : false}"
+                                    (click)="add()" *ngIf="grant.edit && isInsertable() && !isSummarizeMode"><i
+                                class="fa fa-plus"></i><span class="d-none d-lg-inline"></span></button>
+                            <button class="l-fixed-btns__btn -default" (click)="search()"
+                                    *ngIf="searchable"><i class="fa fa-search"></i><span
+                                class="d-none d-lg-inline"></span></button>
+                        </div>
+                        -->
+                        <div *ngIf="customFilter && isChartMode();else isTableMode" class="p-md-3 p-0">
+                            <cloud-charts #sampleChart *ngIf="customFilter.type == 'chart'"
+                                          [customFilter]="customFilter" [chart_index]="0" [type]="customFilter.type">
+                            </cloud-charts>
+                        </div>
+                        <ng-template #isTableMode>
+                            <!--
+                            <div class="l-fixed-btns d-lg-none">
+                                <button class="l-fixed-btns__btn -success"
+                                        [ngClass]="{'t2-border': table_info.table === 'dataset' && tutorial_flag === 'false' ? true : false}"
+                                        (click)="add()" *ngIf="grant.edit && isInsertable() && !isSummarizeMode"><i
+                                    class="fa fa-plus"></i><span class="d-none d-lg-inline"></span></button>
+                                <button class="l-fixed-btns__btn -default" (click)="search()"
+                                        *ngIf="searchable"><i class="fa fa-search"></i><span
+                                    class="d-none d-lg-inline"></span></button>
+                            </div>
+                            -->
+                            <div>
+                                <div id="sticky-table-wrapper" #stickyTableWrapper
+                                     [ngClass]="{'no-sticky':!isSticky(),'sticky-table-wrapper': (_share.admin_setting && _share.admin_setting.scrollable==='true') || data_a.length==0,'list-view':current_url!='/admin/dataset' && !this.switchCalendarView}"
+                                     [ngStyle]="{'overflow-y':'auto','overflow-x':'scroll','min-height':+getTableMinHeight()+'px'}"
+                                     (scroll)="scrollTable($event)"
+                                     (scrollend)="scrollTableEnd($event)"
+                                     doubleScrollbar [loading]="loading" [total_count]="total_count">
+
+                                    <!-- データメインテーブル-->
+                                    <admin-tree *ngIf="current_url=='/admin/dataset' && !this.switchCalendarView" [data_a]="data_a"
+                                                [isSummarizeMode]="isSummarizeMode" [isShowManageCol]="isShowManageColFunc()"
+                                                [table_info]="table_info" [checked_delete_id_a]='checked_id_a'
+                                                [checkboxChange]="checkboxChange" [isEditMode]="isEditMode"
+                                                [openDeleteModal]="openDeleteModal" [switchGroupEdit]="switchGroupEdit"
+                                                [openGroupDeleteModal]="openGroupDeleteModal"
+                                                [reset_tree]="reset_tree"
+                                                [group_edit_data_a]="group_edit_data_a" [is_group_opening]="click_group"
+                                                [group_sort_data_a]="group_sort_data_a" [group_edit_data]="group_edit_data"
+                                                [menu_root]="this._share.menu_root"
+                                                [share]="this._share"
+                                                (openDuplicateModal)="openDuplicateModal($event)"
+                                                (onGroupChange)="adminTreeEvent($event)" [toasterService]="toasterService"></admin-tree>
+                                    <admin-table id="list-table-container" *ngIf="current_url!='/admin/dataset' && !this.switchCalendarView" [parent]="getThis()"
+                                                 #table
+                                                 [adminComponent]="getThis()" [data_a]="data_a" [customFilter]="getMergedCustomFilter()"
+                                                 [sort_params]="sort_params" [table_info]="table_info"
+                                                 [isSummarizeMode]="isSummarizeMode" [hide_scroll]="hide_scroll"
+                                                 [isShowManageCol]="isShowManageColFunc()" [openDeleteModal]="openDeleteModal"
+                                                 (openBranConProsessTransModal)="openBranConProsessTransModal($event)"
+                                                 (onCheckboxChange)="checkboxChange()" [setSelectedCellId]="setSelectedCellId"
+                                                 [selectedCellId]="selectedCellId"
+                                                 [showFormEditModal]="showFormEditModal"
+                                                 [closeFormEditModal]="closeFormEditModal" [isEditModalShown]="isEditModalShown"
+                                                 [isMovable]="isMovable" [onUpDown]="onUpDown"
+                                                 [onFormatViewData]="onFormatViewData" [reload]="reload"
+                                                 [child_a_by_id]="child_a_by_id"
+                                                 [sort]="sort" [isEditMode]="isEditMode"
+                                                 [crossTableHeader]="crossTableHeader"
+                                                 [embedMode]="embedMode"
+                                                 [viewDataMode]="viewDataMode"
+                                                 [clear_header_style]="clear_header_style"
+                                                 (onDuplicateSelectedIndex)="duplicateSelectedIndex()"
+                                                 (onSelectRow)="onSelectRowIndex($event)"
+                                                 (onAddToDeleteCommit)="deleteModal.show()"
+                                                 (viewModallistEvent)="viewmodalopen($event)"
+                                                 (changeSearchValue)="onChangeSearchValue($event)"
+                                                 (onOpenUnlockModal)="openUnlockModal($event)"
+                                                 (ctrlClickEvent)="ctrlClickEvent($event)"
+                                                 (onSelectData)="onSelectData.emit($event)"
+                                                 (onConfirmChangeAllFieldWidth)="onConfirmChangeAllFieldWidth($event)"
+                                                 (onForceLogout)="forceLogoutClick($event)"
+                                                 (onCellDataChanged)="onCellDataChanged($event)"
+                                                 [scrollLeft] ="scrollLeft"
+                                                 [enableStickyTableHeader] ="enableStickyTableHeader"
+                                                 [stickyTableHeaderLists] ="stickyTableHeaderLists"
+                                    >
+
+                                    </admin-table>
+                                    <div *ngIf="this.switchCalendarView && table_info">
+                                        <admin-calendar-view
+                                            [isSummarizeMode]="isSummarizeMode" [isShowManageCol]="isShowManageColFunc()"
+                                            [table_info]="table_info" [checked_delete_id_a]='checked_id_a'
+                                            [checkboxChange]="checkboxChange" [isEditMode]="isEditMode"
+                                            [openDeleteModal]="openDeleteModal" [current_url]="current_url"
+                                            [calendarDefaultDate]="_route.queryParams['value']['registeredDate'] ??''"
+                                            [customFilter]="getMergedCustomFilter()" [toasterService]="toasterService"> </admin-calendar-view>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row card-header margin-left0" style="padding-top:4px" *ngIf="!embedMode">
+                                <div class="col-3" *ngIf="isEditMode">
+                                    <button class="btn btn-success"
+                                            *ngIf=" table_info.menu.editable_on_list && !isSummarizeMode && grant.edit"
+                                            (click)="appendEmptyDataObject()"><i class="fa fa-plus"></i></button>
+                                </div>
+                                <ng-container *ngIf="_share.getHeaderDatasetName()!=''">
+
+
+                                    <div class="col-12">
+                                        <h5 class="table-name sp_display" *ngIf="!nouse_page">
+                                            {{_share.getHeaderDatasetName()}}
+                                            <small>合計{{_share.getHeaderDatasetCount()}}件</small>
+                                        </h5>
+                                        <div class="pull-right sp_display"
+                                             *ngIf="table_info.grant.table_editable && (table_info.isDatasetTable() || table_info.table === 'admin') && !embedMode ">
+                                            <button type="button" (click)="gotoSetting()" class="btn btn-sm ">
+                                                <i class="fa fa-gear"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <div class="col-12 only-pc" *ngIf="!isEditMode && !isSticky()">
+                                    <div class="pull-right pb-1" *ngIf="!isChartMode() && !this.switchCalendarView && !loading" style="   margin-right: 30px;">
+                                        <ul style="display:none">
+                                            <li *ngFor="let item of numbers | paginate: { itemsPerPage: 1, currentPage: page }">
+                                                {{ item }}
+                                            </li>
+                                        </ul>
+                                        <pagination-template #p="paginationApi" (pageChange)="onPageChange($event)">
+
+                                            <ul role="navigation" class="ngx-pagination ng-star-inserted" aria-label="Pagination">
+
+                                                <ng-container *ngIf="nouse_page; else USE_PAGE;">
+                                                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                                                        <a *ngIf="!p.isFirstPage()" (click)="p.setCurrent(p.getCurrent()-1)"></a>
+                                                    </li>
+                                                    <!-- ログページ用 -->
+                                                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                                                        <a *ngIf="!p.isLastPage()" (click)="p.setCurrent(p.getCurrent()+1)"></a>
+                                                    </li>
+
+                                                </ng-container>
+                                                <ng-template #USE_PAGE>
+                                                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                                                        <a *ngIf="!p.isFirstPage()" (click)="p.setCurrent(1)"></a>
+                                                    </li>
+                                                    <li *ngFor="let page of p.pages" [class.current]="p.getCurrent() === page.value">
+                                                        <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value">
+                                                            <span>{{ page.label }}</span>
+                                                        </a>
+                                                        <div *ngIf="p.getCurrent() === page.value">
+                                                            <span>{{ page.label }}</span>
+                                                        </div>
+                                                    </li>
+                                                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                                                        <a *ngIf="!p.isLastPage()" (click)="p.setCurrent(p.getLastPage())"></a>
+                                                    </li>
+                                                </ng-template>
+
+
+                                            </ul>
+
+                                        </pagination-template>
+                                        <!-- <pagination-controls (pageChange)="onPageChange($event)" [previousLabel]="''" [nextLabel]="''">
+                                        </pagination-controls> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+
+
+                    </div>
+                    <div *ngIf="tutorial_flag == 'false'">
+                        <!-- tutorial 2 -->
+                        <img src="../../assets/img/tutorials/t2-p1.png" *ngIf="(table_info.table== 'dataset')"
+                             class="img-fluid t2-image-1 ml-4" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/.col-->
+    </div>
+    <!--/.row-->
+
+
+    <div bsModal #deleteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true" (onHide)="onHideDeleteModal()">
+        <div *ngIf="deleteModal.isShown" class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="deleteModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <span *ngIf="checked_id_a.length">{{ checked_all ? total_count - unchecked_id_a.length : checked_id_a.length }}件のデータを</span>
+                        <span *ngIf="getButtonState()=='csv_upload'">！テーブル内のデータが全削除されます。一度削除したデータは元に戻せません。</span>
+                        本当に削除してもよろしいですか？</p>
+                    <p *ngIf="checked_all && unchecked_id_a.length == 0" style="font-size: 1.2em; font-weight: bold; color: red;">全データが削除されます</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="deleteModal.hide()">キャンセル</button>
+                    <ng-container [ngSwitch]="getButtonState()">
+                        <!-- CSVアップロードの場合 -->
+                        <button *ngSwitchCase="'csv_upload'"
+                                type="button"
+                                class="btn btn-danger"
+                                (click)="_share.useMasterUserAuth(table, modal_data, 'upload_csv') ? masterUserConfirm('upload_csv', []) : uploadCsv()">
+                                全削除してアップロードする
+                        </button>
+
+                        <!-- 編集モードでない場合 -->
+                        <button *ngSwitchCase="'normal'"
+                                type="button"
+                                class="btn btn-danger"
+                                [ladda]="sending"
+                                (click)="_share.useMasterUserAuth(table, modal_data, delete_table_type) ? masterUserConfirm(delete_table_type) : delete(modal_data)">
+                            削除する
+                        </button>
+
+                        <!-- 編集モードの場合 -->
+                        <button *ngSwitchCase="'edit_mode'"
+                                type="button"
+                                class="btn btn-danger"
+                                (click)="addSelectedToDelete()">
+                            削除する
+                        </button>
+                    </ng-container>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <confirm-modal #groupDeleteModal [text]="'本当に削除してもよろしいですか？'" [submit_button_text]="'削除する'"
+        (onOk)="deleteGroup(currentDeleteGroup)" [type]="'danger'"></confirm-modal>
+
+    <div bsModal #copyModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div *ngIf="copyModal.isShown" class="modal-dialog modal-primary" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"></h4>
+                    <button type="button" class="close" (click)="copyModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>本当にコピーしてもよろしいですか？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="copyModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-primary" [ladda]="sending"
+                            (click)="copy(modal_data)">コピーする
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div bsModal #masterUserConfirmModal="bs-modal" class="modal fade auth-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="masterUserAuthCancel()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div *ngIf="!sending">
+                            <p>認証ユーザーを選ぶ</p>
+                            <div *ngIf="master_users.length == 0">
+                                選択できるマスターユーザーがいません
+                            </div>
+                            <select *ngIf="master_users.length > 0" class="form-control" [(ngModel)]="auth_master_user" style="width: auto;">
+                                <option value="0">
+                                   選択してください
+                                </option>
+                                <ng-container *ngFor="let master_user of master_users">
+                                    <option value="{{master_user.id}}">
+                                        {{master_user.name}}
+                                    </option>
+                                </ng-container>
+                            </select>
+                        </div>
+                        <div *ngIf="sending" class="blinking">
+                            <div>他ユーザーの承認待ちです</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="masterUserAuthCancel()">キャンセル</button>
+                    <button  type="button" class="btn btn-danger" [ladda]="sending"
+                            (click)="masterUserAuth(modal_data)">申請する
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <div bsModal #viewModal="bs-modal" class="modal fadeInOverlay modal-z-1060" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true" (onHide)="resetUrl()">
+        <div class="modal-dialog modal-default" role="document" [ngClass]="{'modal-max':embedMode}">
+            <div class="modal-content">
+
+                <div class="modal-header ">
+                    <h4 class="modal-title">詳細情報</h4>
+                    <button type="button" class="close" (click)="viewmodalhide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <app-view-modal [table_info]="table_info" [data]="selectedData" [selectDataMode]="embedMode"></app-view-modal>
+
+                </div>
+                <div class="modal-footer">
+                    <ng-container *ngIf="!embedMode">
+                        <button type="button" class="btn btn-secondary" (click)="copyUrl()">URLをコピー</button>
+                        <button *ngIf="table_info.grant.edit && !table_info.menu.is_onlyone && !table_info.menu.hide_duplicate_button && table_info.grant.duplicate" class="btn btn-info text-bold"
+                                type="submit"
+                                (click)="new_with_copy(selectedData)">
+                            複製
+                        </button>
+                        <button type="button" class="btn btn-warning" *ngIf="table_info.grant.edit && selectedData && selectedData.isEditable()" (click)="goToEdit()">編集</button>
+                    </ng-container>
+                    <button type="button" class="btn" (click)="viewModal.hide()">閉じる</button>
+                    <ng-container *ngIf="embedMode && !viewDataMode">
+                        <button type="button" class="btn btn-primary" (click)="this.viewModal.hide();onSelectData.emit({id:selectedData.raw_data['id']})">選択</button>
+                    </ng-container>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div bsModal #deleteFilterModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div *ngIf="deleteFilterModal.isShown" class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="deleteFilterModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    
+                    <p>本当に現在の{{modalCustomFilter.filter_type == 'filter' ? 'フィルタ' : 'ビュー'}}({{modalCustomFilter?.name ? modalCustomFilter.name : 'カスタム'}})を削除してもよろしいですか？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="deleteFilterModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-danger" (click)="deleteFilter()">削除する</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div bsModal #truncateModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div *ngIf="truncateModal.isShown" class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="truncateModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>テーブル内のデータが全て削除されます。<br>本当に削除してもよろしいですか？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="truncateModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-danger" (click)="_share.useMasterUserAuth(table, null, 'truncate') ? masterUserConfirm('truncate') : truncate()">削除する</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div bsModal #csvModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true" (onHide)="onHideCsvModal()">
+        <div *ngIf="csvModal.isShown" class="modal-dialog modal-default" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-upload"></i> CSVアップロード</h4>
+
+                    <button type="button" class="close" (click)="csvModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">
+                        ※CSVのヘッダー(1行目)は編集しないでください。
+                    </p>
+                    <ul>
+                        <li>ID列が空の行は新規データとして挿入されます。</li>
+                        <li>ID列に入力されているIDと同じIDのデータがある場合、データが更新されます。</li>
+                        <li>作成者、最終更新者、更新日時、作成日時は自動更新されます。</li>
+                        <li>他テーブル参照のデータを更新する場合、参照するデータのID（追加オプション設定で設定している場合はその項目の値）を入力してください。</li>
+                    </ul>
+                    <p class="text-danger font-weight-bold">
+                        ！セルを空欄にしてアップロードした場合は、元の値は保持されず、値が削除（計算式の場合は値の更新）されるよう変更されました。元の値を保持したい場合、{{ '{NOCHANGE}' }} をセルに入れるか、その項目列をCSVから削除してアップロードを行ってください。
+                    </p>
+                    <p>
+                        <button type="button" class="btn btn-outline-primary mr-3" (click)="prepare_csv()"
+                                [ladda]="downloading['csv']">
+                            <i class="fa fa-download"></i> CSVダウンロード
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" (click)="downloadCsvForUpload()"
+                                [ladda]="downloading['csv']">
+                            <i class="fa fa-download"></i> CSVダウンロード（空）
+                        </button>
+                    </p>
+
+                    <p>
+                        <input #inputCsv id="inputCsv" type="file" (change)="changeCsv($event)" accept="text/csv">
+                    </p>
+                    <div *ngIf="table=='admin' || table=='dataset__' + this._share.admin_table_num">
+                        <input type="checkbox" [(ngModel)]="sendMailFlg" type="hidden">&nbsp;<label for="send_mail">
+                        <input type="checkbox" [checked]="sendMailFlg=='true'" id="send_mail"
+                               (change)="sendMailFlg=(sendMailFlg=='true')?'false':'true';">
+                                新規ユーザーにメールを送信する</label>
+                    </div>
+
+
+                    <div class="checkbox" *ngIf="table_info.menu.show_delete_all && grant.delete">
+                        <label>
+                            <input [(ngModel)]="resetBeforeCsvUpload" type="hidden" name="show_id">
+                            <input type="checkbox" [checked]="resetBeforeCsvUpload=='true'"
+                                   (change)="resetBeforeCsvUpload=(resetBeforeCsvUpload=='true')?'false':'true';">
+                            アップロード前にデータをリセットする
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="csvModal.hide()">キャンセル</button>
+                    <button type="button" *ngIf="resetBeforeCsvUpload == 'false'" class="btn btn-primary" [ladda]='sending' (click)="openUploadConfirmModal()">
+                        アップロード
+                    </button>
+                    <button type="button" *ngIf="resetBeforeCsvUpload == 'true'" class="btn btn-primary" [ladda]='sending' (click)="deleteAll()">
+                        データをすべて削除してアップロード
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- アップロード確認モーダル -->
+    <div bsModal #uploadConfirmModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="uploadConfirmModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger font-weight-bold">
+                        ！セルを空欄にしてアップロードした場合は、元の値は保持されず、値が削除（計算式の場合は値の更新）されるよう変更されました。元の値を保持したい場合、{{ '{NOCHANGE}' }} をセルに入れるか、その項目列をCSVから削除してアップロードを行ってください。
+                    </p>
+                    <div class="form-check mt-3">
+                        <label class="form-check-label" for="skipConfirmation">
+                            <input type="checkbox" class="form-check-input" id="skipConfirmation" [(ngModel)]="skipUploadConfirmation">
+                            次回から表示しない
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="uploadConfirmModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-primary" [ladda]='sending' (click)="_share.useMasterUserAuth(table, modal_data, 'upload_csv') ? masterUserConfirm('upload_csv', []) : uploadCsv()">
+                        アップロード
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div bsModal #dlCsvModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div *ngIf="dlCsvModal.isShown" class="modal-dialog modal-default" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-upload"></i> CSVダウンロード</h4>
+
+                    <button type="button" class="close" (click)="dlCsvModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">
+                        ※CSVアップロードに使用する場合、ヘッダー(1行目)は編集しないでください。<br>
+                    </p>
+                    <div class="checkbox" *ngIf="customFilter || customView">
+                        <label>
+                            <input [(ngModel)]="is_use_filter_for_csv_dl" type="hidden" name="show_id">
+                            <input type="checkbox" [checked]="is_use_filter_for_csv_dl"
+                                   (change)="is_use_filter_for_csv_dl=(is_use_filter_for_csv_dl)?false:true;">
+                            CSVに現在のフィルタを反映する
+                        </label>
+                    </div>
+                    <div class="checkbox" *ngIf="table=='admin'">
+                        <label>
+                            <input [(ngModel)]="expand_email_rows" type="hidden" name="expand_email">
+                            <input type="checkbox" [checked]="expand_email_rows"
+                                   (change)="expand_email_rows=(expand_email_rows)?false:true;">
+                            メールアドレスを1行ずつに分割する
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="dlCsvModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-primary" [ladda]='sending' (click)="prepare_csv()"> ダウンロード
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <div bsModal #errorModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-danger" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                        {{modal_error_title}}</h4>
+                    <button type="button" class="close" (click)="errorModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="error-modal-content py-3" [innerHTML]="modal_error_message | safeHtml">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="errorModal.hide()">閉じる</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="only-phone navigation-phone">
+        <ul style="display:none">
+            <li *ngFor="let item of numbers | paginate: { itemsPerPage: 1, currentPage: page }">
+                {{ item }}
+            </li>
+        </ul>
+        <pagination-template #p="paginationApi" (pageChange)="onPageChange($event)">
+
+            <ul role="navigation" class="ngx-pagination ng-star-inserted" aria-label="Pagination">
+
+                <ng-container *ngIf="nouse_page; else USE_PAGE;">
+                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                        <a *ngIf="!p.isFirstPage()" (click)="p.setCurrent(p.getCurrent()-1)"></a>
+                    </li>
+                    <!-- ログページ用 -->
+                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                        <a *ngIf="!p.isLastPage()" (click)="p.setCurrent(p.getCurrent()+1)"></a>
+                    </li>
+
+                </ng-container>
+                <ng-template #USE_PAGE>
+                    <li class="pagination-previous" [class.disabled]="p.isFirstPage()">
+                        <a *ngIf="!p.isFirstPage()" (click)="p.setCurrent(1)"></a>
+                    </li>
+                    <li *ngFor="let page of p.pages" [class.current]="p.getCurrent() === page.value">
+                        <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value">
+                            <span>{{ page.label }}</span>
+                        </a>
+                        <div *ngIf="p.getCurrent() === page.value">
+                            <span>{{ page.label }}</span>
+                        </div>
+                    </li>
+                    <li class="pagination-next" [class.disabled]="p.isLastPage()">
+                        <a *ngIf="!p.isLastPage()" (click)="p.setCurrent(p.getLastPage())"></a>
+                    </li>
+                </ng-template>
+
+
+            </ul>
+
+        </pagination-template>
+
+        <!-- don't remove  if remove, ui style  will not work -->
+        <pagination-controls class="d-none" (pageChange)="onPageChange($event)" [previousLabel]="''" [nextLabel]="''">
+        </pagination-controls>
+
+    </div>
+
+    <toaster-container></toaster-container>
+
+        <sso-settings *ngIf="current_page == 'sso-settings'"></sso-settings>
+</ng-template>
+
+<admin-json-import #adminJsonImport
+                  [sending]="sending"
+                  [json]="json"
+                  [data_a]="data_a"
+                  [modal_error_title]="modal_error_title"
+                  [modal_error_message]="modal_error_message"
+                  [csv]="csv"
+                  (reloadPage)="reloadPage()"
+
+                  >
+</admin-json-import>
+
+<div bsModal #exportModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">テーブルのエクスポート</h4>
+                <button type="button" class="close" (click)="exportModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="grant && grant.edit && missing_datasets.length>0" class="text-danger">
+                    ※ 関連テーブルの【{{missing_datasets}}】も含めエクスポートされます。</p>
+                <h5>ダウンロードオプション:</h5>
+                <div>※添付データはエクスポートされません</div>
+                <br/>
+                <div class="checkbox">
+                    <label>
+                        <input class="ml-2" type="checkbox" name="export_data"
+                               (change)="export_data=!export_data"/>
+                        データを含める
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input class="ml-2" type="checkbox" name="export_grant"
+                               (change)="export_grant=!export_grant"/>
+                        権限設定を含める
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input class="ml-2" type="checkbox" name="export_filter"
+                               (change)="export_filter=!export_filter"/>
+                        フィルタ/ビューを含める
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input class="ml-2" type="checkbox" name="export_notification"
+                               (change)="export_notification=!export_notification"/>
+                        通知設定を含める
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="exportModal.hide()">キャンセル</button>
+                <!-- <a href="{{_connect.getApiUrl()}}/admin/download-json?export_data={{export_data}}&export_notification={{export_notification}}&export_grant={{export_grant}}&export_filter={{export_filter}}&{{query_string}}"
+                   target="_blank">
+                    <button type="button" (click)="exportModal.hide()" class="btn btn-sm btn-primary ml-2"
+                            [disabled]='!export_ready'>
+                        {{missing_datasets.length > 0 ? "関連するデータセットをエクスポートする" : "エクスポート"}}
+                    </button>
+                </a> -->
+                <button type="button" (click)="onExport()" class="btn btn-sm btn-primary ml-2" [disabled]='!export_ready'>
+                    {{missing_datasets.length > 0 ? "関連するデータセットをエクスポートする" : "エクスポート"}}
+                </button>
+                <!-- <button *ngIf="isEditMode" type="button" class="btn btn-danger"
+                (click)="addSelectedToDelete()">削除する</button> -->
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<div bsModal #chartModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <ng-container *ngIf="chartModal.isShown">
+        <charts-modal [customFilter]="modalCustomFilter" [chart_index]="0" [parent]="getThis()" [save_on_edit]="false"
+                      (onClickSaveButton)="onCloseChartModal($event,true)" [show_preview]="true"
+                      (onClickCancelButton)="onCloseChartModal($event)" [table_info]="table_info"
+                      (onClickPreviewButton)="onClickPreviewButton($event)"></charts-modal>
+    </ng-container>
+
+</div><!-- /.modal -->
+
+<div bsModal #chartTitleModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content" *ngIf="modalCustomFilter">
+            <div class="modal-header">
+                <h4 class="modal-title">タイトルを入力して下さい</h4>
+                <button type="button" class="close" (click)="chartTitleModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" *ngIf="this.chartTitleModal.isShown">
+                <div class="row">
+                    <div class="col-md-3 font-weight-bold">
+                        タイトル
+                    </div>
+                    <div class="col-md-9">
+                        <input [(ngModel)]="modalCustomFilter.name" class="form-control">
+                    </div>
+
+                    <div class="col-md-3 font-weight-bold">
+                        権限
+                    </div>
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            <label><input type="radio" [(ngModel)]="modalCustomFilter.grant"
+                                          value="public">&nbsp;全員に表示</label><br>
+                            <label><input type="radio" [(ngModel)]="modalCustomFilter.grant"
+                                          value="private">&nbsp;自分のみ表示</label><br>
+                            <label><input type="radio" [(ngModel)]="modalCustomFilter.grant" value="custom"
+                            >&nbsp;詳細権限設定</label>
+
+                            <ng-container *ngIf="modalCustomFilter.grant === 'custom'">
+                                <br>
+                                <hr>
+                                <grant-group-form [value]="modalCustomFilter.edit_grant_group_id" [title]="'編集可能ユーザー'" (onChangeValue)="onEditGrantGroupIdChanged($event)"></grant-group-form>
+                                <hr>
+                                <grant-group-form [value]="modalCustomFilter.view_grant_group_id" [title]="'閲覧のみ可能ユーザー'" (onChangeValue)="onViewGrantGroupIdChanged($event)"></grant-group-form>
+
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="chartTitleModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-warning" (click)="saveFilter(true)">保存する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+
+</div><!-- /.modal -->
+
+
+<div bsModal #mailPublicFormModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">公開フォームメールテンプレート作成</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 font-weight-bold">
+                        １メールアドレスに対し、１登録に制限する
+                        <br>
+                        <small>
+                            同じメールアドレスが重複してデータに存在する場合は、１度しか送られません。
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="switch switch-text switch-pill switch-primary">
+                            <input type="checkbox" class="switch-input" [value]="true" [(ngModel)]="mail_public_form_option.use_data_related_form">
+                            <span class="switch-label" data-on="On" data-off="Off"></span>
+                            <span class="switch-handle"></span>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="mailPublicFormModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="createEmailTempate()">作成する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+
+</div><!-- /.modal -->
+
+
+<form-field-edit-modal bsModal #editFormFieldModal [form]="formEditData.form"
+                       [table_info]="table_info" [field]="formEditData.field" [grant_menu_a]="formEditData.grant_menu_a"
+                       [data_index]="formEditData.data_index" [is_setting]="formEditData.is_setting" [data]="formEditData.data"
+                       [selectChange]="formEditData.selectChange" (onHide)="onHiddenEditModal()"
+                       (onEditEnd)="onEditModalChangeEnd($event)"></form-field-edit-modal>
+
+
+<confirm-modal #exitEditModeModal [submit_button_text]="'はい'" [text]="'編集モードを終了して、変更を保存しますか？'" (onOk)="commit()"
+               [sending]="sending"></confirm-modal>
+<confirm-modal #cancelEditModeModal [submit_button_text]="'はい'" [text]="'編集モードをキャンセルしますか？'" (onOk)="cancelEdit()"
+               [sending]="sending" [type]="'warning'"></confirm-modal>
+
+<confirm-modal #deleteCheckedConfirmModal [submit_button_text]="'削除する'" [text]="'本当に削除してもよろしいですか？'"
+               (onOk)="addCheckedToDelete()"></confirm-modal>
+
+<confirm-modal #confirmFilterOverwriteConfirmModal [submit_button_text]="'上書き保存する'"
+               [text]="'選択中のフィルタを上書き保存します。よろしいですか？'" (onOk)="saveFilter()" [sending]="sending"></confirm-modal>
+
+<confirm-modal #unlockModal [submit_button_text]="'はい'" [text]="'ロックを強制的に解除しますか？'" (onOk)="unlock()" [type]="'warning'"
+               [sending]="sending"></confirm-modal>
+
+<confirm-modal #forceLogoutModal [submit_button_text]="'はい'" [text]="'このユーザーを強制ログアウトしますか？'" (onOk)="forceLogout()" [type]="'danger'"
+               [sending]="sending"></confirm-modal>
+<index-workflow-modal #indexWorkflowModal [table_info]="table_info" [workflow_status]="index_workflow_param.workflow_status" [data_a]="index_workflow_param.data_a"
+                      (onOk)="onCompleteWorkflowStatusChange()"></index-workflow-modal>
+<!-- <div bsModal #exportModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">テーブルのエクスポート</h4>
+                <button type="button" class="close" (click)="exportModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p *ngIf="grant && grant.edit && missing_datasets.length>0" class="text-danger">
+                    ※ 関連テーブルの【{{missing_datasets}}】も含めエクスポートされます。</p>
+                <h5>ダウンロードオプション:</h5>
+                <br />
+                <div class="checkbox">
+                    <label>
+                        <input class="ml-2" type="checkbox" name="export_data" (change)="export_data=!export_data" />
+                        エクスポートにデータを含める
+                    </label>
+                </div> -->
+
+
+<div bsModal #exportCheckedConfirmModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content modal-danger">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                </h4>
+                <button type="button" class="close" (click)="exportCheckedConfirmModal.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>本当に削除してもよろしいですか？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        (click)="exportCheckedConfirmModal.hide()">キャンセル
+                </button>
+                <button type="button" class="btn btn-danger"
+                        (click)="addCheckedToDelete()">削除する
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+
+</div>
+
+<!-- カスタムJSONエクスポートモーダル -->
+<div class="custom-modal" [class.show]="isJsonExportModalVisible" *ngIf="isJsonExportModalVisible">
+    <div class="custom-modal-overlay" (click)="hideJsonExportModal()"></div>
+    <div class="custom-modal-dialog modal-lg">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h4 class="custom-modal-title">JSONエクスポート</h4>
+                <button type="button" class="close" (click)="hideJsonExportModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="custom-modal-body">
+                <div class="json-content">
+                    <pre style="max-height: 500px; overflow: auto;">{{jsonContent}}</pre>
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="copyJsonContent()">
+                    <i class="fa fa-copy"></i> コピー
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="downloadJsonContent()">
+                    <i class="fa fa-download"></i> ダウンロード
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="hideJsonExportModal()">閉じる</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1050;
+    }
+
+    .custom-modal.show {
+        display: block;
+    }
+
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1051;
+    }
+
+    .custom-modal-dialog {
+        position: relative;
+        width: auto;
+        margin: 1.75rem auto;
+        max-width: 800px;
+        z-index: 1052;
+    }
+
+    .custom-modal-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 0.3rem;
+        outline: 0;
+    }
+
+    .custom-modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        border-top-left-radius: 0.3rem;
+        border-top-right-radius: 0.3rem;
+    }
+
+    .custom-modal-title {
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+
+    .custom-modal-body {
+        position: relative;
+        flex: 1 1 auto;
+        padding: 1rem;
+    }
+
+    .custom-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .custom-modal-footer > button {
+        margin-left: 0.5rem;
+    }
+</style>
+
+
+<div bsModal #tableSettingModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div *ngIf="tableSettingModal.isShown" class="modal-dialog modal-default" role="document">
+        <div class="modal-content modal-default">
+            <div class="modal-header">
+                <h4 class="modal-title">通知設定</h4>
+                <button type="button" class="close" (click)="tableSettingModal.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" *ngIf="table_info">
+                <edit-component [_id]="table_info.admin_table_setting.id" [_table]="'admin_table_setting'" [IS_EMBED_MODE]="true" [submit_text]="'設定'"
+                                (onSubmit)="onSubmitAdminTableSetting()" (onCancel)="tableSettingModal.hide()"></edit-component>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<div bsModal #confirmFilterOverwriteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div *ngIf="confirmFilterOverwriteModal.isShown" class="modal-dialog modal-success" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                </h4>
+                <button type="button" class="close" (click)="confirmFilterOverwriteModal.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>選択中のフィルタを上書き保存します。よろしいですか？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        (click)="confirmFilterOverwriteModal.hide()">キャンセル
+                </button>
+                <button type="button" class="btn btn-success" (click)="saveFilter()">上書き保存する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div bsModal #embedModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-defalut" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">埋め込みフォームリンク</h4>
+                <button type="button" class="close" (click)="embedModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="p-3">
+                    ※公開フォームでは、権限設定は無視され、フィルタの表示項目はすべて入力可能となります。<br>
+                    ※公開しているカラム、ルックアップはすべて権限が無視されて公開フォームに表示されます。
+                    <div *ngIf="customFilter && customFilter.show_fields.length==0" class="text-danger">
+                        ※表示項目を設定していません。<b>全ての項目</b>は権限に関係なく入力可能となります。<br>
+
+                    </div>
+                </div>
+                <div class="p-3 text-center" style="background: #eee;">
+                    {{getEmbedScriptTag()}}
+                </div>
+                <button type="button" class="btn btn-default pull-right mt-1"
+                        (click)="copyEmbedScriptTag()">コピー
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        (click)="embedModal.hide()">閉じる
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div bsModal #publicFormModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-defalut" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">公開フォームリンク</h4>
+                <button type="button" class="close" (click)="publicFormModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="p-3">
+                    ※公開フォームでは、権限設定は無視され、フィルタの表示項目はすべて入力可能となります。<br>
+                    ※公開しているカラム、ルックアップはすべて権限が無視されて公開フォームに表示されます。
+                    <div *ngIf="customFilter && customFilter.show_fields.length==0" class="text-danger">
+                        ※表示項目を設定していません。<b>全ての項目</b>は権限に関係なく入力可能となります。<br>
+
+                    </div>
+                </div>
+                <div class="p-3 text-center" style="background: #eee;">
+                    {{public_form_url}}
+                </div>
+                <button type="button" class="btn btn-primary pull-right mt-1 ml-2"
+                        (click)="openPublicFormUrl()">開く
+                </button>
+                <button type="button" class="btn btn-default pull-right mt-1"
+                        (click)="copyPublicFormUrl()">コピー
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        (click)="publicFormModal.hide()">閉じる
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div bsModal #duplicateModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">テーブルの複製</h4>
+                <button type="button" class="close" (click)="duplicateModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+
+                    <div class="col-md-3 font-weight-bold ">
+                        グループ
+                    </div>
+                    <div class="col-md-9 mb-2">
+                        <input type="text" class="form-control" [(ngModel)]="duplicate_hash['group']">
+                    </div>
+                    <div class="col-md-3 font-weight-bold">
+                        テーブル名 (必須)
+                    </div>
+                    <div class="col-md-9 mb-2">
+                        <input type="text" class="form-control" [(ngModel)]="duplicate_hash['label']">
+                    </div>
+
+                    <div class="col-md-3 font-weight-bold">
+                        オプション
+                    </div>
+                    <div class="col-md-9">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [(ngModel)]="duplicate_hash['copy_grant']" [value]="true">&nbsp;権限設定をコピー
+                            </label>
+                            <br>
+                            <label>
+                                <input type="checkbox" [(ngModel)]="duplicate_hash['copy_notification']" [value]="true">&nbsp;通知設定をコピー
+                            </label>
+                            <br>
+                            <label>
+                                <input type="checkbox" [(ngModel)]="duplicate_hash['copy_filter']" [value]="true">&nbsp;フィルタをコピー
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="duplicateModal.hide()" [ladda]="loading">キャンセル</button>
+                <button type="button" class="btn btn-warning" (click)="copyTable()" [ladda]="loading">保存する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+</div><!-- /.modal -->
+
+<admin-tsv-import #adminTsvImport></admin-tsv-import>
+<ng-container *ngIf="table_info && table_info.grant.table_editable&& !embedMode">
+    <admin-ledger-import [parentComponent]="getThis()" (onImported)="onImportLedger()" #adminLedgerImport></admin-ledger-import>
+</ng-container>
+
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title">ZIPファイルのアップロード</h4>
+    </div>
+    <div class="modal-body">
+        <div>
+            フォルダ構成は下記を参考に作成して下さい。<br>
+            <a target="_blank" href="https://help.pigeon-fw.com/hc/ja/articles/22841234270233-%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%AEzip%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89">マニュアル</a>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                <input type="file" class="file-upload" accept=".zip,.rar,.7zip" id="zip_upload" (change)="onFileSelected($event)" #fileUpload>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <button type="button" class="btn btn-primary" id="zip_upload_btn" (click)="upload_zip_submit()">Upload</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="modalRef.hide()">Close</button>
+    </div>
+</ng-template>
+
+
+<edit-all-modal #editAllModal [parent]="getThis()" [table_info]="table_info" [count]="total_count"
+    [customFilter]="customFilter" [checked_id_a]="checked_id_a" [unchecked_id_a]="unchecked_id_a" [checked_all]="checked_all"></edit-all-modal>
+
+<confirm-modal #confirmSaveWidthModal [submit_button_text]="'はい'" [title]="'項目幅の変更'" [text]="onConfirmFieldWidthText" (onOk)="saveCurrentColumnWidth()"
+               [sending]="sending" [type]="'warning'"></confirm-modal>
+<confirm-modal #exportLedgerAllModal [submit_button_text]="'はい'" [title]="'一括帳票出力'" [text]="'帳票が登録されていない全てのデータに対して、登録を行います。よろしいですか？'" (onOk)="exportLedger()"
+               [sending]="sending" [type]="'warning'"></confirm-modal>
+<confirm-modal #exportCheckedLedgerModal [submit_button_text]="'はい'" [title]="'帳票出力'" [text]="'チェックされたデータに対して、帳票の登録を行います。既に登録されている場合は上書きされます。よろしいですか？'" (onOk)="exportLedger()"
+               [sending]="sending" [type]="'warning'"></confirm-modal>
+<chatgpt-modal #pigeonAiModal [table_name]="table" [action]="this.table=='dataset'?'new_table':'search'"
+               (onSubmitPigeonAi)="onSuccessByPigeonAi($event)" (onErrorPigeonAi)="onErrorByPigeonAi($event)"></chatgpt-modal>
+<analytics-modal #openAnalyticsAiModal [table_name]="table" [sending]="sending" (onSubmitAnalyticsAi)="onSuccessByAnalyticsAi($event)" [customFilter]="customFilter" [fields]="fields"
+                 [table_info]="table_info" (onErrorAnalyticsAi)="onErrorByAnalyticsAi($event)"></analytics-modal>
+
+<confirm-modal #confirmArchiveTableModal [submit_button_text]="'はい'" [text]="archiveFlagConfirmText"
+    (onOk)="saveArchiveTable()" [sending]="sending"></confirm-modal>
+
+
+
+<div bsModal #googleMapViewModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static', keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Googleマップビュー作成</h4>
+                <button type="button" class="close" (click)="isGoogleMapViewOpen = false; googleMapViewModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" *ngIf="isGoogleMapViewOpen">
+                <google-map-view
+                    [table_info]="table_info"
+                    [edittingCustomFilter]="edittingCustomGoogleMapFilter"
+                    (onClickPreviewButton)="onGoogleMapPreview($event)"
+                    (onClickCancelButton)="isGoogleMapViewOpen = false; googleMapViewModal.hide()"
+                    >
+                </google-map-view>
+            </div>
+        </div>
+    </div>
+</div><!-- チャットボット（dataset__XXテーブルのみ表示、admin_settingのenable_pigeon_chatがtrueの場合） -->
+<!--<chat-bot *ngIf="table && isDatasetTable() && _share.admin_setting && _share.admin_setting['enable_pigeon_chat'] === 'true'"-->
+<!--          [table]="table"-->
+<!--          [table_info]="table_info"-->
+<!--          [customFilter]="customFilter"-->
+<!--          (onSetFilter)="onChatSetFilter($event)"></chat-bot>-->
+
+<!-- ファイル検索チャットボット -->
+<chat-bot *ngIf="table && _share.cloud_setting && _share.cloud_setting['enable_filesearch'] === 'true'"
+          [table]="table"
+          [table_info]="table_info"
+          [type]="'file_search'"
+          (onSetFilter)="onChatSetFilter($event)"></chat-bot>

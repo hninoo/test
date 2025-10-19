@@ -1,0 +1,185 @@
+<ng-container *ngIf="isDynamicConditionValue();else NotDynamicCondition">
+    <select [disabled]="disabled" [(ngModel)]="value" class="form-control" (change)="changed()">
+        <ng-container *ngFor="let form of condition.getSameTypeForms(table_info, form, _share )">
+            <!-- <ng-container
+                *ngIf="isConditionField(table_info, form.field) && !table_info.forms.byFieldName(form.field.Field).is_child_form">
+            </ng-container> -->
+            <option value="{{form.field_name}}">
+                {{form.label}}</option>
+        </ng-container>
+    </select>
+</ng-container>
+<ng-template #NotDynamicCondition>
+<!-- TEXT -->
+<ng-container *ngIf="isInputFieldCondition() || force_use_textfield ">
+    <input [disabled]="disabled" [(ngModel)]="value" (change)="changed()" [maxLength]="form['max_len']?form['max_len']:10000000" [minLength]="form['min_len']?form['min_len']:0"
+           placeholder="{{this.placeholder ? this.placeholder : form.placeholder}}"
+           type="text" name="{{field['Field']}}" [id]="getId()" class="form-control custom-40-height">
+</ng-container>
+
+<!-- NUMBER -->
+
+<div *ngIf="formType == 'number' && table_info.table==='admin'" (change)="changeAdminIdType()">
+    <select [disabled]="disabled" class="form-control" [(ngModel)]="admin_id_type">
+        <option [value]="ADMIN_ID_TYPE_LOGGEDIN_ID">ログインユーザー</option>
+        <option value="">ID指定</option>
+    </select>
+</div>
+<input [disabled]="disabled" OnlyNumber (change)="changed($event)" *ngIf="(formType == 'number' && !isSetLoginUserAsValue()) || formType == 'calc' || isTimingCondition()" [(ngModel)]="value"
+       [object]="value"
+       [id]="getId()"
+       placeholder="{{this.placeholder ? this.placeholder : form.placeholder}}"
+       type="text"
+       name="{{field['Field']}}" [id]="getId()" class="form-control custom-40-height" [min]="min_num">
+
+<!-- COLOR -->
+<ng-template [ngIf]="formType=='color'">
+    <input [disabled]="disabled" [(ngModel)]="value"
+           [id]="getId()"
+           type="text" name="{{field['Field']}}" class="form-control custom-40-height">
+    <input [disabled]="disabled" type="color" [(ngModel)]="value"
+           [id]="getId()"
+           name="{{field['Field']}}">
+</ng-template>
+
+<div *ngIf="formType === 'year_month' && !select_date_btn" class="year_month">
+    <input class="form-control not-full" type="number" max="2300" min="1900" [(ngModel)]="year" (blur)="yearMonthChagned()">&nbsp;年
+    <input class="form-control not-full" type="number" max="12" min="1" [(ngModel)]="month" (blur)="yearMonthChagned()">&nbsp;月
+</div>
+
+<!-- DATETIME -->
+<div *ngIf="form && isDateTimeType() && !isTimingCondition()">
+    <ng-container *ngIf="isTimingCondition() && !isDaysShow() && formType !== 'year_month'">
+        <input [disabled]="disabled" class="datetime"
+               [owlDateTime]="owl_datetime"
+               [owlDateTimeTrigger]="owl_datetime"
+               [id]="getId()"
+               name="{{field['Field']}}" [(ngModel)]="date_value">
+
+        &nbsp;<i class="fa fa-calendar"></i>
+        <owl-date-time #owl_datetime (afterPickerClosed)="datetimeValueChanged()" [pickerType]="'both'"></owl-date-time>
+
+
+    </ng-container>
+    <ng-container *ngIf="!isTimingCondition() && !isDaysEnabled() && !isDaysShow()">
+        <label *ngIf="!select_date_btn && formType !== 'year_month'" class="mb-0">
+            <input [disabled]="disabled" [(ngModel)]="is_check_current_date" (change)="currentDateCheckChanged()" type="checkbox" [value]="true" name="is_check_current_date{{id}}">
+            <span *ngIf="formType==='time'">
+            現在時刻
+            </span>
+            <span *ngIf="formType!=='time'">
+            現在日時
+            </span>
+
+            &nbsp;&nbsp;
+        </label>
+        <label class="mb-0">
+            <input [disabled]="disabled" [(ngModel)]="select_date_btn" type="checkbox" name="select_date_btn{{id}}" (change)="onSelectDateBtn()">
+            相対値
+        </label>
+        <ng-container *ngIf="select_date_btn">
+            <div class="row ml-1">
+                <select [disabled]="disabled" *ngIf="!select_date_option['is_number_form']" [(ngModel)]="select_date_option['value']" (change)="selectBtnChanged(select_date_option['value'])"
+                        class="col-5">
+                    <option *ngIf="formType !== 'year_month'" value="0 date">今日</option>
+                    <option *ngIf="formType !== 'year_month'" value="-1 date">昨日</option>
+                    <option *ngIf="formType !== 'year_month'" value="1 date">明日</option>
+                    <option *ngIf="formType !== 'year_month'" value="0 week">今週</option>
+                    <option *ngIf="formType !== 'year_month'" value="-1 week">先週</option>
+                    <option *ngIf="formType !== 'year_month'" value="1 week">来週</option>
+                    <option value="0 month">今月</option>
+                    <option value="-1 month">先月</option>
+                    <option value="1 month">来月</option>
+                    <option value="0 year">今年</option>
+                    <option value="-1 year">去年</option>
+                    <option value="1 year">来年</option>
+                    <option value="0 year fy">今年度</option>
+                    <option value="-1 year fy">昨年度</option>
+                    <option value="1 year fy">来年度</option>
+                </select>
+                <div *ngIf="select_date_option['is_number_form']" class="col-5">
+                    <ng-container *ngIf="select_date_option['num'] < 0">
+                        <span>{{-1 * select_date_option['num']}}</span>
+                        <span>{{select_date_option['unit']}}</span>
+                        <span>前</span>
+                    </ng-container>
+                    <ng-container *ngIf="select_date_option['num'] > 0">
+                        <span>{{select_date_option['num']}}</span>
+                        <span>{{select_date_option['unit']}}</span>
+                        <span>後</span>
+                    </ng-container>
+                </div>
+                <div class="col-3" style="min-width: 90px!important;">
+                    <button [disabled]="disabled" class="btn btn-sm btn-default" (click)="selectButtonLeftChanged()"><i class="fa fa-angle-double-left"></i></button>
+                    <button [disabled]="disabled" class="btn btn-sm btn-default" (click)="selectButtonRightChanged()"><i class="fa fa-angle-double-right"></i></button>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="!select_date_btn && formType !== 'year_month'">
+            <i class="fa fa-trash text-danger" style="    font-size: 19px; padding: 5px;cursor: pointer" (click)="clearDateValue()"></i>
+            <input class="datetime" [disabled]="is_check_current_date || disabled"
+                   [owlDateTime]="owl_datetime"
+                   [owlDateTimeTrigger]="owl_datetime"
+                   name="{{field['Field']}}" [(ngModel)]="date_value"
+                   [id]="getId()"
+            >
+
+
+            &nbsp;<i *ngIf="formType != 'time'" class="fa fa-calendar"></i>
+            <i *ngIf="formType == 'time'" class="fa fa-clock-o"></i>
+            <owl-date-time #owl_datetime (afterPickerClosed)="datetimeValueChanged()"
+                           [pickerType]="formType == 'datetime' && set_time_flg_by_field[field['Field']]? 'both': formType == 'time'? 'timer': 'calendar'"></owl-date-time>
+            <ng-container *ngIf=" formType == 'datetime'">
+                <label style="margin-left:5px"><input [disabled]="disabled" type="checkbox" [(ngModel)]="set_time_flg_by_field[field['Field']]" (change)="changedSetTimeFlg()"
+                                                      value="true">&nbsp;時間も設定</label>
+            </ng-container>
+        </ng-container>
+        <label class="mb-0" *ngIf="select_date_btn">
+            <input [disabled]="disabled" [(ngModel)]="priority_date_relative_value" type="checkbox"
+                name="priority_date_relative_value{{id}}" (change)="changed()">
+            チャート設定よりこの絞り込みを優先する
+            <br>
+            (ONの場合はチャート設定側の設定が無視になります)
+        </label>
+    </ng-container>
+    <ng-container *ngIf="!isTimingCondition() && isDaysEnabled()">
+        <input [disabled]="disabled" (change)="changed()" [(ngModel)]="value" type="number"
+               step="1" name="{{field['Field']}}" [id]="getId()" class="form-control custom-40-height">
+    </ng-container>
+    <ng-container *ngIf="isDaysShow()">
+        <input [disabled]="disabled" value="dammy" type="text" name="{{field['Field']}}" [id]="getId()" class="form-control" type="hidden">
+    </ng-container>
+</div>
+
+<!-- SELECT -->
+<div class="select-wrap">
+    <ng-select [disabled]="disabled"
+               *ngIf="isUseNgSelect()"
+               ng-required="true"
+               class="custom form-control"
+               [items]="options_include_own"
+               appendTo="body"
+               [searchWhileComposing]="false"
+               [virtualScroll]="true"
+               bindLabel="label"
+               bindValue="value"
+               [multiple]="true"
+               [(ngModel)]="value"
+               (change)="changed()"
+               [id]="getId()"
+               [ngStyle]="{'height':'auto','min-height':'40px','padding-top':'0px'}"
+    ></ng-select>
+</div>
+<ng-template [ngIf]="formType == 'boolean'">
+    <div class="checkbox">
+        <label>
+            <!-- ngModelはhiddenに紐付け、checkboxでhiddenのvalueを変える -->
+            <input [disabled]="disabled" type="checkbox" [checked]="value=='true'"
+                   [id]="getId()"
+                   (change)="value=(value=='true')?'false':'true';" (change)="changed()">
+            {{form.option_label}}
+        </label>
+    </div>
+</ng-template>
+
+</ng-template>

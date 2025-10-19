@@ -1,0 +1,281 @@
+<link *ngIf=" _share.admin_setting && _share.admin_setting['custom_css_file_info_id']" rel="stylesheet" [href]="_share.custom_css_url">
+<link *ngIf="_share.cloud_setting && _share.cloud_setting['use_analytics_ai'] === 'true'" rel="stylesheet" [href]="_share.oem_css_url">
+<link *ngIf="_share.env==='development'" rel="stylesheet" href="http://localhost/sample/custom_test.css?t=1">
+<span id="extend_scripts"></span>
+<span id="extend_styles"></span>
+<header class="app-header navbar">
+    <button class="navbar-toggler menu-toggle d-lg-none" type="button" appMobileSidebarToggler>&#9776;</button>
+    <button class="navbar-toggler d-lg-none popup-search-icon" (click) ="handleSearchClick($event)" type="button"><i class="fa fa-search"></i></button>
+    <div class="d-flex navbar-brand">
+        <i class="fa fa-search pt-1 popup-search-icon d-md-down-none" (click) ="handleSearchClick($event)"></i>
+        <a class="navbar-brand p-0 bg-transparent border-bottom-0 h-auto" [routerLink]="'/'+_share.getAdminTable()+'/dashboard'">{{_share.title}}</a>
+    </div>
+    <ul class="nav navbar-nav d-md-down-none b-r-1">
+        <li class="nav-item">
+            <a class="nav-link navbar-toggler" href="javascript:void(0)" appSidebarToggler>&#9776;</a>
+        </li>
+    </ul>
+    <div *ngIf="_share.getHeaderDatasetName()!=''" class="header_extend d-none d-lg-inline-block m-auto">
+        <h5>
+            <img class="header-img-icon" *ngIf="_share.isHeaderImgExist()" [src]="_share.getHeaderDatasetImg()">
+            {{_share.getHeaderDatasetName()}}
+            <ng-container *ngIf="_share.getHeaderDatasetCount()>0">
+                <small class="ml-2">合計</small>
+                <strong class="h5 mx-1">{{_share.getHeaderDatasetCount()}}</strong>
+                <small>件</small>
+            </ng-container>
+
+        </h5>
+    </div>
+    <ul class="nav navbar-nav" [ngClass]="{'ml-auto': _share.getHeaderDatasetName() == ''}">
+        <li class="nav-item dropdown" dropdown placement="bottom right">
+            <button id="bell-notify-icon-link" class="nav-link nav-pill" style="position: relative" (click)="toggleNotificationList()" data-toggle="dropdown" role="button"
+                    aria-haspopup="true" aria-expanded="false"
+                    dropdownToggle>
+                <i class="fa fa-bell" style="font-size: 18px;"></i>
+                <span *ngIf="_share.getNotificationCount()>0" class="badge badge-pill badge-danger ml-2">{{_share.getNotificationCount()}}</span>
+            </button>
+            <div id="header_notification" class="dropdown-menu dropdown-menu-right dropdown-menu-lg" *dropdownMenu aria-labelledby="simple-dropdown">
+                <div class="dropdown-header text-center"><strong class="text-dark"><i class="fa fa-bell mr-2"></i>最近の通知</strong></div>
+                <div *ngFor="let noti of _share.notification_a; let last = last">
+                    <span *ngIf="!noti.url" class="dropdown-item notification-item" [innerHTML]="noti.content">
+                        <i class="icon-doc text-success"></i> {{noti.content}}
+                    </span>
+
+                    <a href="{{noti.url}}" class="dropdown-item notification-item" *ngIf="!!noti.url" [innerHTML]="noti.content">
+                        <i class="icon-doc text-success"></i> {{noti.content}}
+                    </a>
+                </div>
+                <div class="d-flex align-items-center justify-content-center p-2"><strong>
+                    <a href="javascript:void(0)" (click)="goNotificationPage()">通知一覧 &gt;&gt;</a>
+                </strong></div>
+            </div>
+        </li>
+        <li class="nav-item dropdown" dropdown placement="bottom right">
+            <a class="nav-link nav-pill avatar" href="javascript:void(0)" role="button" aria-haspopup="true" aria-expanded="false" dropdownToggle
+               [ngClass]="{'nobackground':_share.user!=null && _share.user.image!=null}">
+                <img *ngIf="_share.user!=null && _share.user.image_url!=null; else NO_UESR_IMG" src="{{_share.user.image_url}}">
+                <ng-template #NO_UESR_IMG>
+                    <i *ngIf="_share.user!=null && _share.user.image==null" class="fa fa-user" aria-hidden="true"></i>
+
+                </ng-template>
+            </a>
+            <div
+                class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="simple-dropdown">
+                <!--
+                                                                <a class="dropdown-item" href="javascript:void(0)"><i class="fa fa-user"></i> Profile</a>
+                                                                -->
+                <a class="dropdown-item" href="javascript:void(0)" (click)="toEditProfile()" *ngIf="_share.show_setting && _share.user_grant.detail && _share.user_grant.list">
+                    <i class="fa fa-user"></i>
+                    ユーザー情報</a>
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="_share.isMasterUser()" (click)="toDatasetPage()">
+                    <i class="fa fa-database"></i>
+                    テーブル管理</a>
+                <!--
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="_share.hasMenu('view')" (click)="toViewPage()" >
+                    <i class="fa fa-list"></i>
+                    View管理</a>
+                -->
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="_share.isMasterUser()  && _share.hasMenu('admin')" (click)="toUserPage()">
+                    <i class="fa fa-users"></i>
+                    ユーザー管理</a>
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="_share.isMasterUser() && _share.hasMenu('division')" (click)="to('division')">
+                    <i class="fa fa-building-o"></i>
+                    組織管理</a>
+                <a class="dropdown-item" href="javascript:void(0)" *ngIf="_share.isMasterUser() && _share.hasMenu('position')" (click)="to('position')">
+                    <i class="fa fa-tag"></i>
+                    役職管理</a>
+                <a *ngIf="_share.hasMenu('notification') && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toNotiPage()">
+                    <i class="fa fa-bell-o"></i>
+                    通知設定</a>
+                <a *ngIf="!_share.system_view_disabled && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toStorageManagement()">
+                    <i class="fa fa-bar-chart"></i>
+                    システム利用状況</a>
+                <a *ngIf="_share.user!=null && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toCommonGrantSetting()">
+                    <i class="fa fa-lock"></i>
+                    権限設定</a>
+                <a *ngIf="_share.user!=null && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toEditImportMailSetting()">
+                    <i class="fa fa-download"></i>
+                    メール取り込み設定</a>
+                <a *ngIf="_share.user!=null && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toEditAdminSetting()">
+                    <i class="fa fa-cog"></i>
+                    その他設定</a>
+                <a *ngIf="_share.user!=null && _share.isMasterUser()" class="dropdown-item" href="javascript:void(0)" (click)="toSsoSettings()">
+                    <i class="fa fa-shield"></i>
+                    SSO設定</a>
+                <a *ngIf="_share.user!=null && _share.isContactableUser()" class="dropdown-item" href="https://help.pigeon-fw.com/hc/ja/requests/new" target="_blank">
+                    <i class="fa fa-envelope-o"></i>
+                    お問い合わせ</a>
+
+                <a *ngIf="_share.user!=null && (_share.isMasterUser() || _share.common_grant.invoice) && !_share.isTrial() && ( _share.cloud_setting['payment_method']=='credit')"
+                   class="dropdown-item" href="javascript:void(0)"
+                   (click)="goAdminInvoices()">
+                    <i class="fa fa-file-text-o"></i> 請求情報</a>
+
+                <a *ngIf="_share.user!=null && _share.isMasterUser() && (_share.isTrial() || _share.cloud_setting['payment_method']=='paypal' || _share.cloud_setting['payment_method']=='credit')"
+                   class="dropdown-item" href="javascript:void(0)"
+                   (click)="toPayment()">
+                    <i class="fa fa-file-text-o"></i> 契約設定</a>
+                <a class="dropdown-item" href="javascript:void(0)" (click)="logout()" id="logout">
+                    <i class="fa fa-sign-out"></i>
+                    ログアウト</a>
+            </div>
+        </li>
+        <li
+            class="nav-item d-md-down-none" style="min-width: 12px;"><!--
+												          <a class="nav-link navbar-toggler" href="javascript:void(0)" appAsideMenuToggler>&#9776;</a>
+												          -->
+        </li>
+    </ul>
+</header>
+
+<div class="app-body" cdkScrollable
+>
+    <admin-tsv-import #adminTsvImport></admin-tsv-import>
+    <admin-json-import #adminJsonImport></admin-json-import>
+    <div class="sidebar " [ngClass]="{'smart-sidebar':_share.sorted_menu.length>20}">
+
+        <nav class="sidebar-nav">
+            <ul *ngIf="this._share.show_only_directory_on_navmenus" class="nav list-unstyled">
+                <li style="font-size: 12px;">
+                    <a class="white pl-1 py-2 d-block no-decoration" [routerLink]="'/admin/group/root'"><i class="fa fa-folder mr-2" aria-hidden="true"></i>ルートフォルダ</a>
+                </li>
+            </ul>
+            <nav-menus [menu_root]="this._share.menu_root" [show_only_directory]="this._share.show_only_directory_on_navmenus"></nav-menus>
+            <ul class="nav list-unstyled">
+                <li class="divider"></li>
+                <li class="nav-item nav-link button_center dropdown" dropdown placement="bottom right" [dropup]="toggle_up" *ngIf="_share.common_grant && _share.common_grant.table_create">
+                    <i class="fa fa-plus" dropdownToggle></i>
+                    <div class="dropdown-menu" *dropdownMenu>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="addNewDataset()">
+                            <i class="fa fa-plus"></i>
+                            テーブル追加画面へ
+                        </a>
+                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                (click)="this.AdminTsvImport.openTsvImportMenu()"><i class="fa fa-plus"></i> エクセルから追加</a>
+                        </li>
+                        <li role="menuitem">
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="add_template()">
+                                <i class="fa fa-plus"></i> テンプレートから追加
+                            </a>
+                         </li>
+                            <li role="menuitem">
+                                <a class="dropdown-item" href="javascript:void(0)" (click)="AdminJsonImport.openJSONModal()">
+                                    <i class="fa fa-plus"></i> JSONから追加
+                                </a>
+                            </li>
+                    </div>
+                </li>
+            </ul>
+            <ng-container>
+                <div class="text-center mt-50" *ngIf="_share.license=='trial' && _share.cloud_setting && _share.cloud_setting['use_analytics_ai'] != 'true'">Powered by
+                    <a href="https://pigeon-fw.com/cloud" target="_blank">PigeonCloud</a>
+                </div>
+            </ng-container>
+        </nav>
+    </div>
+    <!-- Main content -->
+    <main class="main mt-4" [ngClass]="{'not-dashboard':this._router.url != '/admin/dashboard'}">
+        <div class="warning" *ngIf="_share.other_user_view">
+            <div>
+                現在プレビューモード中です。
+                <button class="btn btn-default text-bold pull-right" type="submit" (click)="backtomyaccount()">
+                    元のアカウントに戻る
+                </button>
+                <br style="clear:both">
+            </div>
+        </div>
+        <div class="danger" *ngIf="_share.menu_a!=undefined && !_share.isValidMenuNumber()">
+            無料プランで設定出来るメニュー数は３つまでです。３つ以上メニューを設定したい場合、<a href="https://pigeon-fw.com/mypage" target="_blank">こちら</a>よりライセンス購入を行って下さい。
+        </div>
+        <div class="warning" *ngIf="_share.isTrial() && _share.getTrialRestDays()<8">
+            <div>
+                トライアル期間は残り{{_share.getTrialRestDays()}}日です。プラン購入は<a href="/admin/payment/pay">こちら</a>。お問い合わせは担当者または <a href="mailto:sales@loftal.jp">sales@loftal.jp</a> までご連絡下さい。
+            </div>
+        </div>
+        <div class="warning" *ngIf="_share.stripe_credit_expired_within_1_month">
+            <div>
+                クレジットカードの期限が近づいているため、更新を行って下さい.<a href="/admin/payment/pay">こちら</a>
+            </div>
+        </div>
+        <div class="warning" *ngIf="!recommended_browser">
+            <div>
+                推奨されているブラウザは Edge, chrome, safariの最新版となります。それ以外のブラウザでは予期しない動作をする可能性があります。
+            </div>
+        </div>
+
+        <div class="warning" *ngIf="!_share.is_mail_limit_exceed && _share.is_mail_count_reach_alert && this._share.isMasterUser()">
+            <div>
+                メール通知が上限の90%を超えています。上限を超えると通知メールが送られなくなります。<br>
+                上限を変更するには <a href="mailto:sales@loftal.jp">sales@loftal.jp</a> までご連絡下さい。
+            </div>
+        </div>
+        <div class="danger" *ngIf="_share.is_mail_limit_exceed">
+            <div>
+                メールの送信制限に達しているため、通知等のメールが送信されません。上限を変更するには、管理者様にお問い合わせ下さい。
+            </div>
+        </div>
+
+        <div class="warning" *ngIf="_share.is_notification_exceed">
+            <div>
+                1日の通知制限（{{_share.notify_limit_per_day}}通）に達しているため、通知が送信されません。上限を変更するには <a href="mailto:sales@loftal.jp">sales@loftal.jp</a> までご連絡下さい。
+            </div>
+        </div>
+
+        <div class="warning" *ngIf="_share.debug_mode && false" style="text-align: center">
+            Debug Mode
+        </div>
+
+        <div class="warning" *ngIf="_share.isDevEnvironment()">
+            <div>
+                {{_share.dev_warning_text}}
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <!--
+        <ol class="breadcrumb mb-0">
+            <app-breadcrumbs></app-breadcrumbs>
+        </ol>
+        -->
+        <breadcrumbs [breadcrumbs]="_share.breadcrumbs"></breadcrumbs>
+        <app-progress-bar [progress]="uploadProgress"></app-progress-bar>
+        <div class="container-fluid" id="main-container">
+            <router-outlet></router-outlet>
+
+            <div bsModal #tableShortcut="bs-modal" class="modal fade " tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-warning ">
+                    <div class="modal-body">
+                        <form class="shortcut_modal_form" (submit)="toTable()">
+                            <input #inputField type="text" placeholder="テーブル名検索 " [(ngModel)]="labelText" class="shortcut-input" aria-label="Number" matInput [formControl]="myControl" [matAutocomplete]="auto"
+                                   id="table_shortcut">
+                            <mat-autocomplete #auto="matAutocomplete" (optionSelected)='toTable()'>
+                                <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
+                                    {{ option.name }}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button (click)="toTable()" type="button" class="btn btn-sm btn-primary ml-2 pl-2 mb-1 btn-circle-30 shortcut-icon-btn">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.conainer-fluid -->
+    </main>
+    <app-aside></app-aside>
+
+</div>
+<confirm-modal #logoutConfirm [submit_button_text]="'はい'" [text]="'※全端末がログアウトされます。よろしいですか？'" (onOk)="logout(true)"
+    ></confirm-modal>
+
+<footer class="app-footer" [hidden]="this._router.url != '/admin/dashboard'" *ngIf="_share.cloud_setting && _share.cloud_setting['use_analytics_ai'] != 'true'">
+    <div class="text-right">
+        Ver.{{_share.version}}
+        Powered by
+        <a href="https://pigeon-fw.com/cloud?from=poweredby" target="_blank">PigeonCloud</a>
+    </div>
+</footer>
+

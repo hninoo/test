@@ -1,0 +1,552 @@
+<!-- テーブル定義画面のみ -->
+<div class="" *ngIf="is_dataset_edit" id="pc-edit-view" [ngClass]="table_info.getJaClassName()">
+    <div class="col-lg-12" id="dataset_definition">
+        <dataset-form [is_system_table]="isEditSystemTable()" [system_table_info]="system_table_info" [data]="data" [data_lastchanged]="data.last_dirty_changed"
+                      [workflow_template_a]="workflow_template_a" [workflow_template_csv]="workflow_template_csv" (csvLoaded)="onCsvLoaded($event)" [parent]="getThis()"></dataset-form>
+        <ng-container *ngIf="isUnionMode()">
+
+        </ng-container>
+        <ng-container *ngIf="!isUnionMode()">
+            <div class="my-2">
+                <button *ngIf="dataset_edit_mode=='dataset_field'" class="btn btn-success" type="button"
+                        (click)="openSettingModal(null,true)">
+                    <i class="fa fa-plus mr-1"></i>項目を追加する
+                </button>
+                <button *ngIf="dataset_edit_mode=='grant'" class="ml-2 btn btn-default" type="button"
+                        (click)="dataset_edit_mode='dataset_field'">
+                    &lt;&lt;&nbsp;項目設定に戻る
+                </button>
+                <ng-container *ngIf="dataset_edit_mode=='dataset_field' && (mode=='add' || (target_table_grant && target_table_grant.table_author))">
+                    <button class="ml-2 btn btn-default" type="button"
+                            (click)="dataset_edit_mode='grant'">
+                        <i class="fa fa-gear"></i> 権限設定
+                    </button>
+                </ng-container>
+
+            </div>
+            <div bsModal #settingModal="bs-modal" class="modal fade settingModal {{settingType}}" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+                <div class="modal-dialog modal-default" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">{{ settingTitle }}</h4>
+                            <button type="button" class="close" (click)="settingModal.hide()" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row text-center" *ngIf="settingType==null">
+                                <ng-container *ngFor="let type of this.settingTypes;let child_i = index">
+                                    <div *ngIf="(this.type.show_list!==false && this.settingType==null)"
+                                         class="col-sm-6 mb-3">
+                                        <button
+                                            [disabled]="(settingType == null && (isExistFieldSelected() && !canConvertField(type.value))) "
+                                            class="btn btn-lg btn-block btn-light-gray"
+                                            type="button"
+                                            (click)="selectFieldType(type)"><i class="fa fa-{{type.icon}}"></i> <span> {{
+                                                type.label
+                                            }}</span></button>
+                                    </div>
+                                </ng-container>
+                            </div>
+                            <div *ngIf="this.settingType!=null">
+                                <div class="pl-4">
+                                    <button class="btn btn-md btn-default mb-2" (click)="changeFieldType()"><i class="fa fa-arrow-circle-left mr-1"></i>項目タイプ変更</button>
+                                    <div class="flex">
+                                        <h5 class="">{{ this.settingType != null ? getSettingTypeObj().label : '' }}</h5>
+                                    </div>
+                                    <div *ngIf=" this.settingType!=null &&   getSettingTypeObj().explain" class="text-left mt-3" [innerHTML]="getSettingTypeObj().explain">
+                                    </div>
+                                </div>
+                                <div class="pl-4 mt-4">
+                                    <dataset-field-one [system_table_info]="system_table_info" [data]="settingData" [is_workflow]="data.raw_data['workflow']"
+                                                       [type]="settingType" [parent]="getThis()" [is_child_table]="data.raw_data['is_child_table']"
+                                                       [mode]="(!!settingData.raw_data['id'])?'edit':'add'"></dataset-field-one>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="this.settingType!=null;else fieldTypeSettingMode" class="modal-footer">
+                            <button type="button" class="btn btn-secondary text-bold" (click)="settingModal.hide()">キャンセル</button>
+                            <button type="button" class="btn btn-primary text-bold"
+                                    (click)="addFieldData(false,false,(!settingData.raw_data['id']&&!settingData.raw_data['dummy_id']))">{{ settingBtnLabel }}
+                            </button>
+                        </div>
+                        <ng-template #fieldTypeSettingMode>
+                            <ng-container *ngIf="isExistFieldSelected()">
+                                <button type="button" class="btn btn-secondary"
+                                        (click)="settingType = settingData.raw_data['type']">キャンセル
+                                </button>
+                            </ng-container>
+
+                        </ng-template>
+                    </div>
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+        </ng-container>
+
+    </div>
+</div>
+<!-- /テーブル定義画面のみ END-->
+<div class="col-lg-12" *ngIf="table_info && table_info.menu && table_info?.menu?.use_google_map && table_info.menu.use_google_map_edit">
+    <google-map
+        [table_info]="table_info"
+        (onLocationSelect)="onMapLocationSelect($event)"
+        [is_edit]="true"
+        [data]="data"
+        >
+    </google-map>
+</div>
+<ng-container *ngIf="full_display_message ;else NOT_DISPLAY_MESSAGE">
+    <div class="row pc-edit-view" id="pc-edit-view" [ngClass]="{'iframe':IS_IFRAME_MODE,'public-form':IS_PUBLIC_FORM}" [ngClass]="table_info.getJaClassName()">
+        <div class="col-lg-12">
+            <div class="card" [ngClass]="{'mb-0':IS_EMBED_MODE}">
+                <div class="message ">
+                    {{ full_display_message }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</ng-container>
+
+<ng-template #NOT_DISPLAY_MESSAGE>
+    <ng-container *ngIf="isUnionMode()">
+        <div class="pc-edit-view" id="pc-edit-view" [ngClass]="setClasses()">
+            <!-- textarea -->
+            <div class="col-lg-12">
+                <div class="card card-accent-primary">
+                    <div class="card-block">
+                        <div class="row">
+                            <div class="col-12">
+                                <!-- sample union all -->
+                                <b>サンプル構文</b>
+                                <pre>
+                                    <code>
+                                        SELECT 名前 as 名称,住所 as アドレス FROM テーブルA
+                                        UNION ALL
+                                        SELECT 名前 as 名称,おところ as アドレス FROM テーブルB
+                                        UNION ALL
+                                        SELECT 名称,住所 as アドレス FROM テーブルC
+
+                                    </code>
+                                </pre>
+                                <div class="form-group">
+                                    <label for="textarea-input">構文</label>
+                                    <textarea id="textarea-input" name="textarea-input" rows="9" class="form-control" [(ngModel)]="this.data.raw_data['union_query']"
+                                              placeholder="UNION/UNION ALLの構文を入力してください"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </ng-container>
+
+
+    <div class="pc-edit-view" id="pc-edit-view" [ngClass]="setClasses()">
+        <div class="col-lg-12" *ngIf="before_html!=undefined">
+            <div class="card card-accent-primary">
+                <div class="card-block" [innerHTML]="before_html | safeHtml"></div>
+            </div>
+        </div>
+        <memo class="col-lg-12" [table_info]="table_info" [view_name]="'edit'"></memo>
+        <div class="col-lg-12 pt-sm-2 p-0 p-md-2">
+            <div class="card  main-card" [ngClass]="{'mb-0':IS_EMBED_MODE,'mb-50-mb':!IS_EMBED_MODE}">
+                <div class="card-header" *ngIf="!IS_IFRAME_MODE && !IS_EMBED_MODE">
+                    <!--
+                    <a href="javascript:void(0)" (click)="goList()"><i class="fa fa-th-list"></i> {{page_title}}一覧</a>&ngsp;<i class="fa fa-chevron-right ml-2" aria-hidden="true"></i> <span
+                    *ngIf="mode=='edit';else IsNew">編集 (ID:{{id}})</span>
+                    -->
+                    <ng-template #IsNew>追加</ng-template>
+
+                    <span class="ml-3">
+                    <custom-filter-pulldown *ngIf="hasEditFilter() && !IS_IFRAME_MODE && (table_info && (table_info.grant.table_author || !table_info.menu.not_display_filter_view))"
+                                            [mode]='"edit"'
+                                            [table_info]="table_info"
+                                            [filter_type]="'view'"
+                                            [customFilter]="customFilter"
+                                            (onEditFilter)="onEditFilter($event)"
+                                            (onReset)="resetFilter()"
+                                            (onSelectFilter)="selectFilter($event)"
+                                            (onDeleteFilter)="onDeleteFilter($event)"
+
+                    ></custom-filter-pulldown>
+                </span>
+                </div>
+                <div *ngIf="!isUnionMode()" class="card-block" [ngClass]="{'p-0':isFieldEditMode(), 'px-0':IS_PUBLIC_FORM}">
+                    <div class="" [ngClass]="{'row':!IS_PUBLIC_FORM}">
+
+                        <div class="col-9" cdkScrollable
+                             [ngClass]="{
+                                'col-12':!isFieldEditMode() || !isDesktop,
+                                'drag-drop-edit-mode pr-0':isFieldEditMode() && isDesktop,
+                                'drag-drop-mode pr-0':isFieldEditMode() && isDesktop && show_drag_field_list,
+                                'drag_start':drag_placeholder_visible && isFieldEditMode() && isDesktop && show_drag_field_list,
+                                'pt-4':isFieldEditMode()}
+                            "
+                             [ngStyle]="getFieldListsCss()"
+                        >
+                            <div *ngIf="IS_PUBLIC_FORM && table_info" class="iframe-ex">
+                                <h2 class="iframe-title">{{ table_info.menu.public_form_title }}</h2>
+                                <div class="iframe-description">{{ table_info.menu.public_form_description }}</div>
+                            </div>
+
+                            <div *ngIf="loading;then loading_block else loaded_block"></div>
+                            <ng-template #loading_block>
+                                <div class="sk-circle">
+                                    <div class="loader">Loading...</div>
+                                </div>
+                            </ng-template>
+                            <ng-template #loaded_block>
+                                <!--                                <ng-container *ngIf="loading_reflect_forms">-->
+                                <!--                                    <div class="sk-circle">-->
+                                <!--                                        <div class="loader">Loading...</div>-->
+                                <!--                                    </div>-->
+                                <!--                                </ng-container>-->
+                                <ng-container *ngIf="data==null">
+                                    <div class="data_not_found" style="padding:40px;text-align:center">
+                                        DATA NOT FOUND
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="data!=null">
+
+                                    <div *ngIf="is_dataset_edit && data.child_data_by_table['dataset_field'].length==0 && dataset_edit_mode!='grant' && !isDesktop"
+                                         class="p-3">項目がありません。
+                                    </div>
+                                    <div *ngIf="is_dataset_edit && data.child_data_by_table['dataset_field'].length==0 && dataset_edit_mode!='grant' && isDesktop"
+                                         class="p-3 no-field-list">
+                                        ドラッグ&ドロップで項目を追加してください
+                                        <div class="example-drag">
+                                            <button class="btn btn-lg btn-block btn-light-gray field-drag" type="button">
+                                                <i class="fa fa-list-ol"></i>
+                                                <span> 自動採番 </span>
+                                                <svg style="float: right;" width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <mask id="mask0_2_1569" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="8" height="14">
+                                                        <path d="M8 0.791992H0V13.792H8V0.791992Z" fill="white"/>
+                                                    </mask>
+                                                    <g mask="url(#mask0_2_1569)">
+                                                        <path
+                                                            d="M1.5 3.79199C2.32843 3.79199 3 3.12042 3 2.29199C3 1.46357 2.32843 0.791992 1.5 0.791992C0.671573 0.791992 0 1.46357 0 2.29199C0 3.12042 0.671573 3.79199 1.5 3.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 3.79199C7.32843 3.79199 8 3.12042 8 2.29199C8 1.46357 7.32843 0.791992 6.5 0.791992C5.67157 0.791992 5 1.46357 5 2.29199C5 3.12042 5.67157 3.79199 6.5 3.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M1.5 8.79199C2.32843 8.79199 3 8.12042 3 7.29199C3 6.46357 2.32843 5.79199 1.5 5.79199C0.671573 5.79199 0 6.46357 0 7.29199C0 8.12042 0.671573 8.79199 1.5 8.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 8.79199C7.32843 8.79199 8 8.12042 8 7.29199C8 6.46357 7.32843 5.79199 6.5 5.79199C5.67157 5.79199 5 6.46357 5 7.29199C5 8.12042 5.67157 8.79199 6.5 8.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M1.5 13.792C2.32843 13.792 3 13.1204 3 12.292C3 11.4636 2.32843 10.792 1.5 10.792C0.671573 10.792 0 11.4636 0 12.292C0 13.1204 0.671573 13.792 1.5 13.792Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 13.792C7.32843 13.792 8 13.1204 8 12.292C8 11.4636 7.32843 10.792 6.5 10.792C5.67157 10.792 5 11.4636 5 12.292C5 13.1204 5.67157 13.792 6.5 13.792Z"
+                                                            fill="#374767"/>
+                                                    </g>
+                                                </svg>
+                                                <!-- <i _ngcontent-rgr-c142="" class="fa fa-th" style="float: right;"></i> -->
+                                            </button>
+                                            <svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M4.85996 15.1692V3.92901C4.86022 3.29045 5.11399 2.67815 5.56552 2.22662C6.01705 1.77509 6.62942 1.52132 7.26798 1.52105C7.57393 1.50037 7.88086 1.54241 8.17008 1.64435C8.45929 1.74628 8.72468 1.90612 8.95004 2.11407C9.17541 2.32203 9.356 2.57371 9.48081 2.85382C9.60561 3.13392 9.67201 3.4366 9.67593 3.74322V7.14313V3.93219C9.67593 0.262187 14.493 0.262187 14.493 3.93219V7.14313V4.77813C14.493 1.10813 19.31 1.10813 19.31 4.77813V7.14313V6.22516C19.31 2.55516 24.127 2.55516 24.127 6.22516V19.9871C24.127 24.0011 21.5579 26.4092 17.7049 26.4092H10.2849C9.83994 26.4093 9.39984 26.3167 8.99252 26.1375C8.58521 25.9583 8.21962 25.6963 7.91898 25.3682L1.84396 18.74C1.33721 18.1875 1.0398 17.4752 1.00327 16.7264C0.966737 15.9775 1.19339 15.2394 1.64395 14.6402L4.86197 10.3492"
+                                                    fill="white"/>
+                                                <path
+                                                    d="M4.85996 15.1692V3.92901C4.86022 3.29045 5.11399 2.67815 5.56552 2.22662C6.01705 1.77509 6.62942 1.52132 7.26798 1.52105C7.57393 1.50037 7.88086 1.54241 8.17008 1.64435C8.45929 1.74628 8.72468 1.90612 8.95004 2.11407C9.17541 2.32203 9.356 2.57371 9.48081 2.85382C9.60561 3.13392 9.67201 3.4366 9.67593 3.74322V7.14313V3.93219C9.67593 0.262187 14.493 0.262187 14.493 3.93219V7.14313V4.77813C14.493 1.10813 19.31 1.10813 19.31 4.77813V7.14313V6.22516C19.31 2.55516 24.127 2.55516 24.127 6.22516V19.9871C24.127 24.0011 21.5579 26.4092 17.7049 26.4092H10.2849C9.83995 26.4093 9.39984 26.3167 8.99252 26.1375C8.58521 25.9583 8.21962 25.6963 7.91898 25.3682L1.84396 18.74C1.33721 18.1875 1.0398 17.4752 1.00327 16.7264C0.966737 15.9775 1.19339 15.2394 1.64395 14.6402L4.86197 10.3492"
+                                                    stroke="#374767" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- MAIN FORM START -->
+
+                                    <ng-container>
+                                        <form enctype="multipart/form-data" class="form-horizontal" [ngClass]="{'p-4': IS_PUBLIC_FORM}">
+                                            <admin-forms [customFilter]="customFilter" [table_info]="table_info" [fields]="isFieldEditMode()?converted_fields:fields" [data]="data"
+                                                         [forms]="isFieldEditMode()?converted_forms:forms" [grant_menu_a]="grant_menu_a" [error_a]="error_a" [mode]="mode"
+                                                         [is_setting]="is_setting"
+                                                         [is_custom_table_definition]="is_dataset_edit" [parent]="getThis()"
+                                                         [is_add_new_button_select_other_table]="!IS_IFRAME_MODE && is_add_new_button_select_other_table"
+                                                         [dataset_edit_mode]="dataset_edit_mode"
+                                                         [IS_IFRAME_MODE]="IS_IFRAME_MODE"
+                                                         (valueChanged)="changed()"
+                                                         [IS_PUBLIC_FORM]="IS_PUBLIC_FORM"
+                                                         [IS_EMBED_MODE]="IS_EMBED_MODE"
+                                                         (onLoadReflectForms)="onLoadReflectForms($event)"
+                                                         [grant_kind]="grant_kind"
+                                                         [source]="source"
+                                                         (showDetailSettingsChange)="showDetailSettings = $event">
+
+                                            >
+                                            </admin-forms>
+                                        </form>
+                                    </ng-container>
+                                    <!-- MAIN FORM END -->
+                                    <div class="pl-3" *ngIf="(table=='admin' || table=='dataset__' + this._share.admin_table_num) && mode=='add'">
+                                        <input type="checkbox" [(ngModel)]="sendMailFlg" class="pg-checkbox" id="send_mail">
+                                        <label class="checkbox-custom" for="send_mail">
+                                            <ng-container>
+                                                新規ユーザーにメールを送信する
+                                            </ng-container>
+                                        </label>
+                                    </div>
+                                    <!-- CHILD FORM START -->
+                                    <ng-container *ngFor="let child of data.getFilteredChildAry(this.customFilter);let child_i = index">
+                                        <div class="mt-4"
+                                             *ngIf="isDisplayChild(child_i,child) && !isChildTableHandledByFormField(child)"
+                                             [class.invisible-child]="child.table=='dataset_grant'"
+                                             id="child-{{child.table}}" class="pfc-child-container">
+                                            <hr *ngIf="child.table!='dataset_grant'">
+                                            <ng-template [ngIf]="child.menu && child.menu.multiple_mode=='normal'">
+                                                <h4 style="padding: 10px; margin: 20px;"><span class="pt-1">{{ child.getLabel() }}</span>
+                                                    <button [disabled]="!canAddChildData(child)" class="btn btn-success ml-3 btn-sm" type="button" style="margin-top: -3px;"
+                                                            [ngClass]="'add-btn-'+child.table"
+                                                            (click)="addChildData(child, undefined, undefined, data.child_data_by_table[child.table]?.length)">
+                                                        <i class="fa fa-plus mr-1"></i>{{ child.getLabel() }}を追加する
+                                                    </button>
+
+                                                    <div class="btn-group" dropdown *ngIf="!showDetailSettings">
+
+                                                        <button class="btn btn-success ml-1 btn-sm" type="button" style="margin-top: -3px;" dropdownToggle>
+                                                            <i class="fa fa-caret-down"></i>
+                                                        </button>
+                                                        <ng-container>
+                                                            <ul  id="dropdown-basic" *dropdownMenu class="dropdown-menu"
+                                                                role="menu" aria-labelledby="button-basic">
+                                                                <li role="menuitem">
+                                                                    <label class="dropdown-item" style="margin-bottom: 0;">
+                                                                        CSVでアップロード
+                                                                        <input type="file" (change)="onCsvFileSelected($event, child)" accept=".csv" style="display: none;">
+                                                                    </label>
+                                                                </li>
+                                                            </ul>
+                                                        </ng-container>
+
+                                                    </div>
+                                                </h4>
+                                                <div *ngFor="let c_data of data.child_data_by_table[child.table];let i = index" [attr.data-index]="i"
+                                                     class="child-container">
+                                                    <div class="flex">
+                                                        <div [ngClass]="show_google_calendar ? 'w-75' : 'w-100'">
+                                                            <button class="btn btn-default btn-sm" (click)="orderChange(data.child_data_by_table[child.table],i,i-1)"
+                                                                    *ngIf="child.forms.byFieldName(child.order_field)!=undefined">上へ
+                                                            </button>
+                                                            <button class="btn btn-default btn-sm" (click)="orderChange(data.child_data_by_table[child.table],i,i+1)"
+                                                                    *ngIf="child.forms.byFieldName(child.order_field)!=undefined">下へ
+                                                            </button>
+
+                                                            <button
+                                                                ngbTooltip="削除権限がありません"
+                                                                [disableTooltip]="child.grant.delete || !c_data.raw_data['id']"
+                                                                [disabled]="!child.grant.delete && c_data.raw_data['id'] > 0"
+                                                                class="btn btn-sm btn-danger pull-right z-1 mr-2 delete-button" (click)="clickToDeleteChild(child,i)">
+                                                                削除
+                                                            </button>
+                                                            <button class="btn btn-sm btn-info pull-right z-1 mr-2 duplicate-button" (click)="duplicateChild(child,i)">
+                                                                複製
+                                                            </button>
+                                                            <div *ngIf="child.forms as c_forms">
+                                                                <admin-forms [parent]="getThis()" [table_info]="child" [fields]="child.fields" [forms]="c_forms"
+                                                                             [data]="c_data"
+                                                                             [siblings]="data.child_data_by_table[child.table]"
+                                                                             [error_a]="child_error_a_by_table[child.table][i]?child_error_a_by_table[child.table][i]:{}"
+                                                                             [mode]="mode" [id_prefix]="child.table + '_cindex_' + i + '_'"
+                                                                             [is_custom_table_definition]="is_dataset_edit" [IS_PUBLIC_FORM]="IS_PUBLIC_FORM"
+                                                                             [IS_EMBED_MODE]="IS_EMBED_MODE" [child_index]="i"
+                                                                             [parent_data]="data"
+                                                                             [IS_IFRAME_MODE]="IS_IFRAME_MODE"
+                                                                             (onLoadReflectFormsFromChild)="onLoadReflectFormsFromChild($event)"
+                                                                ></admin-forms>
+                                                            </div>
+                                                        </div>
+                                                        <google-calendar [c_data]="c_data" [table_info]="table_info" [forms]="forms" [data]="data"></google-calendar>
+                                                    </div>
+                                                </div>
+                                                <button *ngIf="data.child_data_by_table[child.table] && data.child_data_by_table[child.table].length>0 && child.table!='dataset_grant' "
+                                                        [disabled]="!canAddChildData(child)"
+                                                        class="btn btn-success ml-3 btn-sm"
+                                                        type="button" style="margin-top: -3px;"
+                                                        (click)="addChildData(child, undefined, undefined, data.child_data_by_table[child.table]?.length)">
+                                                    <i class="fa fa-plus mr-1"></i>{{ child.getLabel() }}を追加する
+
+                                                </button>
+                                            </ng-template>
+
+                                        </div>
+                                    </ng-container>
+                                    <!-- CHILD FORM END -->
+
+                                </ng-container>
+                            </ng-template>
+                        </div>
+                        <!-- Start drag field list column -->
+                        <div class="col-3 pl-0" *ngIf="isFieldEditMode() && isDesktop" [ngStyle]="getSidebarFieldListsCss()">
+                            <div style="display:flex;justify-content:end;position: sticky;top: 0;">
+
+                                <div class="toggle-drag-field-button" (click)="toggleDragFieldList()" [ngStyle]="!show_drag_field_list?{width:'27px'}:''">
+                                    <i class="fa fa-chevron-right" *ngIf="show_drag_field_list"></i>
+                                    <i class="fa fa-chevron-left" *ngIf="!show_drag_field_list"></i>
+                                </div>
+                                <div (scroll)="onScrollSidebar($event)" class="toggle-drag-field-list" style="display:block;width: 100%;overflow-y: scroll;max-height: 100vh;"
+                                     *ngIf="show_drag_field_list">
+                                    <div
+                                        id="dragSidebarList"
+                                        cdkDropList
+                                        cdkDropListSortingDisabled
+                                        [cdkDropListData]="settingTypes"
+                                        [cdkDropListEnterPredicate]="disallowDropPredicate"
+                                        [cdkDropListConnectedTo]="connectedLists"
+
+                                    >
+                                        <div *ngFor="let type of settingTypes"
+                                             cdkDrag
+                                             [cdkDragData]="type"
+                                             (cdkDragMoved)="dragMoved($event)"
+                                             (cdkDragReleased)="dragReleased($event)"
+                                             (cdkDragStarted)="drag_placeholder_visible=true"
+                                             (cdkDragEnded)="drag_placeholder_visible=false"
+                                             class="field-drag">
+                                            <button
+                                                *ngIf="(type.show_list!==false)"
+                                                [disabled]="(settingType == null && (isExistFieldSelected() && !canConvertField(type.Comment))) "
+                                                class="btn btn-lg btn-block btn-light-gray " type="button">
+                                                <i class="fa fa-{{type.icon}}"></i> <span> {{ type.label }}</span>
+                                                <!-- <i class="fa fa-th" style="float: right;"></i> -->
+                                                <svg style="float: right;" width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <mask id="mask0_2_1569" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="8" height="14">
+                                                        <path d="M8 0.791992H0V13.792H8V0.791992Z" fill="white"/>
+                                                    </mask>
+                                                    <g mask="url(#mask0_2_1569)">
+                                                        <path
+                                                            d="M1.5 3.79199C2.32843 3.79199 3 3.12042 3 2.29199C3 1.46357 2.32843 0.791992 1.5 0.791992C0.671573 0.791992 0 1.46357 0 2.29199C0 3.12042 0.671573 3.79199 1.5 3.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 3.79199C7.32843 3.79199 8 3.12042 8 2.29199C8 1.46357 7.32843 0.791992 6.5 0.791992C5.67157 0.791992 5 1.46357 5 2.29199C5 3.12042 5.67157 3.79199 6.5 3.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M1.5 8.79199C2.32843 8.79199 3 8.12042 3 7.29199C3 6.46357 2.32843 5.79199 1.5 5.79199C0.671573 5.79199 0 6.46357 0 7.29199C0 8.12042 0.671573 8.79199 1.5 8.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 8.79199C7.32843 8.79199 8 8.12042 8 7.29199C8 6.46357 7.32843 5.79199 6.5 5.79199C5.67157 5.79199 5 6.46357 5 7.29199C5 8.12042 5.67157 8.79199 6.5 8.79199Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M1.5 13.792C2.32843 13.792 3 13.1204 3 12.292C3 11.4636 2.32843 10.792 1.5 10.792C0.671573 10.792 0 11.4636 0 12.292C0 13.1204 0.671573 13.792 1.5 13.792Z"
+                                                            fill="#374767"/>
+                                                        <path
+                                                            d="M6.5 13.792C7.32843 13.792 8 13.1204 8 12.292C8 11.4636 7.32843 10.792 6.5 10.792C5.67157 10.792 5 11.4636 5 12.292C5 13.1204 5.67157 13.792 6.5 13.792Z"
+                                                            fill="#374767"/>
+                                                    </g>
+                                                </svg>
+
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Drag Field list column -->
+                    </div>
+                </div>
+                <div class="card-footer text-right" *ngIf="data!=null && table_info!=undefined && !loading">
+                    <button *ngIf="!IS_IFRAME_MODE" class="btn btn-default btn-ladda" data-style="expand-right" [ladda]='sending' type="button" (click)="cancel()">
+                        キャンセル
+                    </button>
+                    &nbsp;&nbsp;
+                    <button class="btn btn-primary btn-ladda" data-style="expand-right" [ladda]='sending' type="submit"
+                            (click)="go_edit()" [ngClass]="{'btn-warning':table_info.menu.is_workflow && !IS_IFRAME_MODE}">
+                        <div *ngIf="isWorkflowApplyAvailable();then workflow_block;else non_workflow_block"></div>
+                        <ng-template #workflow_block>
+                            <ng-container *ngIf="IS_IFRAME_MODE">
+                                <span>保存</span>
+                            </ng-container>
+                            <ng-container *ngIf="!IS_IFRAME_MODE">
+                                <span>下書き保存</span>
+                            </ng-container>
+                        </ng-template>
+                        <ng-template #non_workflow_block>
+                            <ng-container *ngIf="IS_IFRAME_MODE || IS_EMBED_MODE;else NOT_IFRAME">
+                                <span>{{ submit_text }}</span>
+                            </ng-container>
+                            <ng-template #NOT_IFRAME>
+                                <span *ngIf="mode=='add'">登録</span>
+                                <span *ngIf="mode=='edit'">更新</span>
+                            </ng-template>
+                        </ng-template>
+                    </button>
+                    &nbsp;
+                    <button class="btn btn-primary btn-ladda" data-style="expand-right" [ladda]='sending' type="submit"
+                            (click)="workflow_apply_start()" *ngIf="isWorkflowApplyAvailable() && !IS_IFRAME_MODE">
+                        <span>申請</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--/.col-->
+    </div>
+    <!--/.row-->
+    <div class="d-none d-sm-block" *ngIf="isQuestionnaireStyle() && !IS_PUBLIC_FORM" style="position: fixed;right:10px;bottom:10px;">
+        <button type="button" class="btn btn-primary" (click)="go_edit()" [ladda]='sending'>保存する</button>
+    </div>
+    <div bsModal #editModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-warning" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                    <button type="button" class="close" (click)="editModal.hide()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p *ngIf="mode=='add'">本当に追加してもよろしいですか？</p>
+                    <p *ngIf="mode=='edit'">本当に更新してもよろしいですか？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="editModal.hide()">キャンセル</button>
+                    <button type="button" class="btn btn-warning" *ngIf="mode=='add'" (click)="add()">追加する</button>
+                    <button type="button" class="btn btn-warning" *ngIf="mode=='edit'" (click)="edit()">更新する</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+</ng-template>
+
+<ng-container *ngIf="table_info && table_info.menu && table_info.menu.is_workflow">
+    <div bsModal #worflowModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+        <workflow-modal [table_info]="table_info" [workflow_base]="workflow" [mode]="mode" [data_id]="id"
+                        (valueChanged)="workflowChanged($event)" (applied)="workflow_store()" [parent]="getThis()"
+                        [sending]="sending" [postFormData]="postFormData" [data_changed]="data.last_dirty_changed"></workflow-modal>
+
+    </div><!-- /.modal -->
+</ng-container>
+
+<ng-container *ngIf="table_info && table_info.menu && table_info.menu.popup_comment_after_save">
+    <div bsModal #commentModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+        <comment-modal #commentModalComponent (valueChanged)="commentChanged($event)" (applied)="store()"
+                       [parent]="getThis()" [sending]="sending"></comment-modal>
+
+    </div><!-- /.modal -->
+</ng-container>
+
+<confirm-modal #childDeltedConfirmModal [type]="'danger'" [submit_button_text]="'削除する'" [text]="'本当に削除してもよろしいですか？'"
+               (onOk)="clickToDeleteChild(childDeleteData.child,childDeleteData.index, true)"></confirm-modal>
+
+<confirm-modal #publicFormConfirmModal [submit_button_text]="'はい'" [text]="'送信してよろしいですか？'" (onOk)="store()"
+               [sending]="sending" [is_iframe]="true"></confirm-modal>
+
+<!-- AIチャットボット -->
+<chat-bot *ngIf="!IS_EMBED_MODE && !IS_PUBLIC_FORM && this.table == 'dataset'"
+    [table]="table"
+    [table_info]="table_info"
+          [type]="this.table == 'dataset'? 'dataset_edit' : 'data_edit'"
+    [data]="data"
+    [resetOnInit]="mode=='add'"
+    (fieldEditComplete)="handleFieldEditFromAi($event)">
+</chat-bot>

@@ -1,0 +1,27 @@
+.sticky-header {
+    position: fixed;
+    display: table-header-group;
+    top: 60px;
+    z-index: 999;
+    min-height: 31px;
+}
+.showing-sticky-table-header .pc-list-view__manage .table-admin-list__scroll-arrow {
+    margin-right: 16px;
+}
+.showing-sticky-table-header .header_first_child_sticky {
+    left: 251px;
+}
+.showing-sticky-table-header:not(.showing-sidebar) .header_first_child_sticky {
+    left: 0px;
+}
+.crosstable thead tr th:first-child,
+.crosstable tbody ::ng-deep tr td:first-child {
+    left: 0px;
+    z-index: 999;
+    position: sticky;
+   
+}
+ .crosstable tbody ::ng-deep tr td:first-child {
+     background: white;
+     z-index: 99;;
+ }

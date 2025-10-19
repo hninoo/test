@@ -1,0 +1,10 @@
+<ol class="breadcrumbs" *ngIf="this.breadcrumbs">
+    <li class="breadcrumbs__item">
+        <a class="breadcrumbs__link" [routerLink]="'/admin/group/root'"><i class="fa fa-folder mr-1" aria-hidden="true"></i> /</a>
+    </li>
+    <ng-container *ngFor="let bread of this.breadcrumbs">
+        <li class="breadcrumbs__item">
+            <a class="breadcrumbs__link" [ngClass]="{'-unlink': !bread.link}" [routerLink]="bread.link">{{bread.name}}</a>
+        </li>
+    </ng-container>
+</ol>

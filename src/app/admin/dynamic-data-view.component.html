@@ -1,0 +1,257 @@
+<ng-container *ngIf="isTextField;else notText">
+    <ng-container *ngIf="data.table_info.forms.byFieldName(field_name) && data.table_info.forms.byFieldName(field_name).is_child_form;else notChild">
+        {{data.view_data[field_name]}}
+    </ng-container>
+    <ng-template #notChild>
+        <ng-container *ngIf="data.table_info.forms &&  data.table_info.forms.byFieldName(field_name) && data.table_info.forms.byFieldName(field_name).is_multi_value_mode;else notMulti">
+            <ng-container *ngIf="data.table_info.forms.byFieldName(field_name).isAutoFillField && !data.table_info.forms.byFieldName(field_name).is_multi_value_mode">
+                {{formatArrayValue(data.view_data[field_name])}}
+            </ng-container>
+            <ng-container *ngFor="let _child_data of data.getMultiDataAry(field_name)">
+                <ng-container *ngIf="!_child_data.link_data['value'] || nolink;else childHasLinkData">
+                    <ng-container *ngIf="dataType == 'text'">
+                        <span style="white-space: pre-wrap;">{{_child_data.view_data['value']}} </span>
+                    </ng-container>
+                    <ng-container *ngIf="dataType != 'text'">
+                        <div [innerHTML]="(textToHtml(_child_data.view_data['value']) || '') | nl2br"></div>
+                    </ng-container>
+                </ng-container>
+                <ng-template #childHasLinkData>
+                    <a href="javascript:void(0)"
+                       (click)="toDetail(_child_data.link_data['value'])">
+                       {{_child_data.view_data['value']}}
+                       <ng-container *ngIf="field_name=='division_ids' && _child_data.view_data['position_id']">:{{_child_data.view_data['position_id']}}</ng-container>
+                    </a>
+                </ng-template>
+            </ng-container>
+            <ng-container *ngIf="crossTableHeader && data.getMultiDataAry(field_name).length == 0">
+                {{data.view_data[field_name + '_view']}}
+            </ng-container>
+        </ng-container>
+        <ng-template #notMulti>
+            <ng-container *ngIf="!data.link_data[field_name] || nolink;else hasLinkData">
+                <ng-container *ngIf="dataType != 'textarea' && isUrl(data.raw_data[field_name]);else notFileLink">
+                    <a href="javascript:void(0)" (click)="clickLink(data.raw_data[field_name])">
+                        {{getFileName(data.raw_data[field_name])}}
+                    </a>
+                </ng-container>
+                <ng-template #notFileLink>
+                    <!-- calcタイプの数値フィールドの場合は数値フォーマットを適用 -->
+                    <ng-container *ngIf="(dataType === 'calc' && isCalcNumericField()) || isYField(); else normalTextField">
+                        <ng-container *ngFor="let _data of arrayValue; let i = index">
+                            <div class="view_{{dataType}} view_block"
+                                 [ngClass]="{'table-admin-list__cell-inner':!this.is_view_mode}"
+                                 [ngStyle]="getNumericStyle(i)">
+                                {{ _data }}
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                    <ng-template #normalTextField>
+                        <div class="view_{{dataType}} view_block"
+                             [ngClass]="{'table-admin-list__cell-inner':!this.is_view_mode,'pre-wrap':this.table_info.forms.byFieldName(this.field_name) && this.table_info.forms.byFieldName(this.field_name).hasCustomTextLen()}"
+                             [innerHtml]="textToHtml(data.view_data[this.field_name])"
+                        >
+                        </div>
+                    </ng-template>
+                    <div *ngIf="table_info.menu.getGoogleMapAddressField() == field_name && is_view_mode">
+                        <a href="{{getGoogelMapLink()}}" target="_blank" style="color: #0066cc; text-decoration: none;">Google マップで開く</a>
+                    </div>
+                    <div *ngIf="_share.useGoogleCalendar() && dataType == 'google_calendar' && data.view_data[this.field_name] == 'false'"
+                        (click)="googleAuth()" >
+                        <div class="google-auth-btn">
+                             <div class="google-icon">
+                                <img src="/assets/img/google-logo.png" alt="Google Logo">
+                             </div>
+                            アカウント連携する
+                        </div>
+
+                        <div *ngIf="google_calendar_setting">
+                            <div>jsonファイルをアップロード  <input #fileInput type="file" accept=".json"></div>
+                            <div><input #textInput type="text" placeholder="カレンダーIDを入力" class="form-control"></div>
+                            <div><button class="btn btn-primary btn-sm" (click)="handleGoogleFileInput(fileInput.files, textInput.value)">認証する</button></div>
+                            <div *ngIf="calendarLoading">
+                                <i class="fa fa-spinner fa-spin"></i>認証中...
+                              </div>
+                        </div>
+                    </div>
+                    <div
+                        *ngIf="_share.useGoogleCalendar() && dataType == 'google_calendar' && data.view_data[this.field_name] == 'true' && !google_calendar_setting">
+                        Google 認証済み(<span class="google-reauth-link" (click)="googleAuth()">再認証を行う</span>)
+                    </div>
+                    <div
+                        *ngIf="_share.useGoogleCalendar() && dataType == 'google_calendar' && data.view_data[this.field_name] == 'true' && google_calendar_setting">
+                        <div>jsonファイルをアップロード <input #fileInput type="file" accept=".json"></div>
+                        <div><input #textInput type="text" placeholder="カレンダーIDを入力" class="form-control"></div>
+                        <div><button class="btn btn-primary btn-sm"
+                                (click)="handleGoogleFileInput(fileInput.files, textInput.value)">認証する</button></div>
+                        <div *ngIf="calendarLoading">
+                            <i class="fa fa-spinner fa-spin"></i> 認証中...
+                        </div>
+                    </div>
+                </ng-template>
+                <a (click)="download_csv()"
+                   *ngIf=" table_info.table === 'csv' && form.field['Field'] === 'type' && data.raw_data[field_name]==='download' && data.raw_data['status']=='done' && is_show_download()">
+                    <i *ngIf="!downloading" style="cursor:pointer" class="fa fa-cloud-download blue" aria-hidden="true"></i>
+                    <div *ngIf="downloading">
+                        <div class="loader_small">Loading...</div>
+                    </div>
+                </a>
+
+            </ng-container>
+            <ng-template #hasLinkData>
+                <div class="text-truncate">
+                    <a href="javascript:void(0)"
+                       (click)="toDetail(data.link_data[field_name])">
+                        <div [innerHTML]="getSanitizedValue(data.view_data[this.field_name])"></div>
+                    </a>
+                </div>
+            </ng-template>
+        </ng-template>
+
+
+    </ng-template>
+
+
+</ng-container>
+<ng-template #notText>
+    <ng-container [ngSwitch]="dataType">
+
+        <div *ngSwitchCase="'grant_group'">
+            <ng-container *ngIf="grantGroupData;else NotLoadGrantGroupData;">
+                <ng-container *ngIf="grantGroupData.raw_data['everyone']==='true';else NotAllUser;">
+                    全ユーザー
+                </ng-container>
+                <ng-template #NotAllUser>
+                    <ng-container *ngIf="!simpleGrantView; else simpleGrantViewTemplate">
+                        <table *ngIf="grantGroupData.getAdminLabel() || grantGroupData.getDivisionLabel()" class="table table-sm table-bordered grant-group-table">
+                            <tr>
+                                <th><i class="fa fa-users pl-2"></i><span class="pl-2">ユーザー</span></th>
+                                <td style="background: white" [innerHTML]="grantGroupData.getAdminLabel()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><i class="fa fa-building-o pl-2"></i><span class="pl-3">組織</span></th>
+                                <td style="background: white">
+                                    {{ grantGroupData.getDivisionLabel() }}
+                                </td>
+                            </tr>
+                        </table>
+                    </ng-container>
+                    <ng-template #simpleGrantViewTemplate>
+                        <div class="simple-grant-view">
+                            <ng-container *ngIf="getCombinedLabels(grantGroupData.getAdminLabel(), grantGroupData.getDivisionLabel()) as combinedLabels">
+                                <ng-container *ngFor="let label of combinedLabels; let i = index; let isLast = last">
+                                    <div *ngIf="i < 3" class="simple-grant-view-item">
+                                        <i class="fa" [ngClass]="{'fa-users': label.type === 'user', 'fa-building-o': label.type === 'org'}"></i> {{ label.text }}
+                                    </div>
+                                </ng-container>
+                                <span *ngIf="combinedLabels.length > 3"> その他{{ combinedLabels.length - 3 }}件</span>
+                            </ng-container>
+                        </div>
+                    </ng-template>
+                </ng-template>
+            </ng-container>
+            <ng-template #NotLoadGrantGroupData>
+            </ng-template>
+        </div>
+       
+        <div *ngSwitchCase="'richtext'" [innerHTML]="getSanitizedValue(data.raw_data[this.field_name])"></div>
+
+
+
+        <div *ngSwitchCase="'number'">
+            <a *ngIf="field_name === 'id';else NotId" href="javascript:void(0)" (click)="view()">
+                {{data.view_data[this.field_name]}}
+            </a>
+            <ng-template #NotId>
+                <ng-container *ngFor="let _data of arrayValue; let i = index">
+                    <div>
+                        <span *ngIf="form && !form.num_separator;else NoNumSep" [ngStyle]="getNumericStyle(i)">
+                        {{_data}}
+                        </span>
+                        <ng-template #NoNumSep>
+                            <span [ngStyle]="getNumericStyle(i)">{{ _data }}</span>
+                        </ng-template>
+                    </div>
+                </ng-container>
+            </ng-template>
+        </div>
+        <div *ngSwitchCase="'url'">
+            <div>
+                <ng-container *ngFor="let _data of arrayValue;let i=index">
+                    <a *ngIf="isUrl(rawArrayValue[i])" [href]="rawArrayValue[i]">
+                        {{_data}}
+                    </a>
+
+                    <a *ngIf="!isUrl(rawArrayValue[i])" (click)="clickLink(rawArrayValue[i])" [href]="rawArrayValue[i]" target="_blank">
+                        {{_data}}
+                    </a>&nbsp;
+                </ng-container>
+            </div>
+        </div>
+        <div *ngSwitchCase="'image'" class="image-container">
+            <div class="image-one" *ngFor="let _data of arrayValue.slice(0,is_view_mode?1000:form.display_num_on_list);let i=index">
+                <img *ngIf="_data" style="display: block; object-fit: contain;" [src]="_data.thumbnail_url" (click)="openImg(i)" alt="">
+                <div class="image_pixel" *ngIf="form.show_pixel && _data && _data.thumbnail_size && is_view_mode" style="display: flex; justify-content: center;">
+                    {{_data.thumbnail_size[0]}} x {{_data.thumbnail_size[1]}}, {{_data.thumbnail_size[6] > 1024*1024 ? (_data.thumbnail_size[6] / (1024 * 1024)).toFixed(2) + 'MB' : (_data.thumbnail_size[6] / 1024).toFixed(2) + 'KB'}}
+                </div>
+                <div class="filename" *ngIf="form.display_image_filename">
+                    <a class="d-none d-lg-inline" *ngIf="_data!=null"
+                       href="javascript:void(0)"
+                       (click)="download_file(_data.url,_data.name)">{{_data.name}}</a>
+                    <div *ngIf="_data && isDownloading(_data.url)">
+                        <div class="loader_small">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngSwitchCase="'file'">
+            <ng-container *ngFor="let _data of arrayValue">
+                <a class="d-lg-none" *ngIf="_data!=null" [href]="_data['display_url']" target="_blank">
+                    {{_data['name']}}
+                </a>
+                <ng-container *ngIf="_data!=null && !is_string(_data)">
+                    <a class="d-none d-lg-inline"
+                       href="javascript:void(0)"
+                       (click)="showFileIfPossibleClicked(_data['url'],_data['name'],_data, template)">{{_data['name']}}</a>
+                </ng-container>
+                <a class="d-none d-lg-inline" *ngIf="_data!=null && is_string(_data)"
+                   href="javascript:void(0)"
+                   (click)="download_file(_data)">Download</a>
+                <div
+                    *ngIf="_data!=null && _data['hit_html']!=undefined"
+                    [innerHTML]="_data['hit_html']">
+                </div>
+                <br>
+
+
+                <div *ngIf="_data && isDownloading(_data.url)">
+                    <div class="loader_small">Loading...</div>
+                </div>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+
+</ng-template>
+
+<ng-template #template>
+    <div class="modal-body">
+        <div class="row">
+            <div style="margin: 0 auto; padding: 0 15px; max-height: 75vh;" [ngClass]="{'col-md-12': videoLoading}">
+                <video width="100%" height="100%" controls (loadeddata)="videoLoading = false">
+                    <source [src]="src" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="modalRef.hide()">Close</button>
+    </div>
+</ng-template>
+
+
+
+

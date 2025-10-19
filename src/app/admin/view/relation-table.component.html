@@ -1,0 +1,89 @@
+<div class="mt-5" class="relation_table" *ngIf="relation_table_hash; else noRelationTable">
+    <ng-container *ngIf="relation_table_info">
+
+        <div class="flex flex-wrap justify-content-between">
+            <div class="flex">
+                <h3>{{ relation_table_hash.label }}</h3>
+                <button class="btn btn-success pull-left btn-md btn-sm px-2 py-1 ml-1 mb-2 relation_add"
+                        (click)="goToTableEdit(relation_table_info)" *ngIf="relation_table_info.grant.add">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+            <ng-container *ngIf="relation_table_hash.data_a.length>0">
+                <ul style="display:none">
+                    <li *ngFor="let item of numbers | paginate: { itemsPerPage: 1, currentPage: page,id:id }">
+                        {{ item }}
+                    </li>
+                </ul>
+
+                <pagination-controls
+                    (pageChange)="onPageChange($event)"
+                    [id]="id"
+                    previousLabel=""
+                    nextLabel=""
+                    >
+                </pagination-controls>
+            </ng-container>
+        </div>
+        <ng-container *ngIf="relation_table_hash.sub_label">
+            <div class="mb-2">
+                <small>{{ relation_table_hash.sub_label }}</small>
+            </div>
+        </ng-container>
+        <div *ngIf="relation_table_hash.data_a.length==0;else relationDataExists" style="text-align: center"> データはありません
+        </div>
+        <ng-template #relationDataExists>
+
+            <div *ngIf="loading;then loading_block else loaded_block"></div>
+            <ng-template #loading_block>
+                <div class="loader">Loading...</div>
+            </ng-template>
+            <div [hidden]="loading">
+
+                <ng-container *ngIf="relation_table_hash.view_mode && relation_table">
+                    <div class="mb-4" *ngFor="let _relation_data of relation_table.data_a">
+                        <admin-view-table *ngIf="relation_table_info"
+                                          (onDelete)="openAdminTableDeleteModal(_relation_data)"
+                                          [fields]="relation_table.getViewFields(relation_table_info)"
+                                          [forms]="relation_table_info.forms" [data]="_relation_data"
+                                          [table]="relation_table_hash.table" [is_relation_view_mode]="true" [relation_show_field]="relation_table.getViewFields(relation_table_info)"></admin-view-table>
+                    </div>
+                    <div bsModal #deleteRelatedItemModal="bs-modal" class="modal fade delete-related-item" tabindex="-1" role="dialog"
+                        aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-danger" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                                    <button type="button" class="close" (click)="deleteRelationModal.hide()" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>本当に削除してもよろしいですか？</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" (click)="deleteRelationModal.hide()">キャンセル</button>
+                                    <button type="button" class="btn btn-danger" (click)="delete(delete_data)">削除する</button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div><!-- /.modal -->
+                </ng-container>
+                <ng-container *ngIf="!relation_table_hash.view_mode">
+                    <admin-table [view_fields]="getRelationViewFields()|async" [is_relation_table]="true"
+                                 [table_info]="relation_table_info" [data_a]="relation_table.data_a"
+                                 [hide_scroll]="true" [isShowManageCol]="true" [reload]="reload" [isMovable]="false"
+                                 [child_a_by_id]="{}"></admin-table>
+                </ng-container>
+             </div>
+
+
+        </ng-template>
+    </ng-container>
+</div>
+
+<ng-template #noRelationTable>
+    <div class="no-relation-table" *ngIf="!is_relation_view_mode">
+        関連テーブルが存在しない、または権限がありません
+    </div>
+</ng-template>

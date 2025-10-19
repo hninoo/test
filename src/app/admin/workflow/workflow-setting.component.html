@@ -1,0 +1,224 @@
+<ng-container *ngFor="let workflowPath of workflow.workflow_path_a;let i = index">
+    <div class="row mt-2 mb-3">
+        <div class="col-md-12">
+            <h5 class="font-weight-bold">承認者（組織）{{i + 1}}</h5>
+        </div>
+        <div class="move-button" [class.disabled]="isDisabled(workflowPath)" (click)="moveUp(i)">↑ 上に移動</div>
+        <div class="move-button" [class.disabled]="isDisabled(workflowPath)" (click)="moveDown(i)">↓ 下に移動</div>
+
+        <!-- <div class="col-md-8">
+            <hr style="width:100%">
+        </div> -->
+
+    </div>
+    <div class="col-md-12 row">
+        <div class="col-md-12 row pr-0">
+            <div class="col-md-2 pl-0 font-weight-bold">承認者（組織）</div>
+            <div class="col-md-10 pr-0 bg-light-gray p-3">
+                <div class="font-weight-bold pt-2">承認者種別<span class="text-danger ml-1 required">※</span></div>
+                <div class="d-flex col-md-9 px-0">
+                    <div class="radio">
+                        <label>
+                            <input [(ngModel)]="workflowPath.type" name="type_{{i}}" (change)="changed()" type="radio" value="admin" [disabled]="isDisabled(workflowPath)"> ユーザー
+                        </label>
+                    </div>
+                    <div class="radio ml-4">
+                        <label>
+                            <input [(ngModel)]="workflowPath.type" name="type_{{i}}" (change)="changed()" type="radio" value="division" [disabled]="isDisabled(workflowPath)"> 組織(役職)
+                        </label>
+                    </div>
+                    <div class="radio ml-4">
+                        <label>
+                            <input [(ngModel)]="workflowPath.type" name="type_{{i}}" (change)="changed()" type="radio" value="field" [disabled]="isDisabled(workflowPath)"> 項目
+                        </label>
+                    </div>
+                </div>
+
+                <!-- type admin -->
+                <div class="col-md-12 px-0 pb-4 boder-button-gray" style="margin-bottom: 5px" *ngIf="workflowPath.type == 'admin'">
+                    <div class="font-weight-bold py-2">ユーザー<span class="text-danger ml-1 required">※</span></div>
+                    <user-forms-field class="mb-2" [added_values]="getUserAddedValues()" [disabled]="isDisabled(workflowPath)" [index]="i" [default_admin_id]="workflowPath.admin_id" (valueChanged)="pathChanged($event,'admin_id')"></user-forms-field>
+                </div>
+
+                <!-- type division -->
+                <div style="margin-bottom: 5px" *ngIf="workflowPath.type == 'division'" class="col-md-12 px-0 boder-button-gray">
+                    <div class="font-weight-bold pt-2">組織に対する条件<span class="text-danger ml-1 required">※</span></div>
+
+                    <div class=" col-md-12 px-0">
+                        <div class="radio d-flex">
+                            <label>
+                                <input [(ngModel)]="workflowPath.division_grant_type" (change)="changed()" name="division_type_{{i}}" type="radio" value="all" [disabled]="isDisabled(workflowPath)"> 全員の承認が必要
+                            </label>
+                            <label>
+                                <input [(ngModel)]="workflowPath.division_grant_type" (change)="changed()" name="division_type_{{i}}" type="radio" value="one" [disabled]="isDisabled(workflowPath)"> 一人の承認が必要
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 font-weight-bold mb-2">組織<span class="text-danger ml-1 required">※</span></div>
+                        <div class="col-md-6 font-weight-bold mb-2">役職<span class="text-danger ml-1 required">※</span></div>
+
+                        <!-- division -->
+                        <div class="col-md-6">
+                            <division-forms-field [added_values]="getDivisionAddedValues()" [disabled]="isDisabled(workflowPath)" [index]="i" [default_division_id]="workflowPath.division_id"
+                                                  (valueChanged)="pathChanged($event,'division_id')"></division-forms-field>
+                            <div class="checkbox">
+                                <label style="width:100px;">
+                                    <input class="" type="checkbox" [(ngModel)]="workflowPath.include_parent_division" [value]="true" (change)="changed()" [disabled]="isDisabled(workflowPath)"/>
+                                    親組織含む
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 ">
+                            <!-- position -->
+                            <position-forms-field [add_all]="true" [disabled]="isDisabled(workflowPath)" [index]="i" [default_position_id]="workflowPath.position_id"
+                                                  (valueChanged)="pathChanged($event,'position_id')"></position-forms-field>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- field -->
+                <div style="margin-bottom: 5px" *ngIf="workflowPath.type == 'field'"  class="col-md-12 pb-4 boder-button-gray px-0">
+                    <div class="font-weight-bold py-2">項目<span class="text-danger ml-1 required">※</span></div>
+                    <ng-select appendTo="body" ng-required="true" class="custom form-control" [hidden]="loading"
+                        [disabled]="isDisabled(workflowPath)" [items]="fieldOptions" [searchWhileComposing]="false"
+                        [virtualScroll]="true" bindLabel="label" bindValue="field_name" [(ngModel)]="workflowPath.field_name"
+                        (change)="fieldChanged(i, $event.field_name)"></ng-select>
+
+                </div>
+
+                <!-- and_or -->
+                <ng-container *ngFor="let and_or_condition of workflowPath.path_and_or_a;let j = index">
+                    <div class="col-md-12 row px-0 ml-1">
+                        <div class="font-weight-bold pt-2 mb-2">AND/OR<span class="text-danger ml-1 required">※</span></div>
+                        <div class="col-md-12 px-0 mb-2" *ngIf="and_or_condition.type == 'admin' || and_or_condition.type == 'field'">
+                            <ng-select class="custom form-control" [(ngModel)]="and_or_condition.and_or" [items]="['AND', 'OR']"
+                                bindLabel="condition" bindValue="condition" (change)="changed()" [disabled]="isDisabled(workflowPath)" [clearable]="false"></ng-select>
+                        </div>
+                        <div class="font-weight-bold pt-2 mb-2 col-md-12 pl-0">承認者種別<span class="text-danger ml-1 required">※</span></div>
+
+                        <div class="radio col-md-8 d-flex px-0 pt-0 align-items-center">
+                            <label class="">
+                                <input [(ngModel)]="and_or_condition.type" name="and_or_condition_type_{{j}}" (change)="changed()" type="radio" value="admin" [disabled]="isDisabled(and_or_condition)"> ユーザー
+                            </label>
+                            <label class="ml-4">
+                                <input [(ngModel)]="and_or_condition.type" name="and_or_condition_type_{{j}}" (change)="changed()" type="radio" value="division" [disabled]="isDisabled(and_or_condition)"> 組織(役職)
+                            </label>
+                            <label class="ml-4">
+                                <input [(ngModel)]="and_or_condition.type" name="and_or_condition_type_{{j}}" (change)="changed()" type="radio" value="field" [disabled]="isDisabled(and_or_condition)"> 項目
+                            </label>
+                        </div>
+                        <button class="btn btn-danger btn-sm" style="height: 30px;" (click)="workflowPath.deleteAndOr(j)" [disabled]="isDisabled(workflowPath)">
+                            <i class="fa fa-minus"></i>
+                        </button>
+
+                        <!-- type admin -->
+                        <div  class="col-md-12 px-0 boder-button-gray pb-4 mt-2" style="margin-bottom: 5px" *ngIf="and_or_condition.type == 'admin'">
+                            <div class="font-weight-bold pt-2 mb-2 col-md-12 pl-0">ユーザー</div>
+                            <user-forms-field [added_values]="getUserAddedValues()" [disabled]="isDisabled(and_or_condition)" [index]="j"
+                                [default_admin_id]="and_or_condition.admin_id" (valueChanged)="andOrChanged($event,'admin_id', i)"></user-forms-field>
+                        </div>
+                        <!-- type field -->
+                        <div class="col-md-12 px-0 boder-button-gray pb-4 mt-2" style="margin-bottom: 5px" *ngIf="and_or_condition.type == 'field'">
+                            <div class="font-weight-bold pt-2 mb-2 col-md-12 pl-0">項目</div>
+                            <ng-select appendTo="body" ng-required="true" class="custom form-control" [hidden]="loading"
+                                [disabled]="isDisabled(and_or_condition)" [items]="fieldOptions" [searchWhileComposing]="false" [virtualScroll]="true"
+                                bindLabel="label" bindValue="field_name" [(ngModel)]="and_or_condition.field_name"
+                                (change)="fieldChanged(j, $event.field_name)"></ng-select>
+
+                        </div>
+
+                        <!-- division -->
+                        <div style="margin-bottom: 5px" *ngIf="and_or_condition.type == 'division'" class="col-md-12 px-0">
+                            <div class="font-weight-bold pt-2">組織に対する条件<span class="text-danger ml-1 required">※</span></div>
+                            <div class="radio d-flex px-0">
+                                <label>
+                                    <input [(ngModel)]="and_or_condition.division_grant_type" (change)="changed()" name="and_or_condition_division_type_{{j}}" type="radio" value="all" [disabled]="isDisabled(and_or_condition)"> 全員の承認が必要
+                                </label>
+                                <label>
+                                    <input [(ngModel)]="and_or_condition.division_grant_type" (change)="changed()" name="and_or_condition_division_type_{{j}}" type="radio" value="one" [disabled]="isDisabled(and_or_condition)"> 一人の承認が必要
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-12 pl-0" *ngIf="and_or_condition.type == 'division'">
+                            <div class="font-weight-bold pt-2 mb-2">AND/OR<span class="text-danger ml-1 required">※</span></div>
+                            <ng-select class="custom form-control mb-2" [(ngModel)]="and_or_condition.and_or" [items]="['AND', 'OR']" [disabled]="isDisabled(workflowPath)"
+                                bindLabel="condition" bindValue="condition" (change)="changed()" [clearable]="false"></ng-select>
+                        </div>
+                        <div style="margin-bottom: 5px" *ngIf="and_or_condition.type == 'division'" class="col-md-12 pl-0">
+                            <div class="row">
+                                <div class="col-md-6 font-weight-bold mb-2">組織<span class="text-danger ml-1 required">※</span></div>
+                                <div class="col-md-6 font-weight-bold mb-2">役職<span class="text-danger ml-1 required">※</span></div>
+                                <div class="col-md-6">
+                                    <division-forms-field [added_values]="getDivisionAddedValues()" [disabled]="isDisabled(and_or_condition)" [index]="j" [default_division_id]="and_or_condition.division_id"
+                                                        (valueChanged)="andOrChanged($event,'division_id', i)"></division-forms-field>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" [(ngModel)]="and_or_condition.include_parent_division" [value]="true" (change)="changed()" [disabled]="isDisabled(and_or_condition)"/>
+                                            親組織含む
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <position-forms-field [add_all]="true" [disabled]="isDisabled(and_or_condition)" [index]="j" [default_position_id]="and_or_condition.position_id"
+                                                        (valueChanged)="andOrChanged($event,'position_id', i)"></position-forms-field>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <button class="btn btn-danger btn-sm" style="height: 30px;" (click)="workflowPath.deleteAndOr(j)" [disabled]="isDisabled(workflowPath)"
+                        *ngIf="and_or_condition.type == 'division'"><i class="fa fa-minus"></i>
+                        </button> -->
+                   </div>
+                </ng-container>
+
+
+            </div>
+            <div class="col-md-2 pl-0"></div>
+            <button class="btn btn-success btn-sm mt-3" (click)="addAndOr(workflowPath, i)" [disabled]="isDisabled(workflowPath)"><i class="fa fa-plus"></i>同承認フロー内で同時に承認するユーザー/組織を追加
+            </button>
+
+            <div class="mt-3" class="col-md-12">
+                <div class="row mt-3">
+                    <div class="col-md-2 pl-0 font-weight-bold">条件 <i class="fa fa-info-circle"
+                                                                        [ngbTooltip]="'条件に合致した場合のみ、このフローに入ります。条件に合致しない場合はフローがスキップされます。'"></i></div>
+                    <div class="col-md-9 pl-0"></div>
+
+                    <ng-container *ngFor="let condition of workflowPath.conditions.condition_a; let i = index;" class="">
+                        <div class="col-md-2 pl-0"></div>
+                        <div class="col-md-10 pr-0 bg-light-gray p-3 ml-0 row">
+
+                            <div class="col-md-11 boder-button-gray">
+                                <condition-form [disabled]="isDisabled(workflowPath)" [no_workflow_select]="true" [table]="table"
+                                    [default_condition]="condition"
+                                    (valueChanged)="workflowPathConditionChanged(workflowPath,$event)" [index]="i"></condition-form>
+                            </div>
+
+
+                            <div class="col-md-1 mt-4 boder-button-gray">
+                                <button class="btn btn-danger pull-left btn-sm btn mt-1"
+                                    (click)="workflowPath.conditions.deleteCondition(i)" [disabled]="isDisabled(workflowPath)"><i
+                                        class="fa fa-minus"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </ng-container>
+                    <div class="col-md-2 pl-0"></div>
+                    <div class="col-md-9 pl-0 mt-2">
+                        <button class="btn btn-success btn-sm" (click)="workflowPath.conditions.addCondition()"
+                            [disabled]="isDisabled(workflowPath)"><i class="fa fa-plus"></i>条件の追加</button>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+        <div class="col-md-1" *ngIf="!isDisabled(workflowPath)">
+            <button *ngIf="i!=0" class="btn btn-danger btn-sm" (click)="delete(i)"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+
+
+</ng-container>

@@ -1,0 +1,15 @@
+Satisfy any
+order allow,deny
+allow from all
+AddDefaultCharset UTF-8
+
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+
+<If "%{THE_REQUEST} =~ m#\s/+public[/?\s]#">
+    Header unset X-Frame-Options
+</If>
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule !\.(js|ico|gif|jpg|jpeg|png|css|html|htm|xml|less|htc|php|pdf|doc|docx|ppt|pptx|xls|xlsx|map|woff2|svg)$ index.html [L]

@@ -1,0 +1,433 @@
+<div class="card m-4">
+    <div class="card-header text-center">
+        <h1 style="    font-size: 20px;">クライアント情報変更</h1>
+    </div>
+    <div class="card-body p-3" style="min-height: 400px;">
+        <div class="form-group row">
+            <div class="col-md-12 ml-4">
+                <img style="width: 240px; " src="https://pigeon-fw.com//assets/cloud2/img/logo.png" class="pigeon-logo" alt="PigeonCloud">
+            </div>
+
+            <div class="col-md-12 m-4 row">
+                <div class="col-md-12">
+                    DB名:
+                    <input class="form-control" type="text" [(ngModel)]="client_name">.pigeon-cloud.com
+                    <br>
+                    <button (click)="getSetting()" class="btn btn-success pull-right" [ladda]="loading">情報取得</button>
+                </div>
+
+                <ng-container *ngIf="setting">
+                    <div *ngIf="payment" class="row">
+                        <div class="col-md-12">
+                            <h5>現在有効な決済情報</h5>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <tbody>
+                                <tr>
+                                    <th>プラン</th>
+                                    <td>{{payment['contract_type'] == 'user_num' ? 'ユーザー数プラン' : 'ログイン数プラン'}}</td>
+                                </tr>
+                                <tr>
+                                    <th>決済日</th>
+                                    <td>{{payment['payDate']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>決済手段</th>
+                                    <td>{{payment['payment_service']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>ユーザー数</th>
+                                    <td>{{payment['user_num']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>追加容量</th>
+                                    <td>{{payment['add_size']}}GB</td>
+                                </tr>
+                                <tr>
+                                    <th>オプション</th>
+                                    <td>
+                                        <ng-container *ngFor="let op of options">
+                                            <div *ngIf="payment['option'][op['type']] == 'true'">・{{op['name']}}</div>
+                                        </ng-container>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>決済反映日時</th>
+                                    <td>{{payment['reflected']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>金額</th>
+                                    <td>{{payment['amount']| number}}円 (税込み)</td>
+                                </tr>
+
+                                <tr>
+                                    <th>subscriptionID</th>
+                                    <td>{{payment['subscriptionID']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>orderID</th>
+                                    <td>{{payment['orderID']}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr style="width:100%">
+                    </div>
+                    <div *ngIf="next_payment" class="row">
+                        <div class="col-md-12">
+                            <h5>次回決済情報</h5>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <tbody>
+                                <tr>
+                                    <th>プラン</th>
+                                    <td>{{next_payment['contract_type'] == 'user_num' ? 'ユーザー数プラン' : 'ログイン数プラン'}}</td>
+                                </tr>
+                                <tr>
+                                    <th>決済日</th>
+                                    <td>{{next_payment['payDate']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>決済手段</th>
+                                    <td>{{next_payment['payment_service']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>ユーザー数</th>
+                                    <td>{{next_payment['user_num']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>追加容量</th>
+                                    <td>{{next_payment['add_size']}}GB</td>
+                                </tr>
+                                <tr>
+                                    <th>オプション</th>
+                                    <td>
+                                        <ng-container *ngFor="let op of options">
+                                            <div *ngIf="next_payment['option'][op['type']] == 'true'">・{{op['name']}}</div>
+                                        </ng-container>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>決済反映日時</th>
+                                    <td>{{next_payment['reflected']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>金額</th>
+                                    <td>{{next_payment['amount']| number}}円 (税込み)</td>
+                                </tr>
+
+                                <tr>
+                                    <th>subscriptionID</th>
+                                    <td>{{next_payment['subscriptionID']}}</td>
+                                </tr>
+                                <tr>
+                                    <th>orderID</th>
+                                    <td>{{next_payment['orderID']}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr style="width:100%">
+                    </div>
+
+                    <div class="card-body">
+                        <div class="alert alert-warning">設定変更は即時適用されます</div>
+                        <div class="alert alert-info" *ngIf="updated">{{updated}}</div>
+
+                        <!-- 基本設定グループ -->
+                        <h4 class="mt-3 mb-2">基本設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>トライアル期限</label>
+                                    <div class="input-group">
+                                        <input
+                                            class="form-control"
+                                            [owlDateTime]="owl_datetime"
+                                            placeholder="YYYY/MM/DD"
+                                            [(ngModel)]="trial_expired"
+                                            (ngModelChange)="datetimeValueChanged($event,'trial_expired','datetime')"
+                                        >
+                                        <button class="btn btn-danger" (click)="setting['trial_expired']=null;trial_expired=null">削除（本番化)</button>
+                                        <owl-date-time #owl_datetime
+                                                    [pickerType]="'both'"
+                                                    [dateFormat]="'YYYY-MM-DD'"
+                                        ></owl-date-time>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>期限（通常は空で、解約時に期限をセット)</label>
+                                    <input type="text" class="form-control" [(ngModel)]="setting['expired']">
+                                </div>
+                                <div class="form-group">
+                                    <label>ユーザー数</label>
+                                    <input type="text" class="form-control" [(ngModel)]="setting['max_user']">
+                                </div>
+                                <div class="form-group">
+                                    <label>追加サイズ(GB)</label>
+                                    <input type="text" class="form-control" [(ngModel)]="setting['add_size']">
+                                </div>
+                                <div class="form-group">
+                                    <label>アップロード最大サイズ(MB)</label>
+                                    <input type="text" class="form-control" [(ngModel)]="setting['max_upload_mb']">
+                                </div>
+                                <div class="form-group">
+                                    <label>契約タイプ</label>
+                                    <select [(ngModel)]="setting['contract_type']" class="form-control">
+                                        <option [value]="'user_num'">ユーザー数</option>
+                                        <option [value]="'login_num'">ログイン数</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- APIと認証設定グループ -->
+                        <h4 class="mt-3 mb-2">APIと認証設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>ログインIDとして、メールアドレス以外を使用可能に変更</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_login_id" id="use_login_id_on" [value]="'true'" [(ngModel)]="setting['use_login_id']">
+                                        <label class="radio-custom" for="use_login_id_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_login_id" id="use_login_id_off" [value]="'false'" [(ngModel)]="setting['use_login_id']">
+                                        <label class="radio-custom" for="use_login_id_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>API有効</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_api" id="enable_api_on" [value]="'true'" [(ngModel)]="setting['enable_api']">
+                                        <label class="radio-custom" for="enable_api_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_api" id="enable_api_off" [value]="'false'" [(ngModel)]="setting['enable_api']">
+                                        <label class="radio-custom" for="enable_api_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>AIファイル検索機能</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_filesearch" id="enable_filesearch_on" [value]="'true'" [(ngModel)]="setting['enable_filesearch']">
+                                        <label class="radio-custom" for="enable_filesearch_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_filesearch" id="enable_filesearch_off" [value]="'false'" [(ngModel)]="setting['enable_filesearch']">
+                                        <label class="radio-custom" for="enable_filesearch_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>マスターユーザー認証を使用</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_master_user_auth" id="use_master_user_auth_on" [value]="'true'" [(ngModel)]="setting['use_master_user_auth']">
+                                        <label class="radio-custom" for="use_master_user_auth_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_master_user_auth" id="use_master_user_auth_off" [value]="'false'" [(ngModel)]="setting['use_master_user_auth']">
+                                        <label class="radio-custom" for="use_master_user_auth_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>マスターログインURLを使用</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_master_login_url" id="use_master_login_url_on" [value]="'true'" [(ngModel)]="setting['use_master_login_url']">
+                                        <label class="radio-custom" for="use_master_login_url_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_master_login_url" id="use_master_login_url_off" [value]="'false'" [(ngModel)]="setting['use_master_login_url']">
+                                        <label class="radio-custom" for="use_master_login_url_off">OFF</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- メール・通知設定グループ -->
+                        <h4 class="mt-3 mb-2">メール・通知設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>配信メールオプション</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="mail_option" id="mail_option_on" [value]="'true'" [(ngModel)]="setting['mail_option']">
+                                        <label class="radio-custom" for="mail_option_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="mail_option" id="mail_option_off" [value]="'false'" [(ngModel)]="setting['mail_option']">
+                                        <label class="radio-custom" for="mail_option_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>ステップメールオプション</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="step_mail_option" id="step_mail_option_on" [value]="'true'" [(ngModel)]="setting['step_mail_option']">
+                                        <label class="radio-custom" for="step_mail_option_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="step_mail_option" id="step_mail_option_off" [value]="'false'" [(ngModel)]="setting['step_mail_option']">
+                                        <label class="radio-custom" for="step_mail_option_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>1日あたりの通知制限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['notify_limit_per_day']">
+                                </div>
+                                <div class="form-group">
+                                    <label>SendGridメール通知制限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['notification_sendgrid_email_limit']">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 表示・機能設定グループ -->
+                        <h4 class="mt-3 mb-2">表示・機能設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>メニューフォルダ表示（多階層用。主にデヂエ）</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="show_only_directory_on_navmenus" id="show_only_directory_on_navmenus_on" [value]="'true'"
+                                               [(ngModel)]="setting['show_only_directory_on_navmenus']">
+                                        <label class="radio-custom" for="show_only_directory_on_navmenus_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="show_only_directory_on_navmenus" id="show_only_directory_on_navmenus_off" [value]="'false'"
+                                               [(ngModel)]="setting['show_only_directory_on_navmenus']">
+                                        <label class="radio-custom" for="show_only_directory_on_navmenus_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>ダッシュボードにマスターユーザー表示</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="display_master_on_dashboard" id="display_master_on_dashboard_on" [value]="'true'"
+                                               [(ngModel)]="setting['display_master_on_dashboard']">
+                                        <label class="radio-custom" for="display_master_on_dashboard_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="display_master_on_dashboard" id="display_master_on_dashboard_off" [value]="'false'"
+                                               [(ngModel)]="setting['display_master_on_dashboard']">
+                                        <label class="radio-custom" for="display_master_on_dashboard_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>メンテナンスモード</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="is_maintenance" id="is_maintenance_on" [value]="'true'" [(ngModel)]="setting['is_maintenance']">
+                                        <label class="radio-custom" for="is_maintenance_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="is_maintenance" id="is_maintenance_off" [value]="'false'" [(ngModel)]="setting['is_maintenance']">
+                                        <label class="radio-custom" for="is_maintenance_off">OFF</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 連携・拡張機能設定グループ -->
+                        <h4 class="mt-3 mb-2">連携・拡張機能設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>支払い方法</label>
+                                    <input type="text" class="form-control" [(ngModel)]="setting['payment_method']" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Googleカレンダー連携を使用</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_google_calendar" id="use_google_calendar_on" [value]="'true'" [(ngModel)]="setting['use_google_calendar']">
+                                        <label class="radio-custom" for="use_google_calendar_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_google_calendar" id="use_google_calendar_off" [value]="'false'" [(ngModel)]="setting['use_google_calendar']">
+                                        <label class="radio-custom" for="use_google_calendar_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>フェーズ機能を使用</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_phase" id="use_phase_on" [value]="'true'" [(ngModel)]="setting['use_phase']">
+                                        <label class="radio-custom" for="use_phase_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="use_phase" id="use_phase_off" [value]="'false'" [(ngModel)]="setting['use_phase']">
+                                        <label class="radio-custom" for="use_phase_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>RPA機能を有効化</label>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_rpa" id="enable_rpa_on" [value]="'true'" [(ngModel)]="setting['enable_rpa']">
+                                        <label class="radio-custom" for="enable_rpa_on">ON</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input type="radio" class="pg-radio" name="enable_rpa" id="enable_rpa_off" [value]="'false'" [(ngModel)]="setting['enable_rpa']">
+                                        <label class="radio-custom" for="enable_rpa_off">OFF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>月間RPAステップ数上限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['monthly_rpa_step_limit']">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 制限・クォータ設定グループ -->
+                        <h4 class="mt-3 mb-2">制限・クォータ設定</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>最大テーブル数</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['max_table_num']">
+                                </div>
+                                <div class="form-group">
+                                    <label>クライアント証明書ユーザー数上限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['max_client_secure_user_num']">
+                                </div>
+                                <div class="form-group">
+                                    <label>1分あたりの操作制限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['action_limit_per_min']">
+                                </div>
+                                <div class="form-group">
+                                    <label>15分あたりの操作制限</label>
+                                    <input type="number" class="form-control" [(ngModel)]="setting['action_limit_per_15min']">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-success pull-right" (click)="update()" [ladda]="loading">更新</button>
+                        </div>
+                    </div>
+
+                    <br style="clear:both">
+                    <hr style="width: 100%">
+
+                    <h2>マスターユーザーアカウント変更</h2>
+                    <div style="color:red;font-weight: bold">
+                        ※クライアントに依頼/許可された場合にのみ行って下さい。
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        メールアドレス(ログインID)
+                        <input type="text" class="form-control" [(ngModel)]="master_user['email']">
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        パスワード(空の場合は変更しない)
+                        <input type="password" class="form-control" [(ngModel)]="master_user['password']">
+                    </div>
+
+
+                    <div class="mt-4">
+                        <button class="btn btn-success pull-right" (click)="update_master()" [ladda]="loading">マスターユーザーアカウント情報変更</button>
+                    </div>
+                </ng-container>
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+

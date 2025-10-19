@@ -1,0 +1,65 @@
+.view_block {
+    min-width: 30px;
+}
+
+.view_textarea {
+    white-space: pre-wrap;
+
+    &.table-admin-list__cell-inner {
+        //white-space: nowrap;
+    }
+
+    &.pre-wrap {
+        //テキストの長さが決まってる場合は、勝手に切らない
+        white-space: pre-wrap;
+
+    }
+}
+
+@media (max-width: 480px) {
+    #pc-detail-view {
+        .card-block {
+            padding: 0 !important;;
+        }
+
+        h4 {
+            padding: 10px !important;
+        }
+    }
+
+}
+
+.comments {
+    .avatar {
+        width: auto;
+        margin-right: 8px;
+
+        img {
+            width: 15px;
+            height: 15px;
+        }
+    }
+
+    .username {
+        padding-top: 2px;
+    }
+
+    .comment-message {
+        text-align: left;
+        font-size: 16px;
+        background: #f7f7f7;
+        //border: 1px solid #e1e6ef;
+
+        &.no-border {
+            border: none !important;
+        }
+
+        .comment-body {
+            font-size: 13px;
+            word-break: break-all;
+        }
+    }
+
+}
+
+

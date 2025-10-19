@@ -1,0 +1,12 @@
+{
+    "api_url": "http://laboratory.loftal.jp",
+    "production": false,
+    "menu": {
+        "admin": [
+            {
+                "field": "news",
+                "name": "ニュース"
+            }
+        ]
+    }
+}

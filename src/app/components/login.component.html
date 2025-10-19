@@ -1,0 +1,217 @@
+<div class="app flex-row align-items-center" id="login" style="margin-top: 30vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card-group mb-0">
+                    <div class="card" [ngClass]="{'p-4': !isForgotPassword}">
+                        <div class="card-header" *ngIf="isForgotPassword && admin_label">
+                            <h3>パスワードをリセット</h3>
+                        </div>
+                        <div class="card-block">
+                            <ng-container *ngIf="is_ip_error">
+                                <div style="text-align: center">
+                                    <h3 class="mb-4">PigeonCloud</h3>
+                                    <div>
+                                        この端末からはアクセスすることは出来ません
+                                    </div>
+
+                                    <div>
+                                        ご不明点は<a href="mailto:sales@loftal.jp">sales@loftal.jp</a>よりお問い合わせ下さい
+                                    </div>
+                                    <div style="margin-top: 30px; text-align: right;">
+                                        <small>
+                                            {{ip}}
+                                        </small>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngIf="terms_and_conditions_ui">
+                                <div [innerHTML]='terms_and_conditions_content'
+                                     style="height: 50vh;width: 100%; overflow: auto;">
+                                </div>
+                                <div>
+                                    <label>
+                                        <input type="checkbox" value="agree_to_terms_and_conditions_check" [value]="true" [(ngModel)]="agree_to_terms_and_conditions_check"
+                                        />
+                                        利用規約に同意します
+                                    </label>
+                                </div>
+                                <button type="button"
+                                        class="btn btn-primary px-4" (click)="agreeToTermsAndConditions()" [disabled]="!agree_to_terms_and_conditions_check">続ける
+                                </button>
+                            </ng-container>
+                            <ng-container *ngIf="!is_ip_error && !terms_and_conditions_ui">
+                                <ng-container *ngIf="admin_label; else NotLoaded">
+                                    <ng-container *ngIf="!isForgotPassword; else ForgotPassword">
+                                        <form [formGroup]="myForm" ngNativeValidate
+                                            (ngSubmit)="password_changed?login(myForm.value):resetPassword(myForm.value)">
+
+                                            <h1 class="mb-4">{{admin_label}}</h1>
+                                            <div class="alert alert-info mb-3" *ngIf="requiresCertificate">
+                                                <i class="fa fa-info-circle"></i> このシステムにはクライアント証明書が必要です
+                                            </div>
+                                            <div *ngIf="before_html;then html_block else no_html_block"></div>
+                                            <ng-template #html_block>
+                                                <div class="mb-3" [innerHTML]="before_html | safeHtml"></div>
+                                            </ng-template>
+                                            <ng-template #no_html_block>
+                                                <p class="text-muted" *ngIf="sub_label!=undefined"
+                                                [innerHTML]="sub_label  | safeHtml"></p>
+                                            </ng-template>
+                                            <div class="input-group mb-3" *ngIf=password_changed>
+                                                <span class="input-group-addon"><i class="icon-user"></i></span>
+                                                <input id="id" type="text" class="form-control" placeholder="ID"
+                                                    [formControl]="myForm.controls['email']">
+                                            </div>
+                                            <div class="input-group mb-4" *ngIf=(password_changed)>
+                                                <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                                <input id="password" type="{{passwordVisibility['password'] ? 'text' : 'password'}}" class="form-control"
+                                                    placeholder="Password" [formControl]="myForm.controls['password']">
+                                                <span class="input-group-addon" style="cursor: pointer;" (click)="togglePasswordVisibility($event, 'password')">
+                                                <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['password']"></i>
+                                                <i class="fa fa-eye" *ngIf="passwordVisibility['password']"></i>
+                                            </span>
+                                        </div>
+                                            <div *ngIf="!password_changed && password_mismatch">
+                                                <span style="color:red">確認パスワードが一致しませんでした</span>
+                                            </div>
+                                            <div *ngIf=(!password_changed)>
+                                                <label>新しいパスワード</label>
+                                                <div class="input-group mb-4">
+                                                    <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                                    <input id="new_password" type="{{passwordVisibility['new_password'] ? 'text' : 'password'}}" class="form-control"
+                                                        placeholder="New Password"
+                                                        [formControl]="myForm.controls['new_password']" required>
+                                                    <span class="input-group-addon" style="cursor: pointer;" (click)="togglePasswordVisibility($event, 'new_password')">
+                                                        <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['new_password']"></i>
+                                                        <i class="fa fa-eye" *ngIf="passwordVisibility['new_password']"></i>
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                            <div *ngIf=(!password_changed)>
+                                                <label>パスワード確認</label>
+                                                <div class="input-group mb-4">
+                                                    <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                                    <input id="confirm_new_password" type="{{passwordVisibility['confirm_new_password'] ? 'text' : 'password'}}" class="form-control"
+                                                        placeholder="Confirm New Password"
+                                                        [formControl]="myForm.controls['confirm_new_password']" required>
+                                                    <span class="input-group-addon" style="cursor: pointer;"
+                                                    (click)="togglePasswordVisibility($event, 'confirm_new_password')">
+                                                        <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['confirm_new_password']"></i>
+                                                        <i class="fa fa-eye" *ngIf="passwordVisibility['confirm_new_password']"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <a *ngIf="allow_forgot_password" routerLink="/user/forgot-password" class="d-block" style="margin-bottom: 10px;margin-top:-10px;">パスワードを忘れた方 </a>
+                                                    <button *ngIf="!oem" style="width: 100%;" type="submit" [ladda]="loading"
+                                                            class="btn btn-primary px-4 font-weight-bold">{{!password_changed ? "パスワード変更" : "ログイン"}}</button>
+                                                    <button *ngIf="oem" style="width: 100%; background-color: #cca046; color:white;" type="submit" [ladda]="loading"
+                                                            class="btn px-4 font-weight-bold">{{!password_changed ? "パスワード変更" : "ログイン"}}</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <div class="row" *ngIf="display_google_login;">
+                                            <div class="col-12">
+                                                <a href="/api/saml/sso" target="_blank">
+                                                    <button style="width: 100%;" id="customBtn" type="submit" [ladda]="loading"
+                                                            class="btn btn-primary px-4 font-weight-bold">Sign in with Google
+                                                    </button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="row" *ngIf="display_365_login;else Not365Login">
+                                            <div class="col-12 mt-2">
+                                                    <a href="{{_connect.getApiUrl()}}/api/saml2/sso" target="_blank">
+                                                        <button style="width: 100%;" type="submit" [ladda]="loading" class="btn btn-primary px-4 font-weight-bold">
+                                                            <object type="image/svg+xml"
+                                                                    data="https://s3-eu-west-1.amazonaws.com/cdn-testing.web.bas.ac.uk/scratch/bas-style-kit/ms-pictogram/ms-pictogram.svg"
+                                                                    class="x-icon"></object>
+                                                                Sign in with Microsoft 365
+                                                        </button>
+                                                    </a>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #ForgotPassword>
+                                        <!-- <form [formGroup]="myForm" ngNativeValidate
+                                            (ngSubmit)="password_changed?handleResetPassword(myForm.value):resetPassword(myForm.value)"> -->
+                                            <div class="card-body py-4">
+                                                <p class="text-center" *ngIf="password_changed">リセットを行うログインIDを入力して下さい</p>
+                                                <div class="input-group" *ngIf="password_changed">
+                                                    <span class="input-group-addon"><i class="icon-user"></i></span>
+                                                    <input id="email" type="email" class="form-control" placeholder="ログインID" [formControl]="myForm.controls['email']" required>
+                                                </div>
+
+                                                <div *ngIf="!password_changed && password_mismatch" class="text-center">
+                                                    <span style="color:red">確認パスワードが一致しませんでした</span>
+                                                </div>
+
+                                                <div *ngIf="!password_changed">
+                                                    <label>新しいパスワード</label>
+                                                    <div class="input-group mb-4">
+                                                        <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                                        <input id="new_password" type="{{passwordVisibility['new_password'] ? 'text' : 'password'}}" class="form-control"
+                                                               placeholder="パスワード"
+                                                               [formControl]="myForm.controls['new_password']" required>
+                                                        <span class="input-group-addon" style="cursor: pointer;" (click)="togglePasswordVisibility($event, 'new_password')">
+                                                            <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['new_password']"></i>
+                                                            <i class="fa fa-eye" *ngIf="passwordVisibility['new_password']"></i>
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+                                                <div *ngIf=(!password_changed)>
+                                                    <label>パスワード確認</label>
+                                                    <div class="input-group mb-4">
+                                                        <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                                        <input id="confirm_new_password" type="{{passwordVisibility['confirm_new_password'] ? 'text' : 'password'}}" class="form-control"
+                                                               placeholder="パスワード確認"
+                                                               [formControl]="myForm.controls['confirm_new_password']" required>
+                                                        <span class="input-group-addon" style="cursor: pointer;" (click)="togglePasswordVisibility($event, 'confirm_new_password')">
+                                                            <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['confirm_new_password']"></i>
+                                                            <i class="fa fa-eye" *ngIf="passwordVisibility['confirm_new_password']"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <!-- </form> -->
+                                    </ng-template>
+                                </ng-container>
+                                <ng-template #NotLoaded>
+                                    <!-- <h3 class="mb-4">PigeonCloud</h3> -->
+                                    <div>ロード中です。しばらくお待ち下さい...</div>
+                                </ng-template>
+
+                            </ng-container>
+
+                        </div>
+                        <div class="card-footer text-muted" *ngIf="isForgotPassword && admin_label">
+                            <div class="input-group" style="justify-content: space-between;">
+                                <p class="btn px-4 font-weight-bold mb-0"><a routerLink="/admin/login">ログインページに戻る</a> </p>
+                                <button (click)="handleForgotSubmit()" [ladda]="loading" class="btn btn-primary px-4 font-weight-bold">
+                                    {{ password_changed ? "パスワードリセット" : "パスワードを変更する" }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            Ver.{{getShare().version}} Powered by &nbsp;
+            <ng-container *ngIf="!powered_by">
+                <a href="https://pigeon-fw.com/cloud" target="_blank">PigeonCloud</a>
+            </ng-container>
+            <ng-container *ngIf="powered_by">
+                <div>{{ powered_by }}</div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+
+
+
+

@@ -1,0 +1,16 @@
+<div class="modal-dialog modal-default modal-large" role="document">
+    <div class="modal-content">
+        <div class="modal-header ">
+            <h4 class="modal-title">{{_share.getSimpleTableInfo(table).name}}</h4>
+            <button type="button" class="close" (click)="close()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <pfc-list [table]="table" [searchValue]="searchValue" [embedMode]="true" [searchValueLastChanged]="searchValueLastChanged" (onSelectData)="selectData($event)"
+                    [lookupformParam]="lookupformParam"></pfc-list>
+
+
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

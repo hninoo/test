@@ -1,0 +1,6 @@
+@media (min-width: 576px) {
+    .small-dialog {
+        max-width: 500px;
+        margin: 30px auto;
+    }
+}

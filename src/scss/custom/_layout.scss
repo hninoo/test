@@ -1,0 +1,533 @@
+// Here you can add other styles
+.fr-sticky-on:not(.fr-sticky-ios) {
+    top: 60px!important;
+}
+
+.fr-sticky-ios.fr-opacity-0 {
+    opacity: 1;
+}
+
+.form-control, .daterangepicker .input-mini, .input-group > .ui-select-bootstrap > input.ui-select-search.form-control, .input-group > .ui-select-bootstrap > input.ui-select-search.form-control.direction-up,
+.form-control:focus, .daterangepicker .input-mini:focus, .input-group > .ui-select-bootstrap > input.ui-select-search.form-control:focus {
+    color: black;
+    border-color: #a2a9b5 !important;
+}
+
+main.main {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.main {
+    .container-fluid {
+        padding: 0 10px !important;
+        height: 100%;
+    }
+
+}
+
+.main .breadcrumb {
+    padding: 0rem 0rem;
+}
+
+.padding-0 {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.navbar {
+    .header_extend {
+        padding: 18px;
+
+        a {
+            text-decoration: underline;
+        }
+
+
+    }
+
+    .form-inline {
+        i {
+            color: $navbar-color;
+        }
+
+        .form-control {
+            margin-top: -3px;
+            color: $navbar-color;
+            border: 0;
+
+            &::placeholder {
+                color: $navbar-color;
+            }
+        }
+
+        .form-control::-webkit-input-placeholder {
+            color: $navbar-color;
+        }
+
+        .form-control:-moz-placeholder {
+            color: $navbar-color;
+        }
+
+        .form-control::-moz-placeholder {
+            color: $navbar-color;
+        }
+
+        .form-control:-ms-input-placeholder {
+            color: $navbar-color;
+        }
+    }
+
+    .nav-item {
+
+        .nav-link.nav-pill {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            line-height: 32px;
+            border: 1px solid $navbar-color;
+            border-radius: 50em;
+
+            &:hover {
+                border-color: $navbar-hover-color;
+            }
+
+            .badge-pill {
+                margin-top: -18px;
+                margin-left: -5px;
+                border: 2px solid #fff !important;
+                line-height: 14px;
+            }
+
+            &.avatar {
+                width: 38px;
+                height: 38px;
+
+                color: #fff;
+                background-color: $gray-light;
+
+                .fa-user {
+                    font-size: 24px;
+                    vertical-align: middle;
+                }
+
+                &.nobackground {
+                    background-color: white;
+                    border: none;
+                }
+
+                img {
+                    border-radius: 30px;
+                    width: 36px;
+                    height: 36px;
+                    margin: 0;
+                    border: 0;
+                }
+
+                .badge {
+                    margin-top: -22px;
+                    margin-left: 5px;
+                }
+
+                &.dropdown-toggle:after {
+                    //display: none;
+                }
+            }
+        }
+    }
+}
+
+.sidebar .sidebar-nav .nav {
+
+    @media (max-width: 480px) {
+        padding-bottom: 200px;
+    }
+    .nav-title {
+        span {
+            position: relative;
+            display: inline-block;
+
+            &:before, &:after {
+                position: absolute;
+                top: 50%;
+                width: 25px;
+                height: 1px;
+                margin-top: -1px;
+                content: '';
+                border-bottom: 1px solid $sidebar-nav-title-color;
+            }
+
+            &:before {
+                left: -30px;
+            }
+
+            &:after {
+                right: -30px;
+            }
+        }
+    }
+}
+
+.app-header.navbar .navbar-brand {
+    background-image: none;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 15px;
+}
+
+#toast-container {
+    hr {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+}
+
+//dapicker time font size
+.owl-timer-wrapper[_ngcontent-c2] .owl-timer-input[_ngcontent-c2] {
+    font-size: 15px;
+}
+
+.fr-view {
+    p {
+        margin-bottom: 0;
+    }
+}
+
+.image-contain {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    vertical-align: bottom;
+}
+
+.datetime_set {
+    owl-date-time, div, input {
+        max-width: 180px;
+    }
+
+    .from_to {
+        float: left;
+        padding: 8px;
+    }
+}
+
+.only-phone {
+    display: none;
+}
+
+#main-container {
+    margin-bottom: 200px !important;
+}
+@media all and (max-width: 480px) {
+    .only-phone {
+        display: block !important;
+    }
+    .only-pc {
+        display: none;
+
+    }
+    #main-container {
+        margin-bottom: 100px !important;
+    }
+    .sidebar-fixed .sidebar {
+        margin-top: 0px;
+    }
+
+    .sidebar-fixed .sidebar .sidebar-nav{
+        margin-top: 45px;
+    }
+    .container-fluid {
+        padding: 0 0px !important;
+    }
+    .card-block {
+        padding: 15px;
+    }
+
+    //LIST  PAGE
+    .table thead th {
+        min-width: 25px;
+    }
+    .table-admin-list__btns {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        min-width: 0 !important;
+    }
+    .table-admin-list__manage {
+        width: 40px;
+    }
+}
+
+.pc-list-view th, .pc-list-view td {
+    max-width: none;
+}
+
+.bg-light-gray {
+    background-color: #f8f8f8;
+}
+
+.nav-dropdown-toggle.nav-arrow-left {
+    padding-left: 48px !important;
+
+    &::before {
+        font-family: FontAwesome;
+        left: $sidebar-nav-link-padding-x;
+        content: "\f105" !important;
+    }
+}
+
+.nav-item.nav-dropdown.open > .nav-link.nav-dropdown-toggle.nav-arrow-left::before {
+
+    transform: rotate(90deg) !important;
+
+}
+
+.app-body {
+    .ngx-pagination {
+        margin-bottom: 0;
+    }
+}
+
+.l-fixed-btns {
+    position: fixed;
+    right: 1.0rem;
+    bottom: 3.5rem;
+    z-index: 1100;
+
+    &__btn {
+        display: block;
+        $size: 50px;
+        width: $size;
+        height: $size;
+        line-height: $size;
+        padding: 0;
+        border: none;
+        background-color: transparent;
+        font-size: 1.3rem;
+        color: #ffffff;
+        border-radius: 50%;
+
+        &:focus {
+            outline: none;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 0.5rem;
+        }
+
+        &.-success {
+            background-color: $brand-success;
+
+        }
+
+        &.-default {
+            background-color: $gray-light;
+        }
+    }
+}
+
+
+#header_notification {
+    width: 350px !important;;
+    word-break: break-all;
+
+    .dropdown-item {
+        white-space: unset !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .aside-menu {
+        margin-right: 0;;
+    }
+    .aside-menu-fixed .main, .aside-menu-fixed .app-footer {
+        margin-right: 0;;
+    }
+    .aside-menu-hidden {
+        .aside-menu {
+            margin-right: -250px;
+        }
+
+    }
+
+    #header_notification {
+        width: auto !important;;
+    }
+}
+
+#bell-notify-icon-link {
+    background-color: white;
+}
+
+
+
+#search_input {
+    width: 120px;
+    height: 27.5px;
+    margin-top: -3px;
+}
+
+
+li, .nav-item {
+    .nav-link.active {
+        background-color: #20a8d8 !important;
+        color: white !important;
+    }
+}
+
+.and_or {
+    border: 1px solid #ccc;
+    padding-top: 4px;
+    border-radius: 20px;
+    font-size: 15px;
+}
+
+
+.custom_logo {
+    width: 250px;
+    object-fit: contain;
+    background: #efefef;
+    padding: 7px 0;
+}
+
+
+//通知のバッヂ
+.app-header.navbar .nav-item .nav-link .badge, .app-header.navbar .nav-item .dropdown-toggle .badge {
+    top: 40%;
+    left: 25%;
+}
+
+.aside-menu {
+    top: 62px;
+}
+
+small.date {
+    font-size: 0.8rem;
+}
+
+.header-fixed .app-body {
+    min-height: calc(100vh - #{$navbar-height});
+}
+
+
+.modal-fixed {
+    position: fixed;
+    width: 800px;
+    /* height: 500px; */
+    /* left: auto; */
+    /* right: auto; */
+    z-index: 10000;
+    top: 0px;
+    left: 50%;
+    /* transform: translate(-50%, -50%); */
+    transform: translate(-50%, 0) !important;
+}
+
+
+.small-title {
+    font-size: 17px;
+    padding-bottom: 8px;
+}
+
+table.grant-group-table {
+    th {
+        background: #eee;
+        width: 130px;
+    }
+}
+
+
+.modal-secondary {
+    .modal-title {
+        color: #585858;
+    }
+}
+
+
+.ngx-pagination .pagination-next a::after, .ngx-pagination .pagination-next.disabled::after,
+.ngx-pagination .pagination-previous a::before, .ngx-pagination .pagination-previous.disabled::before {
+    font-size: 18px;
+}
+
+
+.child-container {
+    background: #F7F7F9;
+    padding: 15px;
+    margin: 20px;
+    border-radius: 3px;
+}
+
+h4 {
+    font-weight: bold;
+}
+
+;
+
+.form-control {
+    border: 1px solid $form-border-color !important;
+}
+
+
+button[type="submit"], .text-bold {
+    font-weight: bold !important;
+}
+
+
+.fa-asterisk {
+    font-size: 10px;
+    height: 11px;
+    /* margin-top: -6px; */
+    vertical-align: middle;
+}
+
+.sidebar {
+    ul.nav li.nav-item a.nav-link {
+        padding-top: 0.50rem !important;
+        padding-bottom: 0.50rem !important;
+    }
+
+    &.smart-sidebar {
+        font-size: 13px;
+
+        ul.nav li.nav-item .nav-link, .nav .nav-item .nav-dropdown-toggle {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .nav-dropdown-toggle.nav-arrow-left {
+            padding-left: 42px !important;
+        }
+    }
+}
+
+
+img.icon {
+    width: 18px;
+    color: white;
+    margin-right: 9px;
+    margin-left: 0.45rem !important;
+    margin-top: -2px;
+}
+.nav-menus__item img.icon{
+    height: 18px;
+    margin-left: 0rem !important;
+    margin-top: 0px;
+    object-fit: cover;
+}
+
+
+img.header-img-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    margin-right: 10px;
+    margin-top: -3px;
+}
+
+bs-dropdown-container {
+    z-index: 1000 !important;
+
+}

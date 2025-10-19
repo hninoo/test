@@ -1,0 +1,32 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document" *ngIf="block && block.type == blockClass.TYPE_FILTER && table_info">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">フィルタ設定</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    ブロック名：<input style="width:200px" type="text" class="form-control" [(ngModel)]="block.name" placeholder="ブロック名を入力してください。">
+                </div>
+                <h5 class="mt-4">条件</h5>
+                <conditions-form [table]="table_info.table" [default_condition_json]="block.conditions.getSearchParamJson()" [output_json]="false"
+                                 (valueChanged)="conditionChanged($event)"></conditions-form>
+
+
+                <h5 class="mt-4">並び順&nbsp;&nbsp;</h5>
+                <sort-params-form [sort_params]="block.sort_params" [table_info]="table_info"
+                                  (onChangeValue)="onChangeSortParams($event)"></sort-params-form>
+
+                <h5 class="mt-4">取得件数(空の場合は全て)</h5>
+                <input type="number" class="form-control" style="width:200px;" [(ngModel)]="block.limit" placeholder="100">
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+

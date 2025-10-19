@@ -1,0 +1,151 @@
+.toggle-drag-field-list{
+    padding-left: 10px;
+    margin-top: 10px;
+}
+.drag-drop-mode{
+    /* height: 720px;
+    overflow-y: scroll;
+    position: relative; */
+    /* z-index: 99; */
+}
+#dragSidebarList{
+    height: 100%;
+}
+.drag_start ::ng-deep .drag-row-list.empty_row_fields {
+      z-index: 999;
+}
+/* to disable scroll bar */
+/* .drag-drop-mode::-webkit-scrollbar{
+    width: 1px;
+}
+.drag-drop-mode::-webkit-scrollbar-track {
+    background-color: #fff;
+    padding: 0px 0px;
+    border:1px solid #fff
+}
+.drag-drop-mode::-webkit-scrollbar-thumb {
+    border-radius: 0px;
+    box-shadow: inset 0 0 0px rgba(0, 0, 0, .3);
+    background-color: #fff;
+    border: 1px solid #fff;
+} */
+.toggle-drag-field-button {
+    display: flex;
+    border: 1px solid #a1a1a166;
+    width: 27px;
+    min-width: 27px;
+    justify-content: center;
+    align-items: flex-start;
+    border-top: 0px;
+    border-bottom: 0px;
+    min-height: 100vh;
+    cursor: pointer;
+}
+.toggle-drag-field-button>i{
+    margin-top: 20px;
+}
+.toggle-drag-field-list,
+.toggle-drag-field-button{
+    padding-top: 20px;
+}
+.example-drag{
+    width: 20%;
+    margin: 10px auto;
+    position: relative;
+}
+.example-drag .field-drag{
+    cursor: default;
+}
+.example-drag>svg{
+    position: absolute;
+    right: 5px;
+    bottom: -20px;
+    z-index: 9999;
+    background: #f0f0f085;
+}
+
+.example-drag .field-drag:hover,
+.field-drag:hover button,
+.toggle-drag-field-list .cdk-drag:hover{
+    color: #000;
+}
+.cdk-drop-list{
+    text-align: left;
+    font-size: 15px;
+}
+
+.field-drag{
+    width: 100%;
+    display: block;
+}
+.example-drag .field-drag,
+.field-drag button,
+.toggle-drag-field-list button{
+    font-size: 15px;
+    border: 1px solid #c7c7c7;
+    background-color: transparent;
+    padding: 10px 10px;
+    text-align: left;
+    margin-bottom: 10px;
+    cursor: grab;
+    display: block;
+    width: 100%;
+}
+.card-block .drag-drop-mode form {
+    height: 100%;
+}
+
+.px-0 {
+    padding-left: 0;
+    padding-right: 0;
+}
+.no-field-list{
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 9;
+}
+.drag-drop-edit-mode ::ng-deep admin-forms ::ng-deep admin-forms-field .date-input-group .now-btn {
+    display: none;
+}
+::ng-deep .date-input-group input.datetime{
+    width: 130px;
+    min-width: 130px;
+}
+.pc-notification ::ng-deep .order_list{
+    overflow: unset;
+}
+
+.settingModal.fixed_html .modal-dialog{
+    transform: unset;
+}
+.settingModal.fixed_html .modal-dialog ::ng-deep .fr-sticky-on {
+    top: 0px!important;
+}
+@media (max-width:1380px) {
+   ::ng-deep .date-input-group input.datetime {
+       width: 110px;
+       min-width: 110px;
+   }
+}
+@media (max-width:1200px) {
+    .toggle-drag-field-list button,
+    .field-drag{
+        font-size: 12px;
+    }
+    .field-drag{
+        padding:0px 5px;
+    }
+    .toggle-drag-field-list{
+        padding: 15px 0px;
+    }
+    .toggle-drag-field-list {
+        padding-top: 15px;
+    }
+}
+
+.z-1 {
+    position: relative;
+    z-index: 1;
+}

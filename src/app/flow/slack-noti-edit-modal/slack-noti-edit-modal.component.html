@@ -1,0 +1,32 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="slackModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" *ngIf="block && block.type == blockClass.TYPE_SLACK_NOTIFICATION">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="slackModalLabel">slack通知設定</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card card-accent-primary p-3">
+                    インプットの件数が１件の場合のみ、通知内にデータ内容をタグで埋め込むことができます。<br>
+                    例） {{ '{顧客名}' }} のように記述
+                </div>
+                <div class="form-group mt-2">
+                    <h6>slack webhook URL</h6>
+                    <input type="text" class="form-control" id="slackAddress" [(ngModel)]="block.webhook_url" placeholder="slack webhook URL">
+                </div>
+
+
+                <div class="form-group">
+                    <h6>メッセージ</h6>
+                    <textarea class="form-control" id="slackMessage" [(ngModel)]="block.body" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="modal.hide()">閉じる</button>
+                <button type="button" class="btn btn-primary" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

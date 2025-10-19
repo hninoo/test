@@ -1,0 +1,91 @@
+<aside class="aside-menu">
+    <div class="pull-right" style="z-index: 10000">
+        <div class="circle_wrap">
+            <a href="javascript:void(0)" style="cursor:pointer;" appAsideMenuToggler style="margin-top: 2px;" class="circle nav-link nav-pill pull-right" role="button" aria-haspopup="true"
+               aria-expanded="false"
+               (click)="false">
+                <i style="font-size: 17px;color:black !important;" class="fa fa-bars icon-menu text-warning"></i>
+            </a>
+        </div>
+    </div>
+    <ng-container *ngIf="_share.getCurrentData() && _share.getCurrentData().table_info.menu.merge_comment_and_history;else NotMerge">
+        <div class="p-1 pt-3 comments comments-merged" *ngIf="_share.getCurrentData()">
+            <div class="message p-2 auto-complete-font" style="border:none">
+                <div [mention]="list" [mentionConfig]="mentionConfig"
+                     (itemSelected)="onSelect($event)" contenteditable="true"
+                     (textContent)="comment"
+                     (input)="commentInput($event)"
+                     (ngModelChange)="commentInput($event)"
+                     (ng-paste)="pasteevent($event)"
+                     (keydown)="onKeyDown($event)"
+                     class="commentdiv form-control"
+                     id="comment"
+                >
+                </div>
+
+
+                <button class="btn btn-sm btn-primary pull-right" style="margin-top:5px" (click)="addComment()">送信</button>
+                <br style="clear: both">
+            </div>
+            <ng-container *ngFor="let log_and_comment of _share.getCurrentData().log_and_comments.log_and_comment_merge_a">
+                <ng-container *ngIf="log_and_comment.log;else NotLog">
+                    <update-log-block [log]="log_and_comment.log" [comment]="log_and_comment.comment"></update-log-block>
+                </ng-container>
+
+                <ng-template #NotLog>
+                    <comment-log-block [comment]="log_and_comment.comment"></comment-log-block>
+                </ng-template>
+
+            </ng-container>
+        </div>
+    </ng-container>
+    <ng-template #NotMerge>
+        <tabset>
+            <tab>
+                <ng-template tabHeading><i class="fa fa-bell icon-speech"></i></ng-template>
+                <div class="p-1 comments" *ngIf="_share.getCurrentData()">
+                    <div class="p-2 no-border auto-complete-font">
+                        <div id="comment-input">
+                            <div [mention]="list" [mentionConfig]="mentionConfig"
+                                 (itemSelected)="onSelect($event)" contenteditable="true"
+                                 (textContent)="comment"
+                                 (input)="commentInput($event)"
+                                 (ngModelChange)="commentInput($event)"
+                                 (ng-paste)="pasteevent($event)"
+                                 (keydown)="onKeyDown($event)"
+                                 class="commentdiv form-control"
+                                 id="comment"
+                            >
+                                <!-- <span  contentEditable = "true" > {{comment}}</span> -->
+                            </div>
+
+                            <button class="btn btn-sm btn-primary pull-right" style="margin-top:5px" (click)="addComment()" [ladda]="sending">送信</button>
+                            <br style="clear: both">
+                        </div>
+
+                    </div>
+                    <ng-container *ngFor="let comment of _share.getCurrentData().comments">
+                        <comment-log-block [comment]="comment" (valueChanged)="reload()"></comment-log-block>
+                    </ng-container>
+                </div>
+            </tab>
+            <tab>
+                <ng-template tabHeading><i class="fa fa-history"></i></ng-template>
+                <hr class="transparent mx-3 my-0">
+                <ng-container *ngIf="_share.getCurrentDataLog()">
+                    <ng-container *ngFor="let log of _share.getCurrentDataLog()">
+                        <update-log-block [log]="log"></update-log-block>
+                        <hr class="mx-3 my-0">
+                    </ng-container>
+
+                    <div class="text-center mt-2" *ngIf="_share.hasCurrentLogNext() && !this.table_info.menu.merge_comment_and_history">
+                        <button [ladda]="loading" class="btn btn-secondary" (click)="getNextLogs()" *ngIf="_share.hasCurrentLogNext()">さらに読み込む</button>
+                    </div>
+                </ng-container>
+            </tab>
+
+        </tabset>
+    </ng-template>
+</aside>
+<confirm-modal #confirmSendCommentModal [submit_button_text]="'はい'" [text]="confirmSendCommentText" (onOk)="saveComment()" [sending]="sending" [type]="'warning'"></confirm-modal>
+

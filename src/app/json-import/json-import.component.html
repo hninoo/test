@@ -1,0 +1,63 @@
+<div bsModal #jsonModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-upload"></i> JSONアップロード</h4>
+
+                <button type="button" class="close" (click)="hideJSONModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        グループ名
+                        <span class="text"> (任意) </span>
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <input [(ngModel)]="group_name" type="text" class="form-control">
+                    </div>
+
+                </div>
+                <p>
+                    <input #inputJSON id="inputCsv" type="file" (change)="changeJson($event)" accept="text/json">
+                </p>
+                <!-- <div class="checkbox" *ngIf="table_info.menu.show_delete_all && grant.delete">
+                    <label>
+                        <input [(ngModel)]="resetBeforeCsvUpload" type="hidden" name="show_id">
+                        <input type="checkbox" [checked]="resetBeforeCsvUpload=='true'"
+                            (change)="resetBeforeCsvUpload=(resetBeforeCsvUpload=='true')?'false':'true';">
+                        アップロード前にデータをリセットする
+                    </label>
+                </div> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="hideJSONModal()">キャンセル</button>
+                <button type="button" class="btn btn-primary" [ladda]='sending' (click)="uploadJSON()">アップロード
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<div bsModal #errorModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-danger" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    {{modal_error_title}}</h4>
+                <button type="button" class="close" (click)="errorModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="error-modal-content py-3" [innerHTML]="modal_error_message | safeHtml">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="errorModal.hide()">閉じる</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

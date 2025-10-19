@@ -1,0 +1,19 @@
+
+.fc-event-time {
+    min-width: 35px;
+}
+/* event layout  */
+.fc-daygrid tr>td tr img {
+    height: auto;
+    width: 30%;
+    display: block;
+    text-align: center;
+    margin: auto auto;
+}
+
+.full-calendar .non-clickable {
+    pointer-events: none;
+    cursor: default;
+    text-decoration: none;
+    color: inherit;
+}

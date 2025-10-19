@@ -1,0 +1,23 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" *ngIf="block && block.type == blockClass.TYPE_SLEEP">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailModalLabel">待機ブロック</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <label for="emailMessage">待機時間(秒)</label>
+                    <input type="number" class="form-control" id="emailMessage" [(ngModel)]="block.sleep_sec" placeholder="待機時間(秒)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="modal.hide()">閉じる</button>
+                <button type="button" class="btn btn-primary" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

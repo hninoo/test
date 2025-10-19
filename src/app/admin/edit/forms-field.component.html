@@ -1,0 +1,871 @@
+<ng-container *ngIf="form">
+    <ng-container *ngIf="form.original_type != 'calc';else isCalcField;">
+        <ng-container *ngIf="['text','email','url'].indexOf(form['type'])>=0 && field['Field']!='password'">
+            <input [(ngModel)]="value" (change)="onChange(null,null,$event)" [maxLength]="form['max_len']?form['max_len']:10000000" [minLength]="form['min_len']?form['min_len']:0"
+                   placeholder="{{form.placeholder}}"
+                   type="text" name="{{field['Field']}}" [id]="getId()" class="form-control">
+            <div *ngIf="table_info?.menu?.isDisplayGoogleMap() && table_info?.menu?.getGoogleMapAddressField() == field['Field']">
+                <button (click)="getGoogleMapFields()" class="btn btn-primary">
+                    緯度経度を取得
+                </button>
+                <a href="{{getGoogelMapLink()}}" target="_blank" style="color: #0066cc; text-decoration: none;" class="ml-4">Google マップで開く</a>
+            </div>
+        </ng-container>
+        <!--        [mentionConfig]="{triggerChar:'{',items:mentionItems(),mentionSelect:mentionSelect}"-->
+        
+        <div *ngIf="form['type'] == 'number'" class="input-group">
+            <span *ngIf="form.num_unit && form.num_unit_order=='first'" class="input-group-addon">{{form.num_unit}}</span>
+            <!--
+            Two separate inputs for isEditMode intentionally:
+            - isEditMode = true: plain string input to preserve commas, minus signs, and large numbers safely.
+            - isEditMode = false: OnlyNumber for numeric enforcement.
+
+            Duplication exists but is necessary to avoid JS number overflow and cursor issues.
+            -->
+            <input *ngIf="isEditMode"
+            (change)="onChangeNum($event)"
+            [(ngModel)]="value"
+            [object]="value"
+            placeholder="{{form.placeholder}}"
+            min="{{form.getMinNumber()}}"
+            max="{{form.getMaxNumber()}}"
+            type="text"
+            inputmode="decimal"
+            step="{{ count_step() }}"
+            name="{{field['Field']}}"
+            [ngClass]="{'width80': !!form.num_unit}"
+            [id]="getId()"
+            class="form-control input-number">
+
+            <input *ngIf="!isEditMode"
+                OnlyNumber
+                appDecimalSeparator
+                [separateNumber]="!form.num_separator"
+                [decimalPlaces]="form.decimal_places"
+                (change)="onChangeNum($event)"
+                [(ngModel)]="view_value"
+                [object]="value"
+                placeholder="{{form.placeholder}}"
+                min="{{form.getMinNumber()}}"
+                max="{{form.getMaxNumber()}}"
+                type="text"
+                inputmode="decimal"
+                step="{{ count_step() }}"
+                name="{{field['Field']}}"
+                [ngClass]="{'width80': !!form.num_unit}"
+                [id]="getId()"
+                class="form-control input-number">
+            
+            <span *ngIf="form.num_unit && form.num_unit_order=='end'" class="input-group-addon"> {{form.num_unit}}</span>
+        </div>
+        <div *ngIf="field['Field'] == 'password'">
+            <div class="input-group mb-2">
+                <input (change)="onChange()" [(ngModel)]="value" autocomplete="new-password"
+                    type="{{passwordVisibility['password'] ? 'text' : 'password'}}" name="{{field['Field']}}" class="form-control"
+                    placeholder="パスワード">
+                <span class="input-group-addon" style="cursor: pointer;" (click)="toggleFiledPasswordVisibility($event, 'password')">
+                    <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['password']"></i>
+                    <i class="fa fa-eye" *ngIf="passwordVisibility['password']"></i>
+                </span>
+            </div>
+            <div class="input-group mb-2">
+                <input (change)="onChange(field.Field+'_conf',password_conf_value||' ')" autocomplete="new-password"
+                    [(ngModel)]="password_conf_value" type="{{passwordVisibility['password_conf'] ? 'text' : 'password'}}"
+                    name="{{field['Field']}}_conf" class="form-control" placeholder="パスワード確認">
+                <span class="input-group-addon" style="cursor: pointer;"
+                    (click)="toggleFiledPasswordVisibility($event, 'password_conf')">
+                    <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['password_conf']"></i>
+                    <i class="fa fa-eye" *ngIf="passwordVisibility['password_conf']"></i>
+                </span>
+            </div>
+            <button (click)="onCreatePassword()" type="button" *ngIf="is_add"
+                    class="btn btn-sm btn-default p-1 pl-2 pr-2">
+                パスワードを自動生成
+            </button>
+        </div>
+        <div *ngIf="form['type']=='password'">
+            <div class="input-group">
+                <input (change)="onChange()" [(ngModel)]="value" autocomplete="new-password" type="{{passwordVisibility['password'] ? 'text' : 'password'}}" name="{{field['Field']}}" class="form-control" placeholder="パスワード">
+                <span class="input-group-addon" style="cursor: pointer;" (click)="toggleFiledPasswordVisibility($event, 'password')">
+                    <i class="fa fa-eye-slash" *ngIf="!passwordVisibility['password']"></i>
+                    <i class="fa fa-eye" *ngIf="passwordVisibility['password']"></i>
+                </span>
+            </div>
+        </div>
+        <div *ngIf="!is_add && form['type']=='calc' && form['is_calc_auto_reload_off']" class="checkbox">
+            {{ value }}
+            <br>
+            <label>
+                <input (change)="onChange(field.Field+'_update',is_update_calc)" [(ngModel)]="is_update_calc" type="checkbox" name="{{field['Field']}}_update" value="update">
+                値を更新する
+            </label>
+        </div>
+        <ng-template [ngIf]="form['type']=='color'">
+            <input [(ngModel)]="value" (change)="onChange()"
+                   type="text" name="{{field['Field']}}" class="form-control">
+            <input type="color" [(ngModel)]="value"
+                   name="{{field['Field']}}">
+        </ng-template>
+        <div *ngIf="form['type'] == 'image' && value!=null && value!=''" style="justify-content: center; ;">
+            <img class="admin-forms__image mb-2" [src]="thumbnail_file_info.thumbnail_url"
+                 *ngIf="thumbnail_file_info!=undefined" (click)="openImg()">
+            <img class="admin-forms__image mb-2" [src]="icon_image_url" *ngIf="icon_image_url" (click)="openImg()">
+            <div *ngIf="form.display_image_filename">
+                <a class="d-none d-lg-inline" *ngIf="thumbnail_file_info!=null" href="javascript:void(0)"
+                   (click)="download_file(thumbnail_file_info.url,thumbnail_file_info.name)">
+                    {{ thumbnail_file_info.name }}
+                </a>
+                <div *ngIf="thumbnail_file_info && isDownloading(thumbnail_file_info.url)">
+                    <div class="loader_small">Loading...</div>
+                </div>
+            </div>
+            <br>
+
+            <button *ngIf="!form.required && !isChild()" (click)="openDeleteModal()" class="button  btn-danger btn btn-sm mb-2">
+                画像を削除
+            </button>
+        </div>
+        <div
+            *ngIf="form['type'] == 'file' && value!=null && value!='' && !isObject(value)">
+
+            <div style="margin-bottom:20px;">
+                <div *ngIf="!is_string(view_value)">
+                    <a class="d-none d-lg-inline" *ngIf="view_value!=null && !is_string(view_value)"
+                       href="javascript:void(0)"
+                       (click)="download_file(view_value['url'],false,view_value['name'])">{{ view_value['name'] }}</a>
+                    <div *ngIf="view_value && isDownloading(view_value.url)">
+                        <div class="loader_small">Loading...</div>
+                    </div>
+                </div>
+                <div *ngIf="is_string(view_value)">{{ view_value }}</div>
+            </div>
+        </div>
+        <div *ngIf="form['type'] == 'file' && value!=null && value!=''">
+            <button *ngIf="!form.required && !isChild()" (click)="openDeleteModal()"
+                    class="delete-btn btn-danger btn-xs mb-2">ファイルを削除
+            </button>
+        </div>
+        <ng-container *ngIf="(form['type'] == 'image' || form['type'] == 'file') && !disable_edit">
+            <div class="fileStyle" [appModuleDragAndDrop]="true" (files)="fileChange(data,$event)" (click)="file.click()">
+                <div *ngIf="value && value.name!=undefined; then thenBlock else elseBlock"></div>
+                <ng-template #thenBlock>
+                    <div [hidden]="!isimagecheck">
+                        <img id="{{value.id_generate}}" [src]="value.url" class="preview_thumbnail"/>
+                    </div>
+                    <p class="mediumFont text-primary font-weight-bold">[{{ value.name }}]が選択済み</p></ng-template>
+                <ng-template #elseBlock><i class="fa fa-cloud-upload fileUploadIcon"></i>
+                    <p *ngIf="!form['is_multi_value_mode']" class='mediumFont  mb-0'>ここにファイルをドロップ</p>
+                    <p *ngIf="form['is_multi_value_mode']" class='mediumFont  mb-0'>複数ファイル選択可能</p>
+                    <small>※うまくアップロード出来ない場合は、ここをクリックして直接ファイルを選択して下さい。</small>
+                </ng-template>
+
+                <input hidden #file
+                       (change)="fileChange(data,$event)" [id]="getId()" name="{{field['Field']}}"
+                       type="file">
+
+            </div>
+        </ng-container>
+        <div *ngIf="form['type'] === 'year_month'" class="year_month">
+            <input class="form-control not-full year yearInput-{{field['Field']}}" type="text" maxlength="4" max="2300" min="1900" [(ngModel)]="year" (blur)="onYearMonthInput($event, 'year')">&nbsp;年
+            <input class="form-control not-full month monthInput-{{field['Field']}}" type="text" maxlength="2" max="12" min="1" [(ngModel)]="month" (blur)="onYearMonthInput($event, ',month')">&nbsp;月
+        </div>
+        <div
+            *ngIf="form['type'] == 'datetime' || form['type'] == 'date' || (form['type'] == 'time' && isOneMinuteTimeField(form))">
+
+            <div class="input-group date-input-group">
+                <input class="datetime dateInput-{{field['Field']}}" type="text"
+                       [owlDateTime]="owl_datetime"
+                       name="{{field['Field']}}" [(ngModel)]="date_value" (ngModelChange)="datetimeValueChanged()"
+                       (input)="onInput($event)" (blur)="onBlur($event)" (keyup)="onKeyupDate($event)"
+                >
+                <span class="input-group-addon" style="cursor: pointer" *ngIf="form['type'] != 'time'" [owlDateTimeTrigger]="owl_datetime">
+                <i class="fa fa-calendar"></i>
+                </span>
+                <span class="input-group-addon" style="cursor: pointer" *ngIf="form['type'] == 'time'" [owlDateTimeTrigger]="owl_datetime">
+                <i class="fa fa-clock-o"></i>
+                </span>
+                <owl-date-time
+                    (afterPickerOpen)="onOpenDtPicker()"
+                    #owl_datetime
+                    [pickerType]="form['type'] == 'datetime'? 'both': form['type'] == 'date'? 'calendar': 'timer'">
+                </owl-date-time>
+                <button class="btn btn-sm btn-default ml-2 now-btn" style="padding-left:7px;padding-right:7px;" (click)="setCurrentDateTime($event)">現在</button>
+            </div>
+            <ng-container *ngIf="false">
+                <br style="clear:both">
+                <div class="col-md-12 mt-2">
+                    <label>
+                        <input (change)="onChange()" type="checkbox" [value]="true" class="pr-2" (click)="onClickCurrentDatetime($event)"> &nbsp;現在日時
+                    </label>
+                </div>
+            </ng-container>
+        </div>
+        <!--20240529 Kanazawa 追加 15分間隔以上の時間の設定 -->
+        <ng-container *ngIf="form['type'] == 'time' && form.custom_field && form.custom_field['minutes_interval'] > 1">
+            <select [(ngModel)]="value" class="form-control" (change)="onChange()">
+                <option value=""></option>
+                <option *ngFor="let time of this.minutes_by_interval[form.custom_field['minutes_interval']]" value="{{time}}:00">
+                    {{ time }}
+                </option>
+            </select>
+        </ng-container>
+        <div *ngIf="form['type'] == 'textarea'">
+        <textarea (change)="onChange(null,null,$event)" [mention]="auto_complete_values" [mentionConfig]="{triggerChar:'{',items:name,mentionSelect:mentionSelect}"
+                  [(ngModel)]="value"
+                  placeholder="{{form.placeholder}}"
+                  class="form-control" appTextareaAutoresize
+                  data-min-height="150"
+                  #textarea
+                  (input)="resize(textarea)"
+        ></textarea>
+        </div>
+        <div style="" *ngIf="form['type'] == 'richtext'" [froalaEditor]="_share.getFroalaOption('full',this.table_info.table, this.IS_PUBLIC_FORM ? 'iframe-form' : '.app-body')"
+             [(froalaModel)]="value" (froalaModelChange)="onChangeRichText($event)"></div>
+        <ng-container
+            *ngIf="['select','select_other_table','table','fields','notify_target_fields','email_fields','file_fields','table_filter'].indexOf(form['type']) >= 0 && option_items && !this.loading">
+            <div class="input-group">
+                <!--  Kanazawa 20240530 Kanazawa 追加 -->
+                <!--  複数選択可能、且つ検索虫眼鏡非表示の場合テーブル検索のUIに合わせたセレクトボックスを用意 -->
+                <!--  [closeOnSelect]="false"で選択してもボックスを開いたままにできる -->
+                <!--  show_add_on_listがONの場合は従来の追加フォームを表示する -->
+                <ng-container *ngIf="isUsePulldown(); else enableSearchText">
+
+
+                    <ng-select
+                        class="custom form-control"
+                        [id]="getId()"
+                        [required]="form.required"
+                        [multiple]="form.isUseMultiplePulldown(this.cellMode)"
+                        [(ngModel)]="value"
+                        [items]="option_items"
+                        [loading]="false"
+                        appendTo="body"
+                        [virtualScroll]="true"
+                        [searchWhileComposing]="false"
+                        bindLabel="label"
+                        bindValue="value"
+                        (change)="onChangeOtherSelectValue($event)"
+                        (open)="openNgSelect()"
+                        (focusout)="onSelectFocusOut($event)"
+                        [clearable]="!form.required"
+                        [disabled]="!is_all_related_condition_value_selected"
+                        [placeholder]="selectPlaceHolder"
+                        (keyup)="onChangeSelect($event)"
+                        [closeOnSelect]="true"
+                        [ngStyle]="form.is_multi_value_mode ? {'height':'auto', 'min-height':'40px', 'padding-top':'0px'} : {}"
+                    ></ng-select>
+                </ng-container>
+
+                <ng-template #enableSearchText>
+                    <input
+                        class="form-control"
+                        type="text"
+                        name="{{field['Field']}}"
+                        [(ngModel)]="lookupSearchValue"
+                        (change)="onChangeSelect($event)"
+                    />
+                </ng-template>
+
+                <span
+                    *ngIf="form.original_type === 'select_other_table' && !IS_PUBLIC_FORM && !IS_EMBED_MODE && form.show_lookup_modal &&_share.getSimpleTableInfo(form.item_table)
+                           && _share.getSimpleTableInfo(form.item_table).grant.list && !isEditMode"
+                    class="input-group-addon pointer" (click)="is_all_related_condition_value_selected ? openLookupModal() : null">
+                <i class="fa fa-search "></i>
+                </span>
+
+            </div>
+            <ng-container *ngIf="form.not_display_pulldown && !isEditMode">
+                <small *ngIf="value">
+                    選択済み:{{ view_value }}
+                </small>
+
+            </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="form.type === 'multi-select'">
+            <ng-select
+                ng-required="true"
+                class="custom form-control"
+                appendTo="body"
+                [id]="getId()"
+                [items]="admin_notification"
+                [multiple]="true"
+                [searchWhileComposing]="false"
+                [virtualScroll]="true"
+                bindLabel="label"
+                bindValue="value"
+                [(ngModel)]="value"
+                (change)="onChange()"
+            ></ng-select>
+        </ng-container>
+        <ng-template [ngIf]="form.type == 'boolean'">
+            <div class="checkbox">
+                <label>
+                    <label class="switch switch-text switch-pill switch-primary" *ngIf="form.use_switch;else notUseSwitch;">
+                        <input type="checkbox" class="switch-input" [attr.disabled]="form.disable_switch == 'true' ? true : null" (change)="onBooleanChange()" [checked]="value=='true'">
+                        <span class="switch-label" data-on="On" data-off="Off"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <ng-template #notUseSwitch>
+                        <input type="checkbox" class="pg-checkbox" [checked]="value=='true'" (change)="onBooleanChange()" [id]="getId()" (click)="onClickBoolean($event)">
+                        <label class="checkbox-custom" [for]="getId()">
+                            <ng-container *ngIf="form.option_label;else NO_OPTION_LABEL">
+
+                                <ng-container *ngIf="form.option_label === 'Yes / No';else optionLabel">
+                                    ON
+                                </ng-container>
+                                <ng-template #optionLabel>
+                                    {{ form.option_label }}
+                                </ng-template>
+                            </ng-container>
+                            <ng-template #NO_OPTION_LABEL>
+                                {{ form.boolean_text }}
+                            </ng-template>
+                        </label>
+
+                    </ng-template>
+                </label>
+            </div>
+        </ng-template>
+        <ng-template [ngIf]="(form['type'] == 'checkbox')">
+            <!-- ngModelはhiddenに紐付け、checkboxでhiddenのvalueを変える -->
+            <ng-container *ngIf="isMultiSelect(form);else notMultiSelect">
+                <ng-select
+                    class="custom form-control"
+                    appendTo="body"
+                    [id]="getId()"
+                    [items]="option_items"
+                    [multiple]="true"
+                    [searchWhileComposing]="false"
+                    [virtualScroll]="true"
+                    bindLabel="label"
+                    bindValue="label"
+                    [(ngModel)]="value"
+                    (change)="onChange()"
+                ></ng-select>
+            </ng-container>
+            <ng-template #notMultiSelect>
+                <div *ngFor="let option of option_items" class="checkbox layout-{{this.form['_layout'] ?? this.form['_custom_field']['layout']}}">
+                    <input type="checkbox" class="pg-checkbox" [checked]="isCheck(i,option.value)" id="{{unique_input_id}}_{{field['Field']}}_{{option.value}}"
+                           value="{{option.value}}" name="{{unique_input_id}}_{{field['Field']}}"
+                           (change)="checkboxChange(field['Field'],unique_input_id+'_'+field['Field'])">
+                    <label class="checkbox-custom" for="{{unique_input_id}}_{{field['Field']}}_{{option.value}}">
+                        {{ option.label }}
+                    </label>
+                </div>
+            </ng-template>
+        </ng-template>
+        <ng-template [ngIf]="form['type'] == 'radio'">
+            <div *ngFor="let option of option_items" class="radio layout-{{this.form['_layout'] ?? this.form['_custom_field']['layout']}}">
+                <input (change)="onChange()" [(ngModel)]="value" type="radio" class="pg-radio" id="{{field_for_radio}}_{{field['Field']}}_{{option.value}}"
+                       name="{{field_for_radio}}_{{field['Field']}}" value="{{option.value}}">
+                <label class="radio-custom" for="{{field_for_radio}}_{{field['Field']}}_{{option.value}}">
+                    {{ option.label }}
+                </label>
+            </div>
+            <div *ngIf="form.field.Field == 'two_factor_method' && value == 'qr'">
+                <div class="col-12 mb-3">
+                    <img [src]="'data:image/png;base64,' + qrCodeImage" alt="QR Code" style="width: 200px; height: auto;"/>
+                    <p>このQRコードをAuthenticatorアプリでスキャンしてください。</p>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template [ngIf]="(form.type == 'grant_group')">
+            <dynamic-data-view [is_view_mode]="true" [dataType]="'grant_group'" [grantGroupData]="grantGroupData" [loadGrantGroupAuto]="false"></dynamic-data-view>
+            <button class="btn btn-success btn-sm mt-2 user_division_grant_btn" (click)="grantGroupModal.show()" type="button">権限ユーザー/組織 選択</button>
+
+
+            <div bsModal #grantGroupModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-default" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">権限グループ選択</h4>
+                            <button type="button" class="close" (click)="grantGroupModal.hide()" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body m-2">
+                            <edit-component [_mode]="!value?'add':'edit'" [IS_EMBED_MODE]="true" [_id]="!value?null:value" [_table]="'grant_group'" (onSubmit)="onInputGrantGroup($event)"
+                                            (onCancel)="grantGroupModal.hide()" [is_add_new_button_select_other_table]="false" [grantGroupData]="grantGroupData"></edit-component>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
+
+        </ng-template>
+        <ng-template [ngIf]="(form.type == 'condition' || form.type =='timing_condition')">
+            <div class="" *ngIf="isConditionTableSet(); else tableNotSelected;">
+                <button class="btn btn-success btn-sm" (click)="addCondition()"><i class="fa fa-plus mr-1"></i>
+                    <ng-container *ngIf="form.type=='condition'">
+                        条件追加
+                    </ng-container>
+                    <ng-container *ngIf="form.type=='timing_condition'">
+                        タイミング追加
+                    </ng-container>
+                </button>
+            </div>
+            <ng-template #tableNotSelected>
+                [テーブルを選択して下さい]
+            </ng-template>
+            <ng-container *ngIf="conditions">
+                <ng-container *ngFor="let condition of conditions.condition_a; let i = index;">
+                    <div class="condition-wrap mt-1">
+                        <condition-form [id_prefix]="id_prefix +'_' + form.type + '_condindex_' + i + '_'" [condition_type]="form.type" [table]="getConditionTable()"
+                                        [default_condition]="condition"
+                                        (valueChanged)="onValueChanged($event)"
+                                        [index]="i"></condition-form>
+                        <div class="buttons">
+                            <button class="btn btn-danger pull-left btn-sm btn" (click)="delCondition(i)"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                </ng-container>
+                <br style="clear: both">
+            </ng-container>
+
+        </ng-template>
+
+        <!-- ONLY GRANT!!!! HIDDEN DOM -->
+        <ng-template [ngIf]="form['type'] == 'grant'">
+            <button *ngIf="this.table_info.table==='dataset_grant' || this.table_info.table==='dataset_group_grant'" class="table-management-button btn btn-primary mt-2"
+                    (click)="tableManagementModal.show()">
+                <i class="fa fa-cogs"></i> テーブル管理
+            </button>
+
+            <div bsModal #tableManagementModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-default modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">テーブル管理</h4>
+                            <button type="button" class="close" (click)="tableManagementModal.hide()" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body m-2">
+                            <grant-check [grant_json]="value" [data]="data" [table]="'dataset__'+editComponent.id" (valueChanged)="onChangeGrantFromModal($event)"
+                                         [is_show_table_grant]="this.table_info.table==='dataset_grant'"></grant-check>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" (click)="tableManagementModal.hide()">キャンセル</button>
+                            <button type="button" class="btn btn-primary" (click)="applyTableManagement()">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <!-- ONLY GRANT END!!!! -->
+
+
+        <ng-template [ngIf]="form.type == 'noti_type'">
+            <input type="hidden" value="{{datasetId(grant_menu_a)}}" id="dataset_id">
+            <!--
+                <label>
+                    <input type="checkbox" value="email"
+                           id="email"
+                           name="{{field['Field']}}_dataset"
+                           (change)="checkboxChange(field['Field'],field['Field']+'_dataset')"
+                           [checked]="isCheck(value,'email')"
+                           >
+                    Email
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" value="sms"
+                           id="sms"
+                           name="{{field['Field']}}_dataset"
+                           (change)="checkboxChange(field['Field'],field['Field']+'_dataset')"
+                        [checked]="isCheckGrant('sms')"
+                           >
+                    SMS
+                </label>
+                <br>
+            <label>
+                <input type="checkbox" value="created_user"
+                       name="{{field['Field']}}_dataset"
+                       (change)="checkboxChange(field['Field'],field['Field']+'_dataset')"
+                       [checked]="isCheck(value,'created_user')"
+                >
+                作成者
+            </label>
+            <br>
+            -->
+            <label>
+                <input type="checkbox" value="slack"
+                       name="{{field['Field']}}_dataset"
+                       id="slack"
+                       (change)="checkboxChange(field['Field'],field['Field']+'_dataset')"
+                       [checked]="isCheck(value,'slack')"
+                >
+                Slack
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" value="webhook_url"
+                       id="webhook_url"
+                       name="{{field['Field']}}_dataset"
+                       (change)="checkboxChange(field['Field'],field['Field']+'_dataset')"
+                       [checked]="isCheck(value,'webhook_url')"
+                >
+                Webhook
+            </label>
+        </ng-template>
+        <div class="grant_patterns ml-2" *ngIf="table_info && (table_info.table==='dataset_group') && this.form.field_name === 'group_grant_type'">
+            <div class="flex">
+                <div class="col-sm-3">
+                    <button class="quick-button" [ngClass]="{'active':value=='everyone'}" (click)="changeGrantType('everyone')">
+                        <i class="fa fa-group"></i>
+                        <p>全員閲覧可能</p>
+                    </button>
+                </div>
+
+                <div class="col-sm-3">
+                    <button class="quick-button" [ngClass]="{'active':value=='custom'}" (click)="changeGrantType('custom')" [disabled]="is_add">
+                        <i class="fa fa-gear"></i>
+                        <p>詳細設定</p>
+
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 pl-2" *ngIf="isDatasetEdit() && is_add">
+                ※詳細設定は一度保存後に設定可能です。
+            </div>
+        </div>
+        <div class="grant_patterns ml-2" *ngIf="table_info && (isDatasetEdit()  || table_info.table==='dataset_group') && this.form.field_name === 'grant_type'">
+            <div class="flex">
+                <div class="col-sm-3" *ngIf="table_info.table === 'dataset_group'">
+                    <button class="quick-button active" [ngClass]="{'active':value=='none'}" (click)="changeGrantType('none')">
+                        <i class="fa fa-ban"></i>
+                        <p>無し</p>
+                    </button>
+                </div>
+                <div class="col-sm-3" *ngIf="isDatasetEdit()">
+                    <button class="quick-button active" [ngClass]="{'active':value=='me'}" (click)="changeGrantType('me')">
+                        <i class="fa fa-user"></i>
+                        <p>作成者のみ</p>
+                    </button>
+                </div>
+                <div class="col-sm-3">
+                    <button class="quick-button" [ngClass]="{'active':value=='everyone'}" (click)="changeGrantType('everyone')">
+                        <i class="fa fa-group"></i>
+                        <p>全員編集可能</p>
+                    </button>
+                </div>
+
+                <div class="col-sm-3">
+                    <button class="quick-button" [ngClass]="{'active':value=='custom'}" (click)="changeGrantType('custom')" [disabled]="is_add">
+                        <i class="fa fa-gear"></i>
+                        <p>詳細設定</p>
+
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 pl-2" *ngIf="isDatasetEdit() && is_add">
+                ※詳細設定は一度保存後に設定可能です。
+            </div>
+
+            <div class="grant-overview-table mt-4 w-100" *ngIf="value === 'custom' && table_info?.child_a?.length">
+                <style>
+                    .grant-overview-table {
+                        width: 100% !important;
+                    }
+
+                    .grant-overview-table table {
+                        width: 100% !important;
+                    }
+
+                    .grant-overview-table th {
+                        background-color: #e9ecef;
+                        border-bottom: 2px solid #dee2e6;
+                    }
+
+                    .grant-overview-table thead th {
+                        vertical-align: middle;
+                        text-align: center;
+                    }
+                </style>
+                <hr>
+                <h4 class="mb-2 mt-2">テーブル権限設定
+                    <!-- add button -->
+                    <button class="btn btn-success btn-sm ml-2" (click)="addTableGrant()">
+                        <i class="fa fa-plus"></i>
+                        権限追加
+                    </button>
+                </h4>
+                <div class="table-responsive grant-overview-table-wrapper">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>権限グループ</th>
+                            <th>項目編集権限</th>
+                            <th>総合権限</th>
+                            <th>閲覧</th>
+                            <th>編集</th>
+                            <th>追加</th>
+                            <th>削除</th>
+                            <th>集計</th>
+                            <th>複製</th>
+                            <th>一括編集</th>
+                            <th *ngIf="table_info.table !== 'dataset_group'">制限項目</th>
+                            <th *ngIf="table_info.table !== 'dataset_group'">非表示項目</th>
+                            <th *ngIf="table_info.table !== 'dataset_group'">編集不可項目</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let grant of getGrantArray(); let i = index">
+                            <td>
+                                <ng-container *ngIf="loadingGrantGroupData;else NotLoadingGrantGroupData">
+                                    <div class="loader_small">Loading...</div>
+                                </ng-container>
+                                <ng-template #NotLoadingGrantGroupData>
+
+                                    <dynamic-data-view [is_view_mode]="true" [dataType]="'grant_group'" [grantGroupData]="grant['data']" [simpleGrantView]="true"></dynamic-data-view>
+                                    <div *ngIf="grant['data'] == null">
+                                        未設定 <span class="text-danger">※必須</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary" (click)="modalUserDivisionGrant(grant,i)">選択</button>
+                                </ng-template>
+                            </td>
+                            <ng-container *ngIf="grant['data']==null || !grant.grant_value;else GrantDataNotNull">
+                                <td colspan="15" class="text-center">
+                                    <div *ngIf="loadingGrantGroupData;else NotLoadingGrantGroupData">
+                                        <div class="loader_small">Loading...</div>
+                                    </div>
+                                    <ng-template #NotLoadingGrantGroupData>
+                                        <ng-container *ngIf="grant['data']==null ">
+                                            <div class="alert alert-danger">権限グループを選択してください
+                                                <div class="mt-2">
+                                                    <!-- delete button -->
+                                                    <button class="btn btn-sm btn-danger" (click)="delTableGrant(i)">
+                                                        <i class="fa fa-trash"></i>
+                                                        削除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf=" grant['data']!=null && (!grant.grant_value) ">
+                                            <div class="alert alert-danger">権限を設定してください
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-warning" (click)="openTableGrantModal(grant, i)">
+                                                        <i class="fa fa-edit"></i>
+                                                        設定
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-template #GrantDataNotNull>
+
+                                <td class="text-center">
+                                    <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.table_editable, 'fa-times text-danger': !grant.grant_value.table_editable}"></i>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.table_author, 'fa-times text-danger': !grant.grant_value.table_author}"></i>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else viewIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #viewIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.view, 'fa-times text-danger': !grant.grant_value.view}"></i>
+                                    </ng-template>
+                                    <i *ngIf="grant.grant_value.condition_a?.length" class="fa fa-exclamation-circle text-warning ml-1" title="条件あり"></i>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else editIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #editIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.edit, 'fa-times text-danger': !grant.grant_value.edit}"></i>
+                                    </ng-template>
+                                    <i *ngIf="grant.grant_value.edit_condition_a?.length" class="fa fa-exclamation-circle text-warning ml-1" title="条件あり"></i>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else addIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #addIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.add, 'fa-times text-danger': !grant.grant_value.add}"></i>
+                                    </ng-template>
+                                    <i *ngIf="grant.grant_value.add_condition_a?.length" class="fa fa-exclamation-circle text-warning ml-1" title="条件あり"></i>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else deleteIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #deleteIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.delete, 'fa-times text-danger': !grant.grant_value.delete}"></i>
+                                    </ng-template>
+                                    <i *ngIf="grant.grant_value.delete_condition_a?.length" class="fa fa-exclamation-circle text-warning ml-1" title="条件あり"></i>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else summarizeIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #summarizeIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.summarize, 'fa-times text-danger': !grant.grant_value.summarize}"></i>
+                                    </ng-template>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else duplicateIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #duplicateIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.duplicate, 'fa-times text-danger': !grant.grant_value.duplicate}"></i>
+                                    </ng-template>
+                                </td>
+                                <td class="text-center">
+                                    <ng-container *ngIf="grant.grant_value.table_editable; else bulkEditIconTemplate">
+                                        -
+                                    </ng-container>
+                                    <ng-template #bulkEditIconTemplate>
+                                        <i class="fa" [ngClass]="{'fa-check text-success': grant.grant_value.update_all, 'fa-times text-danger': !grant.grant_value.update_all}"></i>
+                                    </ng-template>
+                                </td>
+                                <td class="text-center" *ngIf="table_info.table !== 'dataset_group'">
+                                    <ng-container *ngIf="grant.grant_value.table_editable">
+                                        -
+                                    </ng-container>
+                                    <ng-container *ngIf="!grant.grant_value.table_editable">
+                                        <span *ngIf="grant.grant_value.only_one" class="badge badge-danger mr-1 disable-tag">1データのみ</span>
+                                        <span *ngIf="grant.grant_value.disable_csv_dl" class="badge badge-danger mr-1 disable-tag">CSV DL不可</span>
+                                        <span *ngIf="grant.grant_value.disable_csv_up" class="badge badge-danger mr-1 disable-tag">CSV UP不可</span>
+                                        <span *ngIf="grant.grant_value.disable_zip_up" class="badge badge-danger mr-1 disable-tag">ZIP UP不可</span>
+                                        <span *ngIf="!grant.grant_value.only_one && !grant.grant_value.disable_csv_dl && !grant.grant_value.disable_csv_up && !grant.grant_value.disable_zip_up">-</span>
+                                    </ng-container>
+                                </td>
+                                <td class="text-center" *ngIf="table_info.table !== 'dataset_group'">
+                                    <ng-container *ngIf="grant.hide_fields?.length === 0">
+                                        -
+                                    </ng-container>
+                                    <ng-container *ngIf="grant.hide_fields?.length > 0">
+                                        <div *ngFor="let field of grant.hide_fields" class="badge badge-info field-tag">
+                                            {{ getFieldLabel(field) }}
+                                        </div>
+                                    </ng-container>
+                                </td>
+                                <td class="text-center" *ngIf="table_info.table !== 'dataset_group'">
+                                    <ng-container *ngIf="grant.only_view_fields?.length === 0">
+                                        -
+                                    </ng-container>
+                                    <ng-container *ngIf="grant.only_view_fields?.length > 0">
+                                        <div *ngFor="let field of grant.only_view_fields" class="badge badge-info field-tag">
+                                            {{ getFieldLabel(field) }}
+                                        </div>
+                                    </ng-container>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-warning" (click)="openTableGrantModal(grant, i)">
+                                        <i class="fa fa-edit"></i>
+                                        管理
+                                    </button>
+                                </td>
+                                <td class="text-center text-danger">
+                                    <button class="btn btn-sm btn-danger" (click)="delTableGrant(i)">
+                                        <i class="fa fa-trash"></i>
+                                        削除
+                                    </button>
+                                    <!-- duplicate button -->
+                                    <button
+                                        class="btn btn-sm btn-primary mt-1"
+                                        (click)="duplicateTableGrant(i)"
+                                    >
+                                        <i class="fa fa-copy"></i>
+                                        複製
+                                    </button>
+
+                                </td>
+
+                            </ng-template>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <ng-template #isCalcField>
+        <ng-container *ngIf="form.is_calc_auto_reload_off; else readOnlyCalcField">
+            <input class="form-control" [(ngModel)]="value" (change)="onChange()" [value]="view_value ?? null">
+        </ng-container>
+        <ng-template #readOnlyCalcField>
+            <input class="form-control" disabled [value]="view_value ?? null">
+        </ng-template>
+    </ng-template>
+</ng-container>
+
+<ng-container *ngIf="form && form.button_label && !form.is_multi_value_mode">
+    <button class="btn btn-sm btn-success pull-right mt-1" (click)="call_func(form.button_function)" [ladda]="sending_custom_button">{{ form.button_label }}</button>
+</ng-container>
+
+
+<div bsModal #deleteModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-danger" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                <button type="button" class="close" (click)="deleteModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>本当に削除してもよろしいですか？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="deleteModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-danger" (click)="deleteImage()">削除する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div bsModal #verifyModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">SMTP送信テスト</h4>
+                <button type="button" class="close" (click)="verifyModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>送信テストするメールアドレスを入力して下さい</p>
+                <input class="form-control" type="text" [(ngModel)]="verify_smtp_email">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="verifyModal.hide()">キャンセル</button>
+                <button type="button" class="btn modal-default ml-2" (click)="this.verifySmtp()">送信</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div bsModal #testMailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">送信テスト</h4>
+                <button type="button" class="close" (click)="testMailModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>送信テストするメールアドレスを入力して下さい</p>
+                <input class="form-control" type="text" [(ngModel)]="verify_smtp_email">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="testMailModal.hide()">キャンセル</button>
+                <button type="button" class="btn modal-default ml-2" (click)="this.sendTestMail()">送信</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

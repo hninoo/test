@@ -1,0 +1,118 @@
+<ng-container *ngIf="isValidChildForm">
+    <div class="mt-4" id="child-{{child_table?.table}}" class="pfc-child-container">
+        <h4>
+            <span class="pt-1">{{ child_table?.getLabel() }}</span>
+            <button 
+                [disabled]="!editComponent?.canAddChildData(child_table)" 
+                class="btn btn-success ml-3 btn-sm" 
+                type="button"
+                style="margin-top: -3px;"
+                [attr.aria-label]="'Add ' + child_table?.getLabel()"
+                (click)="editComponent.addChildData(child_table, undefined, undefined, childData?.length)">
+                <i class="fa fa-plus mr-1" aria-hidden="true"></i>{{ child_table?.getLabel() }}を追加する
+            </button>
+            <div class="btn-group" dropdown>
+                <button 
+                    class="btn btn-success ml-1 btn-sm" 
+                    type="button" 
+                    style="margin-top: -3px;" 
+                    dropdownToggle
+                    [attr.aria-label]="'Additional options for ' + child_table?.getLabel()">
+                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                </button>
+                <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu" role="menu" aria-labelledby="button-basic">
+                    <li role="menuitem">
+                        <label class="dropdown-item" style="margin-bottom: 0;">
+                            CSVでアップロード
+                            <input 
+                                type="file" 
+                                (change)="editComponent.onCsvFileSelected($event, child_table)" 
+                                accept=".csv"
+                                style="display: none;"
+                                [attr.aria-label]="'Upload CSV for ' + child_table?.getLabel()">
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </h4>
+
+        <div *ngFor="let c_data of childData; let i = index" 
+             [attr.data-index]="i"
+             class="child-container">
+            <div class="flex">
+                <div [ngClass]="editComponent?.show_google_calendar ? 'w-75' : 'w-100'">
+                    <button 
+                        class="btn btn-default btn-sm"
+                        (click)="editComponent.orderChange(childData, i, i-1)"
+                        *ngIf="child_table?.forms?.byFieldName(child_table.order_field)"
+                        [attr.aria-label]="'Move ' + child_table?.getLabel() + ' up'">
+                        上へ
+                    </button>
+                    <button 
+                        class="btn btn-default btn-sm"
+                        (click)="editComponent.orderChange(childData, i, i+1)"
+                        *ngIf="child_table?.forms?.byFieldName(child_table.order_field)"
+                        [attr.aria-label]="'Move ' + child_table?.getLabel() + ' down'">
+                        下へ
+                    </button>
+
+                    <button 
+                        ngbTooltip="削除権限がありません" 
+                        [disableTooltip]="child_table?.grant?.delete || !c_data?.raw_data?.['id']"
+                        [disabled]="!child_table?.grant?.delete && c_data?.raw_data?.['id'] > 0"
+                        class="btn btn-sm btn-danger pull-right z-1 mr-2" 
+                        (click)="editComponent.clickToDeleteChild(child_table, i)"
+                        [attr.aria-label]="'Delete ' + child_table?.getLabel()">
+                        削除
+                    </button>
+                    <button 
+                        class="btn btn-sm btn-info pull-right z-1 mr-2" 
+                        (click)="editComponent.duplicateChild(child_table, i)"
+                        [attr.aria-label]="'Duplicate ' + child_table?.getLabel()">
+                        複製
+                    </button>
+
+                    <div *ngIf="child_table?.forms as c_forms">
+                        <admin-forms 
+                            [parent]="editComponent" 
+                            [table_info]="child_table" 
+                            [fields]="child_table.fields" 
+                            [forms]="c_forms"
+                            [data]="c_data" 
+                            [siblings]="childData"
+                            [error_a]="editComponent?.child_error_a_by_table?.[child_table.table]?.[i] || {}"
+                            [mode]="editComponent?.mode" 
+                            [id_prefix]="child_table.table + '_cindex_' + i + '_'"
+                            [is_custom_table_definition]="editComponent?.is_dataset_edit" 
+                            [IS_PUBLIC_FORM]="editComponent?.IS_PUBLIC_FORM"
+                            [IS_EMBED_MODE]="editComponent?.IS_EMBED_MODE" 
+                            [child_index]="i" 
+                            [parent_data]="editComponent?.data"
+                            [IS_IFRAME_MODE]="editComponent?.IS_IFRAME_MODE"
+                            (onLoadReflectFormsFromChild)="editComponent.onLoadReflectFormsFromChild($event)">
+                        </admin-forms>
+                    </div>
+                </div>
+
+                <google-calendar 
+                    *ngIf="editComponent?.show_google_calendar"
+                    [c_data]="c_data" 
+                    [table_info]="editComponent?.table_info" 
+                    [forms]="editComponent?.forms"
+                    [data]="editComponent?.data">
+                </google-calendar>
+            </div>
+        </div>
+
+        <button 
+            *ngIf="hasChildData"
+            [disabled]="!editComponent?.canAddChildData(child_table)" 
+            class="btn btn-success ml-3 btn-sm" 
+            type="button"
+            style="margin-top: -3px;"
+            [attr.aria-label]="'Add another ' + child_table?.getLabel()"
+            (click)="editComponent.addChildData(child_table, undefined, undefined, childData?.length)">
+            <i class="fa fa-plus mr-1" aria-hidden="true"></i>{{ child_table?.getLabel() }}を追加する
+        </button>
+    </div>
+</ng-container>

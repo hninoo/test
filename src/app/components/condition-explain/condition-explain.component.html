@@ -1,0 +1,70 @@
+<!-- 20240613 Kanazawa sub_fieldsがある場合は強制的にcondition.field_labelを見るように修正 -->
+<ng-container *ngIf="table_info.forms.byFieldName(condition.field) && condition.sub_fields.length < 1; else showFieldLabel">
+    <b>{{ table_info.forms.byFieldName(condition.field).label }}</b>&ngsp;が
+</ng-container>
+<ng-template #showFieldLabel>
+    <ng-container>
+        <b>{{ condition.field_label }}</b>&ngsp;が
+    </ng-container>
+</ng-template>
+<ng-container *ngIf="!condition.inc_table">
+    {{ _share.condition_a[condition.condition] }}
+</ng-container>
+<ng-container *ngIf="!isDaysShow(condition.condition)">
+    <ng-container *ngIf="condition.use_variable">
+        <ng-container
+                *ngIf="customFilter.getVariableByCondition(condition)!=null">
+            【{{ customFilter.getVariableByCondition(condition).name }}】
+        </ng-container>
+
+    </ng-container>
+
+    <ng-container *ngIf="!condition.use_variable">
+        <ng-container
+                *ngIf="!condition.isIncludeTableOrNotInclude();else IS_INC_TABLE">
+                                                            <span *ngIf="condition.condition !== 'null' && condition.condition !== 'not_null';else notConditionNull">
+                                                                <ng-container *ngIf="!isEditCondition(condition);else isEditMode;">
+                                                                    <ng-container *ngIf="!enableSelectDate(condition)">
+                                                                        <!-- FIXME use async -->
+                                                                         「{{ condition.value === 'updated_admin_id' ? filterTextCondition(condition) : condition.view_value }}」
+                                                                    </ng-container>
+                                                                    <ng-container *ngIf="enableSelectDate(condition)">
+                                                                        「{{ select_date_option['title'] }}」
+                                                                    </ng-container>
+                                                                    <i *ngIf="conditionEditable(condition)" (click)="editCondition(condition)"
+                                                                       class="fa fa-pencil-square-o text-warning"
+                                                                       style="cursor: pointer"></i>
+                                                                </ng-container>
+                                                                <ng-template #isEditMode>
+                                                                    <search-field [table_info]="condition.target_table_info" [ignore_change]="true" [placeholder]="''"
+                                                                                  [value]="condition.value"
+                                                                                  [form]="condition.target_form"
+                                                                                  [is_timing_condition]="false"
+                                                                                  [condition]="condition"
+
+                                                                                  (valueChange)="conditionValueChanged($event,condition)">
+                                                                </search-field>
+                                                                </ng-template>
+                                                            </span>
+            <ng-template #notConditionNull>
+            </ng-template>
+        </ng-container>
+        <ng-template #IS_INC_TABLE>
+            <ng-container
+                    *ngIf="_share.getSimpleTableInfo(condition.inc_table)">
+                <!-- 別テーブルに含まれる（ない）場合 -->
+                {{ _share.getSimpleTableInfo(condition.inc_table).getLabel() }}
+                <span *ngIf="condition.inc_filter_id">
+                                                                    ({{ _share.getFilterName(condition.inc_table, condition.inc_filter_id)|async }})
+
+                                                                </span>
+                に
+                <span
+                        *ngIf="condition.condition == 'include_other_table'">含まれる</span>
+                <span
+                        *ngIf="condition.condition == 'not_include_other_table'">含まれない</span>
+            </ng-container>
+
+        </ng-template>
+    </ng-container>
+</ng-container>

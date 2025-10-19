@@ -1,0 +1,176 @@
+<!-- speed ok -->
+<td *ngIf="table_info.grant.edit && !is_relation_table && !isSummarizeMode && !crossTableHeader && !embedMode && !isEditMode" [ngClass]="{'td_first_child_sticky': stored_fields.length>0}">
+    <ng-container *ngIf="data.is_locked;else NotLocked">
+        <i class="fa fa-lock text-warning" style="cursor: pointer" ngbTooltip="他のユーザーが編集中です" container="body" (click)="openUnlockModal()"></i>
+    </ng-container>
+    <ng-template #NotLocked>
+        <input type="checkbox" name="data_check" style="margin-top: 4px;"
+               (change)="checkboxChange($event)" value="{{data.raw_data[this.primary_key]}}">
+    </ng-template>
+    <span *ngIf="data.hasComment()" style="vertical-align: top; line-height:20px;margin-left:4px">
+        <a (click)="toComment()">
+            <i class="fa fa-commenting ml-1" ngbTooltip="{{data.getCommentTooltipText()}}" container="body" style="font-size:18px;color:#999;cursor:pointer"></i>
+        </a>
+    </span>
+</td>
+
+<td *ngIf="table_info.menu.is_workflow && !isSummarizeMode" style="width:74px" [ngClass]="{'sticky': stored_fields.length >0}"
+    [ngStyle]="{left: workflow_cell_left+'px'}">
+    <ng-container *ngIf="data.workflow">
+        <button (click)="view()"
+                *ngIf="data.workflow.status==='applying' && data.workflow.is_assigned; else NOT_NEED_CHEDK"
+                class="btn btn-sm btn-primary">要確認
+        </button>
+        <ng-template #NOT_NEED_CHEDK>
+            <button (click)="view()" *ngIf="data.workflow.status==='done'" class="btn btn-sm btn-success">承認済み</button>
+            <button (click)="view()" *ngIf="data.workflow.status==='applying'" class="btn btn-sm btn-warning">申請中</button>
+            <button (click)="view()" *ngIf="data.workflow.status==='rejected'" class="btn btn-sm btn-danger">否認</button>
+            <button (click)="view()" *ngIf="data.workflow.status==='withdraw'" class="btn btn-sm btn-success">取り下げ</button>
+        </ng-template>
+
+
+    </ng-container>
+</td>
+
+<ng-container *ngIf="table=='dataset'">
+    <td *ngIf="movable" class="table-admin-list__btns">
+        <button class="btn btn-sm btn-outline-primary" type="button" (click)="up(data)">
+            <i class="fa fa-arrow-up"></i></button>
+        <button class="btn btn-sm btn-outline-danger" type="button" (click)="down(data)"><i
+            class="fa fa-arrow-down"></i></button>
+    </td>
+</ng-container>
+
+<!-- speed ok end -->
+
+<ng-container *ngFor="let field of view_fields;let e = index">
+    <!-- ngStyle is causing issues since forms property is missing from table_info, as far as i know.-->
+    <td *ngIf="field.Field != 'breakdown_item_field' && !data.duplication"
+        dataset-table-cell [ngStyle]="getCellStyle(field['Field'],true)"
+        [class.error-box]="required_data_errors.includes(field['Field'])"
+        [form]="rowForms.byFieldName(field.Field)"
+        [field]="field"
+        [dataType]="getDataType(field)"
+        [data]="data"
+        [primary_key]="primary_key"
+        [cellId]="cellIds[field.Field]"
+        [selectedCellId]="selectedCellId"
+        [showFormEditModal]="showFormEditModal"
+        [table_info]="table_info"
+        [data_index]="data_index"
+        [child_a]="child_a"
+        [isEditMode]="isEditMode && !data.is_locked"
+        [selectOptionItemsFilter]="selectOptionItemsFilter"
+        [update]="update$"
+        [embedMode]="embedMode"
+        [viewDataMode]="viewDataMode"
+        [customFilter]="customFilter"
+        (valueChanged)="onValueChanged($event)"
+        (onFormatViewData)="onFormatViewDataRow($event)"
+        (ctrlClickEvent)="crlClickEventRow($event)"
+        [crossTableHeader]="crossTableHeader"
+
+    ></td>
+    <td *ngIf="field.Field != 'breakdown_item_field' && data.duplication">
+
+    </td>
+    <td *ngIf="field.Field == 'breakdown_item_field'">
+        {{data.breakdown_item.label}}
+    </td>
+    <!-- speed ok -->
+    <ng-container *ngFor="let extend_header of table_info.extend_headers">
+        <ng-container *ngIf="extend_header.order_after==field['Comment']">
+            <ng-container *ngIf="data.extend_data[extend_header.header_id]!=undefined;else noExtendData1">
+                <td>
+                    <div style="display: flex">
+
+                        <ng-container
+                            *ngIf="data.extend_data[extend_header.header_id]['data']!=undefined && data.extend_data[extend_header.header_id]['data']['url'] != undefined ;else notFile">
+                            <a href="javascript:void(0)"
+                               (click)="download_file(data.extend_data[extend_header.header_id]['data']['url'],data.extend_data[extend_header.header_id]['data'],data.extend_data[extend_header.header_id].order_after,data.extend_data[extend_header.header_id]['data']['no_action_log'])">{{data.extend_data[extend_header.header_id]['data']['name']}}</a>
+                            <div *ngIf="downloading[data.extend_data[extend_header.header_id].order_after]"
+                                 class="sk-circle sk-small">
+                                <div class="loader_small">Loading...</div>
+                            </div>
+                        </ng-container>
+                        <ng-template #notFile>
+                            <div *ngIf="!_share.is_object(data.extend_data[extend_header.header_id]['data'])"
+                                 [innerHTML]="data.extend_data[extend_header.header_id]['data']"></div>
+                            <div *ngIf="_share.is_object(data.extend_data[extend_header.header_id]['data'])"
+                                 [innerHTML]="data.extend_data[extend_header.header_id]['data']['html']"
+                                 (click)="extendDataClicked(data.extend_data[extend_header.header_id]['data'])"></div>
+
+                        </ng-template>
+                        <ng-container
+                            *ngIf="_share.isMasterUser() && extend_header['name']=='ログイン状態' && data.extend_data[extend_header.header_id]['data'] == 'ログイン中' && _share.isUserLoginContractType()">
+                            <button style="zoom:0.7" class="btn btn-sm btn-danger ml-2" (click)="forceLogout(data.raw_data['id'])"><i class="fa fa-sign-out"></i></button>
+                        </ng-container>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-template #noExtendData1>
+                <td></td>
+            </ng-template>
+        </ng-container>
+
+    </ng-container>
+    <!-- speed ok end -->
+</ng-container>
+
+<!-- cross table -->
+<ng-container *ngIf="crossTableHeader">
+    <ng-container *ngFor="let sub_label of crossTableHeader.sub_label_a;let i = index">
+        <td>
+            {{data.raw_data['x1_a'][sub_label] ?? '-'}}
+        </td>
+
+    </ng-container>
+    <td>
+        {{crossTableHeader.summarize_by_record[this.data_index]}}
+    </td>
+</ng-container>
+
+
+<!-- speed ok -->
+<ng-container *ngIf="!isSummarizeMode">
+    <ng-container *ngFor="let extend_header of table_info.extend_headers">
+        <ng-container *ngIf="extend_header.order_after==-1">
+            <ng-container *ngIf="data.extend_data[extend_header.header_id]!=undefined;else noExtendData">
+                <td>
+                    <div *ngIf="!_share.is_object(data.extend_data[extend_header.header_id]['data'])"
+                         [innerHTML]="data.extend_data[extend_header.header_id]['data']"></div>
+                    <div *ngIf="_share.is_object(data.extend_data[extend_header.header_id]['data'])"
+                         [innerHTML]="data.extend_data[extend_header.header_id]['data']['html']"
+                         (click)="extendDataClicked(data.extend_data[extend_header.header_id]['data'])"></div>
+                </td>
+            </ng-container>
+            <ng-template #noExtendData>
+                <td></td>
+            </ng-template>
+        </ng-container>
+    </ng-container>
+</ng-container>
+<td class="pc-list-view__btns" *ngIf="(showCRUDControls) && !isEditMode" [ngClass]="{'disable-float':disable_float_management_buttons}">
+    <!--
+    <button *ngIf="table_info.grant.permission_view && table=='admin'" class="btn btn-outline-primary  btn-sm" type="button"
+            (click)="check_grant_permission(data)"
+    ><i class="fa fa-user"></i></button>
+    -->
+    <ng-container *ngIf="embedMode && !viewDataMode">
+        <button class="btn btn-primary" style="width:auto;margin-right:5px" (click)="onSelectData.emit({id:data.raw_data['id']})">選択</button>
+    </ng-container>
+
+    <button *ngIf="is_viewable_detail && !viewDataMode" class="btn  btn-sm" type="button" style="border: 1px solid #ccc;"
+            (click)="view($event)"
+    ><i class="fa fa-search-plus"></i></button>
+    <ng-container *ngIf="!embedMode">
+        <button *ngIf="data.isEditable()" class="btn btn-warning btn-sm" type="button" [disabled]="data.is_locked"
+                (click)="goToEdit()"><i class="fa fa-pencil"></i></button>
+        <button *ngIf="table_info.grant.delete && data.isDeletable() && !disable_float_management_buttons" class="btn btn-danger btn-sm" type="button"
+                (click)="onDelete.emit()"
+                [disabled]="data['state']=='delete'"><i
+            class="fa fa-trash"></i></button>
+    </ng-container>
+
+</td>
+<!-- speed ok end -->

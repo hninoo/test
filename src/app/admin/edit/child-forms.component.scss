@@ -1,0 +1,55 @@
+// ChildFormsComponent styles
+.pfc-child-container {
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f8f9fa;
+}
+
+.child-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #ffffff;
+}
+
+.flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+// ボタンのスタイル調整
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-radius: 0.2rem;
+}
+
+// 順序変更ボタンのグループ化
+.btn-default + .btn-default {
+  margin-left: 0.25rem;
+}
+
+// アクションボタンの整列
+.pull-right {
+  float: right;
+}
+
+.z-1 {
+  z-index: 1;
+}
+
+// レスポンシブ対応
+@media (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
+  
+  .w-75 {
+    width: 100% !important;
+  }
+}

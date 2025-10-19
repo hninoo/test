@@ -1,0 +1,88 @@
+<div *ngIf="fieldrows" class="table table-bordered mb-0 table-admin-view">
+    <div *ngIf="_share.usePhase() && this.table_type == 'phase'">
+        <phase-status [data]="data" [table]="table" [forms]="forms">
+        </phase-status>
+    </div>
+    <div *ngFor="let row of fieldrows;" style="display:flex" class="table-admin-view__1row pc-view-row">
+        <ng-container *ngFor="let field of row">
+            <div class="table-admin-view__field-row"
+                 *ngIf="field.hasOwnProperty('Field') && forms.byFieldName(field.Field).type!='relation_table' && ignore_fieldname_a.indexOf(field.Field)==-1 && forms.byFieldName(field.Field).shouldShowForm(data.raw_data) && field.show_view && displayOnDetail(field) && relationViewField(field)"
+                 [ngClass]="'field_type_'+forms.byFieldName(field.Field).original_type">
+                <div class="table-admin-view__field-name pc-field-label">{{forms.byFieldName(field.Field).label}}
+                    <ng-template appDebugMode="true">
+                        <a>( {{field.Field}} )</a>
+                    </ng-template>
+                    <div *ngIf="forms.byFieldName(field.Field)['sub-label']"><small class="text-gray-dark">{{forms.byFieldName(field.Field)['sub-label']}}</small></div>
+                </div>
+                <div [ngStyle]="getCellStyle(field.Field)" class="table-admin-view__field-value pc-field-value">
+                    <dynamic-data-view [is_view_mode]="true" [table_info]="data.table_info" [field_name]="field['Field']" [dataType]="forms.byFieldName(field['Field']).type"
+                                       [data]="data" [nolink]="selectDataMode"></dynamic-data-view>
+                </div>
+            </div>
+            <ng-container *ngIf="field.hasOwnProperty('Field') && forms.byFieldName(field['Field']).type=='fixed_html' && forms.byFieldName(field.Field)['_custom_field'].show_view_page">
+                <div class="fixed_html_wrapper">
+                    <div [innerHTML]="forms.byFieldName(field['Field']).fixed_html | safeHtml"></div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="!field.hasOwnProperty('Field') || forms.byFieldName(field['Field']).type == 'relation_table' && !selectDataMode && getRelationTableHashOfField(field)">
+                <app-relation-table id="relation_tables" [base_table_info]="table_info" [data]="data" [relation_table_hash]="getRelationTableHashOfField(field)" [is_relation_view_mode]="is_relation_view_mode" [field_id]="field.id ? field.id : field.Field?.replace('field__', '')"></app-relation-table>
+            </ng-container>
+        </ng-container>
+
+        <div *ngIf="row.length==3" class="table-admin-view__field-row" style="border:none">
+            <!-- dummy -->
+
+        </div>
+    </div>
+
+    <div class="table-admin-view__1row pc-view-row" *ngIf="is_relation_view_mode">
+        <div class="table-admin-view__field-row field_type_datetime">
+            <div class="table-admin-view__field-name pc-field-label"></div>
+            <div class="table-admin-view__field-value pc-field-value">
+                <div class="pc-list-view__btns text-right"
+                    [ngClass]="{'disable-float':disable_float_management_buttons}">
+                    <button *ngIf="is_viewable_detail" class="btn  btn-sm" type="button" style="border: 1px solid #ccc;"
+                        (click)="view($event)"><i class="fa fa-search-plus"></i></button>
+                    <button *ngIf="data.isEditable()" class="btn btn-warning btn-sm" type="button" [disabled]="data.is_locked"
+                        (click)="goToEdit()"><i class="fa fa-pencil"></i></button>
+                    <button *ngIf="table_info.grant.delete && data.isDeletable() && !disable_float_management_buttons"
+                        class="btn btn-danger btn-sm" type="button" (click)="onDelete.emit()" [disabled]="data['state']=='delete'"><i
+                            class="fa fa-trash"></i></button>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="extend_headers">
+        <div *ngFor="let row of fieldrows;" style="display:flex" class="table-admin-view__1row pc-view-row">
+            <ng-container class="table-admin-view__field-row" *ngFor="let field of row">
+                <ng-container *ngFor="let header of extend_headers; let e = index">
+                    <div class="table-admin-view__field-row" *ngIf="header.order_after==field.Comment">
+                        <tr style="display: flex">
+                            <th class="table-admin-view__field-name pc-field-label">{{header.name}}</th>
+                            <td class="table-admin-view__field-value pc-field-value" *ngIf="!_share.is_object(data.extend_data[header.header_id]['data'])"
+                                [innerHTML]="data.extend_data[header.header_id]['data']"></td>
+                            <td class="table-admin-view__field-value pc-field-value" *ngIf="_share.is_object(data.extend_data[header.header_id]['data'])"
+                                [innerHTML]="data.extend_data[header.header_id]['data']['html']"
+                                (click)="extendDataClicked(data.extend_data[header.header_id]['data'])"></td>
+                        </tr>
+                    </div>
+                </ng-container>
+            </ng-container>
+
+        </div>
+    </div>
+
+
+    <ng-container *ngFor="let header of extend_headers; let e = index">
+        <tr style="display: flex" *ngIf="header.order_after==-1 && data.extend_data[header.header_id]">
+            <th class="table-admin-view__field-name pc-field-label">{{header.name}}</th>
+            <td class="table-admin-view__field-value pc-field-value" *ngIf="!_share.is_object(data.extend_data[header.header_id]['data'])"
+                [innerHTML]="data.extend_data[header.header_id]['data']"></td>
+            <td class="table-admin-view__field-value pc-field-value" *ngIf="_share.is_object(data.extend_data[header.header_id]['data'])"
+                [innerHTML]="data.extend_data[header.header_id]['data']['html']"
+                (click)="extendDataClicked(data.extend_data[header.header_id]['data'])"></td>
+        </tr>
+    </ng-container>
+</div>

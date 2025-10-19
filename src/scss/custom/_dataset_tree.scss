@@ -1,0 +1,28 @@
+#first-stage {
+
+    .dataset-group {
+        cursor: pointer;
+        background: rgb(32, 169, 216);
+        color: white;
+        margin: 6px 0;
+
+        i.big {
+            font-size: 25px;
+        }
+    }
+
+    .dataset-group-container {
+        padding-left: 35px;
+        margin-bottom: 10px;
+    }
+
+    button.group-edit {
+        margin-top: -6px;
+        margin-left: 20px;
+    }
+
+    .check_box {
+        margin-top: -6px;
+        margin-left: 18px;
+    }
+}

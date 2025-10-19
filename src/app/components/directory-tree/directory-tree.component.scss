@@ -1,0 +1,62 @@
+$indent: 1.0rem;
+$blue: #20a8d8;
+$hover-bg: rgb(38, 43, 44);
+$padding-tb: 0.2rem;
+.directory-tree{
+    list-style: none;
+    margin-bottom: 0;
+    padding-left: 0;
+    font-size: 14px;
+    &__item{
+        display: block;
+        overflow: hidden;
+        padding: $padding-tb 0;
+        &.open{
+            > .directory-tree__lower-menus{
+                max-height: 2000px;
+            }
+            > .directory-tree__dir-wrap{
+                i::before{
+                    content: "\f147" !important;
+                }
+            }
+        }
+        &:hover{
+            cursor: pointer;
+        }
+    }
+    &__dir-wrap{
+        padding-left: 1.0rem;
+        display: block;
+        position: relative;
+        text-decoration: none;
+    }
+    &__dir-toggle{
+        position: absolute;
+        top: $padding-tb;
+        left: 0;
+        >i{
+            &::before{
+                font-family: FontAwesome;
+                content: "\f196" !important;
+                transition: .3s;
+            }
+        }
+    }
+    &__dir-link{
+        padding: $padding-tb 0.5rem;
+        display: block;
+        position: relative;
+        text-decoration: none;
+        &.-nowrap{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+    &__lower-menus{
+        transition: max-height .3s ease-in-out;
+        max-height: 0;
+        padding-left: $indent;
+    }
+}

@@ -1,0 +1,36 @@
+<div class="card m-4">
+    <div class="card-header text-center">
+        <h1 style="    font-size: 20px;">トライアルアカウント作成</h1>
+    </div>
+    <div class="card-body p-3" style="height: 400px;">
+        <div class="form-group row">
+            <div class="col-md-12 ml-4">
+                <img style="width: 240px; " src="https://pigeon-fw.com//assets/cloud2/img/logo.png" class="pigeon-logo" alt="PigeonCloud">
+            </div>
+            <div class="col-md-12 m-4">
+                <div>
+                    クライアントドメイン:
+                    <input type="text" [(ngModel)]="client_name">.{{ _share.domain }}
+                    <br>
+                    ※空の場合は自動
+                </div>
+                <div>
+                    ログインID:
+                    <input type="text" [(ngModel)]="email">
+                </div>
+
+                <div>
+                    <button class="btn btn-success" (click)="create()" [ladda]="loading">作成</button>
+                </div>
+                <div *ngIf="result">
+                    <h2>作成完了</h2>
+                    <a href="{{url}}">{{url}}</a><br>
+                    ID: {{result['email']}}<br>
+                    PASSWORD: {{result['pw']}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

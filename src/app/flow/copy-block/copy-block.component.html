@@ -1,0 +1,11 @@
+<ng-container *ngIf="table_info">
+    <div *ngFor="let field_label of copy_field_name_a">
+        ・{{ field_label }}
+    </div>
+    <div *ngIf="has_more_copy_field">
+        その他{{ block.copy_fields.length - copy_field_name_a.length }}項目
+    </div>
+    <div class="data_count">
+        データ件数: {{ block._data_count ?? '-' }}
+    </div>
+</ng-container>

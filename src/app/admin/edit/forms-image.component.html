@@ -1,0 +1,19 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="p-2 bg-light-gray h-100">
+            <img class="forms-image-img" src="{{data['image_url']}}" alt="">
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="p-2">
+            <ng-container *ngFor="let field of fields">
+                <div *ngIf="['id','order','created','updated','image_url'].indexOf(field.Field) == -1" class="form-group">
+                    <label><small>{{forms.byFieldName(field.Field).label}}</small></label>
+                    <input *ngIf="forms.byFieldName(field.Field).type == 'text' && field.Field!='password'" [(ngModel)]="data[field.Field]"
+                           placeholder="{{forms.byFieldName(field.Field).placeholder}}"
+                           type="text" name="{{field.Field}}" id="_form_{{field.Field}}" class="form-control form-control-sm">
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>

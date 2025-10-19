@@ -1,0 +1,40 @@
+<ul class="nav-menus" *ngIf="this.menu_root">
+    <ng-container *ngFor="let child of this.menu_root.children">
+        <li class="nav-menus__item" *ngIf="!show_only_directory && !child.isDir && child.menu.show_menu">
+            <a class="nav-menus__link -nowrap" [ngClass]="{'menu_with_badge_text':!!child.menu.badge_text}" routerLinkActive="active" (click)="clickMenu()" [routerLink]="child.menu.link">
+                <ng-container *ngIf="child.menu.icon_type=='class'; else soretdMenuImg">
+                    <i class="fa fa-{{child.menu.icon_class}}" aria-hidden="true"></i>
+                </ng-container>
+                <ng-template #soretdMenuImg>
+                    <img *ngIf="child.menu.icon_image_url" class="icon" src="{{child.menu.icon_image_url}}" [alt]="child.name || 'Menu icon'">
+                    <i *ngIf="!child.menu.icon_image_url" class="fa fa-{{child.menu.icon_class}}" aria-hidden="true"></i>
+                </ng-template>
+                <span [ngClass]="{'menu_item_name':!!child.menu.badge_text}">{{child.name}}</span>
+                <span class="badge badge-danger ml-2" *ngIf="!!child.menu.badge_text">{{child.menu.badge_text}}</span>
+            </a>
+        </li>
+        <li class="nav-menus__item" *ngIf="child.isDir && hasVisibleChildren(child) && !child.archive_flag" dropdown [isOpen]="child.isActive"
+            [autoClose]="false">
+            <a *ngIf="!show_only_directory" class="nav-menus__link -nowrap -toggle" dropdownToggle>
+                <span>{{ child.name }}</span>
+                <span class="badge badge-danger ml-2" *ngIf="child.badge_total != 0">{{child.badge_total}}</span>
+            </a>
+            <div *ngIf="show_only_directory" class="nav-menus__dir-wrap">
+                <a *ngIf="child.hasChildDir" class="nav-menus__dir-toggle" dropdownToggle="false">
+                    <i class="fa" aria-hidden="true"></i>
+                </a>
+                <a *ngIf="!child.hasChildDir" class="nav-menus__dir-no-toggle" routerLinkActive="active" [routerLink]="'/admin/group/' + child.id">
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                </a>
+                <a class="nav-menus__dir-link -nowrap" routerLinkActive="active" [routerLink]="'/admin/group/' + child.id">
+                    <span>{{ child.name }}</span>
+                    <span class="badge badge-danger ml-2" *ngIf="child.badge_total != 0">{{child.badge_total}}</span>
+                </a>
+            </div>
+            <div class="nav-menus__lower-menus">
+                <nav-menus [menu_root]="child" [show_only_directory]="show_only_directory" [show_root]="false"></nav-menus>
+            </div>
+        </li>
+    </ng-container>
+</ul>
+

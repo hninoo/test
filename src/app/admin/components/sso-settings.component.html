@@ -1,0 +1,250 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>SSO設定</h2>
+            <p>Google、Microsoft 365のシングルサインオン（SSO）設定を行います。</p>
+
+            <!-- クライアント情報 -->
+            <div class="info-box">
+                <h5>クライアント情報</h5>
+                <p>以下の情報をSSOプロバイダの設定画面で使用してください。</p>
+                <p>
+                    <strong>識別子 (エンティティ ID)：</strong>
+                    <code>{{ entityId }}</code>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-2" (click)="copyToClipboard(entityId)" title="クリップボードにコピー">
+                        <i class="fa fa-copy"></i>
+                    </button>
+                </p>
+                <p>
+                    <strong>応答 URL：</strong>
+                    <code>{{ responseUrl }}</code>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ml-2" (click)="copyToClipboard(responseUrl)" title="クリップボードにコピー">
+                        <i class="fa fa-copy"></i>
+                    </button>
+                </p>
+            </div>
+
+            <!-- Google SAML設定 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Google SAML設定</span>
+                    <span class="mr-2" [ngClass]="googleConfigured ? 'text-success' : 'text-muted'">
+                        <i class="fa" [ngClass]="googleConfigured ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                        {{ googleConfigured ? '設定済み' : '未設定' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- スイッチ設定エリア -->
+                    <div class="switch-settings-box" *ngIf="googleConfigured">
+                        <h6 class="switch-settings-title">認証設定</h6>
+                        <!-- 有効化設定 -->
+                        <div class="form-group mb-3">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="googleSamlSwitch"
+                                       [checked]="googleEnabled" (change)="toggleSamlEnabled('google', $event)">
+                                <label class="custom-control-label" for="googleSamlSwitch">
+                                    <strong>Google SAML認証を有効化</strong>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                有効にするとGoogle SAMLでのシングルサインオンが利用可能になります
+                            </small>
+                        </div>
+
+                        <!-- 組織連携設定 -->
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="googleOrganizationSwitch"
+                                       [checked]="googleLinkOrganization" [disabled]="!googleConfigured"
+                                       (change)="toggleSamlOrganizationLink('google', $event)">
+                                <label class="custom-control-label" for="googleOrganizationSwitch">
+                                    <strong>組織連携</strong>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                有効にするとGoogle Workspaceの組織単位（OU）情報をシステムに連携します。
+                                ユーザーの組織情報が自動的に同期され、組織ベースのアクセス制御が可能になります。
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- 設定情報エリア -->
+                    <div class="settings-info-box">
+                        <h6 class="settings-info-title">設定情報</h6>
+                        <!-- 現在の期限表示 -->
+                        <div *ngIf="googleExpired" class="alert alert-info mb-3">
+                            <p class="mb-0">現在のGoogle SAML設定の有効期限: <span class="expiry-date">{{ googleExpired }}</span></p>
+                        </div>
+
+                        <!-- マニュアルリンク -->
+                        <div class="manual-link mb-3">
+                            <a href="https://help.pigeon-fw.com/hc/ja/articles/48956644694553-Google-SAML%E8%A8%AD%E5%AE%9A%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB" target="_blank">
+                                <i class="fa fa-external-link"></i> Google SAML設定マニュアル
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 設定フォーム -->
+                    <form [formGroup]="googleSamlForm" (ngSubmit)="saveGoogleSaml()">
+                        <div class="form-group">
+                            <label>設定の有効期限 <span class="required">*</span></label>
+                            <div class="input-group date-input-group">
+                                <input class="form-control" type="text" formControlName="saml_expired"
+                                       [owlDateTime]="googleDatePicker" placeholder="有効期限を選択">
+                                <span class="input-group-addon" style="cursor: pointer" [owlDateTimeTrigger]="googleDatePicker">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <owl-date-time #googleDatePicker pickerType="calendar"></owl-date-time>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>フェデレーションメタデータXML <span class="required">*</span></label>
+                            <div class="fileStyle" [appModuleDragAndDrop]="true" (files)="onGoogleMetadataFileChange($event)" (click)="googleFileInput.click()">
+                                <div *ngIf="googleMetadataFile && googleMetadataFile.name; then fileSelected else noFileSelected"></div>
+                                <ng-template #fileSelected>
+                                    <p class="mediumFont text-primary font-weight-bold">[{{ googleMetadataFile.name }}]が選択済み</p>
+                                </ng-template>
+                                <ng-template #noFileSelected>
+                                    <i class="fa fa-cloud-upload fileUploadIcon"></i>
+                                    <p class='mediumFont mb-0'>XMLファイルをここにドロップ</p>
+                                    <small>※うまくアップロード出来ない場合は、ここをクリックして直接ファイルを選択して下さい。</small>
+                                </ng-template>
+                                <input hidden #googleFileInput type="file" (change)="onGoogleMetadataFileChange($event)" accept=".xml">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" [disabled]="loadingGoogle">
+                            <i class="fa fa-spinner fa-spin" *ngIf="loadingGoogle"></i>
+                            {{ googleConfigured ? 'Google SAML設定を更新' : 'Google SAML設定を保存' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Microsoft 365 SAML設定 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Microsoft 365 SAML設定</span>
+                    <span class="mr-2" [ngClass]="azureConfigured ? 'text-success' : 'text-muted'">
+                        <i class="fa" [ngClass]="azureConfigured ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                        {{ azureConfigured ? '設定済み' : '未設定' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- スイッチ設定エリア -->
+                    <div class="switch-settings-box" *ngIf="azureConfigured">
+                        <h6 class="switch-settings-title">認証設定</h6>
+                        <!-- 有効化設定 -->
+                        <div class="form-group mb-3">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="azureSamlSwitch"
+                                       [checked]="azureEnabled" (change)="toggleSamlEnabled('azure', $event)">
+                                <label class="custom-control-label" for="azureSamlSwitch">
+                                    <strong>Microsoft 365 SAML認証を有効化</strong>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                有効にするとMicrosoft 365 SAMLでのシングルサインオンが利用可能になります
+                            </small>
+                        </div>
+
+                        <!-- 組織連携設定 -->
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="azureOrganizationSwitch"
+                                       [checked]="azureLinkOrganization" [disabled]="!azureConfigured"
+                                       (change)="toggleSamlOrganizationLink('azure', $event)">
+                                <label class="custom-control-label" for="azureOrganizationSwitch">
+                                    <strong>組織連携</strong>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                有効にするとAzure Active Directoryのグループ情報をシステムに連携します。
+                                ユーザーの所属グループが自動的に同期され、グループベースのアクセス制御が可能になります。
+                            </small>
+                        </div>
+
+                        <!-- 組織名同期設定 -->
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="azureNameSyncSwitch"
+                                       [checked]="azureSyncName" [disabled]="!azureConfigured"
+                                       (change)="toggleSamlNameSync('azure', $event)">
+                                <label class="custom-control-label" for="azureNameSyncSwitch">
+                                    <strong>組織名同期</strong>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                有効にするとAzure Active Directoryのグループ名を組織名として同期します。
+                                無効の場合、既存組織の名前は更新されません。
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- 設定情報エリア -->
+                    <div class="settings-info-box">
+                        <h6 class="settings-info-title">設定情報</h6>
+                        <!-- マニュアルリンク -->
+                        <div class="manual-link mb-3">
+                            <a href="https://help.pigeon-fw.com/hc/ja/articles/48958478363417-Microsoft-365-SAML%E8%A8%AD%E5%AE%9A%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB" target="_blank">
+                                <i class="fa fa-external-link"></i> Microsoft 365 SAML設定マニュアル
+                            </a>
+                        </div>
+
+                        <!-- 現在の期限表示 -->
+                        <div *ngIf="msSecretExpired" class="alert alert-info mb-3">
+                            <p class="mb-0">現在のClient Secretの有効期限: <span class="expiry-date">{{ msSecretExpired }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- 設定フォーム -->
+                    <form [formGroup]="msSamlForm" (ngSubmit)="saveMsSaml()">
+                        <div class="form-group">
+                            <label>Client ID <span class="required">*</span></label>
+                            <input type="text" class="form-control" formControlName="client_id" placeholder="Client IDを入力">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Client Secret <span class="required">*</span></label>
+                            <input type="text" class="form-control" formControlName="client_secret" placeholder="Client Secretを入力">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Client Secretの有効期限 <span class="required">*</span></label>
+                            <div class="input-group date-input-group">
+                                <input class="form-control" type="text" formControlName="secret_expired"
+                                       [owlDateTime]="msDatePicker" placeholder="有効期限を選択">
+                                <span class="input-group-addon" style="cursor: pointer" [owlDateTimeTrigger]="msDatePicker">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                                <owl-date-time #msDatePicker pickerType="calendar"></owl-date-time>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>フェデレーションメタデータXML <span class="required">*</span></label>
+                            <div class="fileStyle" [appModuleDragAndDrop]="true" (files)="onMsMetadataFileChange($event)" (click)="msFileInput.click()">
+                                <div *ngIf="msMetadataFile && msMetadataFile.name; then msFileSelected else msNoFileSelected"></div>
+                                <ng-template #msFileSelected>
+                                    <p class="mediumFont text-primary font-weight-bold">[{{ msMetadataFile.name }}]が選択済み</p>
+                                </ng-template>
+                                <ng-template #msNoFileSelected>
+                                    <i class="fa fa-cloud-upload fileUploadIcon"></i>
+                                    <p class='mediumFont mb-0'>XMLファイルをここにドロップ</p>
+                                    <small>※うまくアップロード出来ない場合は、ここをクリックして直接ファイルを選択して下さい。</small>
+                                </ng-template>
+                                <input hidden #msFileInput type="file" (change)="onMsMetadataFileChange($event)" accept=".xml">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" [disabled]="loadingMs">
+                            <i class="fa fa-spinner fa-spin" *ngIf="loadingMs"></i>
+                            {{ azureConfigured ? 'Microsoft 365 SAML設定を更新' : 'Microsoft 365 SAML設定を保存' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

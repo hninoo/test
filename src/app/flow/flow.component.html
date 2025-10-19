@@ -1,0 +1,260 @@
+<div *ngIf="isShow" class="flow-container">
+    <div class="row">
+        <div class="col-md-3">
+            <select-field [disabled]="this.id" [use_condition]="false" [table_name]="table" [is_select_field]="false" (valueChange)="tableChanged($event)"></select-field>
+        </div>
+        <div class="col-md-3">
+            RPA名:
+            <input style="width:240px" type="text" class="form-control" [(ngModel)]="name" placeholder="フロー名">
+        </div>
+        <div class="col-md-6 pt-4 ">
+            <ng-container *ngIf="!tableNotSelected()">
+                <!--    <button class="btn btn-danger" (click)="resetLocalStorage()">ローカルストレージをリセット</button>-->
+                <button class="btn btn-sm btn-default mr-1" (click)="openJsonModal()">JSON表示</button>
+                <!-- PIgeonAI button -->
+                <button class="btn btn-sm btn-success mr-1" (click)="openPigeonAiModal()">PigeonAI</button>
+                <!--            <button class="btn btn-success mr-1" (click)="arrangeBlocks()">整列</button>-->
+                <!-- もとに戻すボタン -->
+                <button class="btn btn-sm btn-warning mr-1" (click)="undoChanges()" [disabled]="!triggerHistoryService.canUndo()">
+                    <i class="fa fa-undo" aria-hidden="true"></i>
+                </button>
+                <!-- やり直しボタン -->
+                <button class="btn btn-sm btn-info mr-1" (click)="redoChanges()" [disabled]="!triggerHistoryService.canRedo()">
+                    <i class="fa fa-repeat" aria-hidden="true"></i>
+                </button>
+                <!-- 有効 switch -->
+                <label class="switch switch-lg switch-text switch-pill switch-primary ml-2">
+                    <input type="checkbox" class="switch-input" [(ngModel)]="enabled">
+                    <span class="switch-label" data-on="有効" data-off="無効"></span>
+                    <span class="switch-handle"></span>
+                </label>
+            </ng-container>
+            <!-- 保存ボタン -->
+            <button *ngIf="table" class="btn btn-sm btn-primary ml-2" (click)="saveFlowCheck()" [ladda]="loading">
+                <i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp;
+                <ng-container *ngIf="tableNotSelected()">作成</ng-container>
+                <ng-container *ngIf="!tableNotSelected()">保存</ng-container>
+            </button>
+        </div>
+    </div>
+    <div *ngIf="tableNotSelected(); else TableSelected">
+        まずテーブルを選択し、作成を押してください。
+    </div>
+    <ng-template #TableSelected>
+        <button class="btn btn-primary " (click)="addBlock()">ブロック追加</button>
+        <div class="rpa_container">
+            <div *ngFor="let block of blocks; let i=index" [attr.id]="block.id" [style]="getBoxStyle(i)" class="block-box" [ngClass]="block.type" #blockBox>
+                <p class="text-bold">
+                    <!-- タイプを表すアイコンを表示 -->
+                    <i *ngIf="block.type === 'TRIGGER'" class="fa fa-play-circle-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'EMAIL_NOTIFICATION'" class="fa fa-envelope-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'COPY'" class="fa fa-files-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'COPY_OTHER_TABLE'" class="fa fa-files-o" aria-hidden="true"></i>
+
+                    <i *ngIf="block.type === 'FILTER'" class="fa fa-filter" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'SLEEP'" class="fa fa-clock-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'CREATE_DATA'" class="fa fa-plus" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'UPDATE_DATA'" class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'DELETE_DATA'" class="fa fa-trash-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'CONDITION'" class="fa fa-question-circle-o" aria-hidden="true"></i>
+                    <i *ngIf="block.type === 'SLACK_NOTIFICATION'" class="fa fa-slack" aria-hidden="true"></i>
+                    {{ block.name }}
+
+                </p>
+
+
+                <!-- トリガブロック専用のUI -->
+
+                <app-trigger-block [block]="block" *ngIf="isTriggerBlock(block)"></app-trigger-block>
+
+                <!-- メール送信ブロック専用のUI -->
+                <app-email-noti-block [block]="block" *ngIf="isEmailNotificationBlock(block)"></app-email-noti-block>
+
+                <!-- コピー専用のUI -->
+                <app-copy-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_COPY"></app-copy-block>
+
+                <app-copy-other-table-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_COPY_OTHER_TABLE"></app-copy-other-table-block>
+
+                <!-- フィルタ専用のUI -->
+                <app-filter-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_FILTER"></app-filter-block>
+
+                <!-- スリープ専用のUI -->
+                <app-sleep-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_SLEEP"></app-sleep-block>
+
+                <!-- データ作成専用のUI -->
+                <app-create-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_CREATE"></app-create-block>
+
+                <!-- データ更新専用のUI -->
+                <app-update-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_UPDATE"></app-update-block>
+
+                <!-- データ削除専用のUI -->
+                <app-delete-block [block]="block" [table_info]="table_info" *ngIf="block.type == Block.TYPE_DELETE"></app-delete-block>
+
+                <!-- 条件ブロック専用のUI -->
+                <app-condition-block [block]="block" *ngIf="isConditionBlock(block)"></app-condition-block>
+
+                <!-- Slack通知ブロック専用のUI -->
+                <app-slack-noti-block [block]="block" *ngIf="isSlackNotificationBlock(block)"></app-slack-noti-block>
+
+
+                <!-- 通常のブロックUI -->
+                <i *ngIf="block.type === Block.TYPE_TRIGGER" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && triggerModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_EMAIL_NOTIFICATION" class="fa fa-pencil edit-icon pull-right" aria-hidden="true"
+                   (click)="setEdittingBlock(block) && this.emailNotificationBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_SLACK_NOTIFICATION" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.slackNotiModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_COPY" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.copyBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_COPY_OTHER_TABLE" class="fa fa-pencil edit-icon pull-right" aria-hidden="true"
+                   (click)="setEdittingBlock(block) && this.copyOtherTableBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_FILTER" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.filterBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_SLEEP" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.sleepBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_CREATE" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.createBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_UPDATE" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.updateBlockModal.show()"></i>
+                <i *ngIf="block.type === Block.TYPE_DELETE" class="fa fa-pencil edit-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.deleteBlockModal.show()"></i>
+                <!-- preview icon -->
+                <i class="fa fa-eye preview-icon pull-right" aria-hidden="true" (click)="setEdittingBlock(block) && this.previewModal.show()"></i>
+
+
+                <!-- 削除アイコン -->
+                <i *ngIf="block.type!='TRIGGER'" class="fa fa-trash delete-icon text-danger" aria-hidden="true" (click)="deleteConfirm(block.id)"></i>
+
+
+                <!-- trueNext、falseNext、またはnextに応じてエンドポイントを表示 -->
+                <div *ngIf="block.trueNext || block.falseNext" class="endpoint true-endpoint" [attr.data-block-id]="block.id" [attr.data-endpoint]="block.id + '-true'"></div>
+                <div *ngIf="block.falseNext" class="endpoint false-endpoint" [attr.data-block-id]="block.id" [attr.data-endpoint]="block.id + '-false'"></div>
+                <div *ngIf="block.next" class="endpoint next-endpoint" [attr.data-block-id]="block.id" [attr.data-endpoint]="block.id + '-next'"></div>
+            </div>
+        </div>
+    </ng-template>
+
+
+</div>
+
+<!-- add block modal -->
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #addModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-primary" x role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    ブロック追加
+                </h4>
+            </div>
+            <div class="modal-body">
+                <select class="form-control" [(ngModel)]="selectedBlockType">
+                    <!-- blockTypeOptions配列を使用 -->
+                    <option *ngFor="let option of blockTypeOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-ladda" (click)="addModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success btn-ladda" (click)="addBlockSave()">追加</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- JSON editable display modal -->
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #jsonModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div *ngIf="jsonModal.isShown" class="modal-dialog modal-primary" x role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    JSON
+                </h4>
+            </div>
+            <div class="modal-body">
+                <textarea id="jsonText" style="height:500px;" class="form-control" rows="10" [(ngModel)]="edittingBlocks">{{ edittingBlocks }}</textarea>
+            </div>
+            <div class="modal-footer">
+                <!-- copy -->
+                <button type="button" class="btn btn-primary btn-ladda" (click)="copyJson()">コピー</button>
+
+                <button type="button" class="btn btn-secondary btn-ladda" (click)="jsonModal.hide()">閉じる</button>
+                <button type="button" class="btn btn-success btn-ladda" (click)="reflectJson()">反映</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- PigeonAI request modal -->
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #pigeonAiModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true" [config]="{ backdrop: 'static', keyboard: false }">
+    <div *ngIf="pigeonAiModal.isShown" class="modal-dialog modal-primary" x role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    PigeonAI
+                </h4>
+            </div>
+            <div class="modal-body">
+                どのようなフローを作成したいか、AIにリクエストするテキストを入力してください。以下は例<br>
+                <div style="    background: #eee; border: 1px solid #ccc; padding: 15px;">
+                    毎日朝９時に実行してください。<br>
+                    ID>4かつ、顧客名が「山田太郎」のデータを取得してください。<br>
+                    そのデータに対して、受注日を2023/01/01にしてください。
+                </div>
+
+
+                <textarea id="jsonText" style="height:500px;" class="form-control" rows="10" placeholder="毎日朝９時に実行してください。..." [(ngModel)]="requestGptText">{{ requestGptText }}</textarea>
+            </div>
+            <div class="modal-footer">
+
+                <button [disabled]="gptLoading" type="button" class="btn btn-secondary" (click)="pigeonAiModal.hide()">閉じる</button>
+                <button [ladda]="gptLoading" type="button" class="btn btn-success btn-ladda" (click)="requestPigeonAi()">反映</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- preview list data modal -->
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #previewModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div *ngIf="previewModal.isShown" class="modal-dialog modal-primary modal-large" x role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    プレビュー
+                </h4>
+            </div>
+            <div class="modal-body">
+                <pfc-list [table]="table" [_customFilter]="EdittingBlockfilter" [embedMode]="true" [viewDataMode]="true"></pfc-list>
+
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary btn-ladda" (click)="previewModal.hide()">閉じる</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<!-- トリガブロック専用モーダル -->
+<app-trigger-edit-modal #triggerModal [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'TRIGGER')"></app-trigger-edit-modal>
+
+<app-email-noti-edit-modal #emailNotificationBlockModal [srcBlock]="edittingBlock" [toasterService]="toasterService"
+                           (onChange)="onChangeEdittingBlock($event,'EMAIL_NOTIFICATION')"></app-email-noti-edit-modal>
+<app-copy-block-edit-modal #copyBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'COPY')"></app-copy-block-edit-modal>
+
+<app-copy-other-table-block-edit-modal #copyOtherTableBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock"
+                                       (onChange)="onChangeEdittingBlock($event,'COPY_OTHER_TABLE')"></app-copy-other-table-block-edit-modal>
+
+<app-filter-block-edit-modal #filterBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'FILTER')"></app-filter-block-edit-modal>
+
+<app-sleep-edit-modal #sleepBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'SLEEP')"></app-sleep-edit-modal>
+
+<app-create-edit-modal #createBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'CREATE_DATA')"></app-create-edit-modal>
+
+<app-update-edit-modal #updateBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'UPDATE_DATA')"></app-update-edit-modal>
+
+<app-delete-edit-modal #deleteBlockModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'DELETE_DATA')"></app-delete-edit-modal>
+
+<app-slack-noti-edit-modal #slackNotiModal [table_info]="edittingBlockTableInfo" [srcBlock]="edittingBlock" (onChange)="onChangeEdittingBlock($event,'SLACK_NOTIFICATION')"></app-slack-noti-edit-modal>
+
+
+<confirm-modal #blockDeleteConfirmModal [submit_button_text]="'はい'" [text]="'削除してよろしいですか？'" [type]="'warning'" (onOk)="deleteBlock()"></confirm-modal>
+<confirm-modal #saveConfirmModal [submit_button_text]="'はい'" [text]="'RPAが有効化になっています。保存してよろしいですか？ \nデータの更新・削除などは元に戻せないため、十分に注意してONにしてください。'"
+               [type]="'warning'" (onCancel)="enabled=false" (onOk)="saveFlow()"></confirm-modal>
+

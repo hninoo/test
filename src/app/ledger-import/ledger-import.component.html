@@ -1,0 +1,28 @@
+<div bsModal #importMenu="bs-modal" class="modal fade small-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">帳票追加</h4>
+                <button type="button" class="close" (click)="importMenu.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="id" class="mb-1">
+                    <button class="btn btn-sm pull-right" (click)="donwloadLedgerTemplate()"><i
+                        class="fa fa-download"></i>ダウンロード
+                    </button>
+                    <button class="btn btn-sm btn-danger pull-right mr-1" (click)="confirmDeleteLedgerTemplate()"><i
+                        class="fa fa-trash"></i>削除
+                    </button>
+                    <br style="clear:both">
+                </div>
+                <edit-component *ngIf="this.importMenu.isShown" [_table]="'ledger'" [_id]="id" [_add_post_params]="{'table_name':table_name}" [IS_EMBED_MODE]="true" (onSubmit)="uploadFile()"
+                                (onCancel)="importMenu.hide()"></edit-component>
+            </div>
+        </div>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<confirm-modal #deleteLedgerConfirmModal [submit_button_text]="'はい'" [text]="'帳票を削除してよろしいですか？'" (onOk)="deleteLedgerTemplate()" [type]="'danger'"
+></confirm-modal>

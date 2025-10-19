@@ -1,0 +1,32 @@
+.breadcrumbs{
+    list-style: none;
+    padding-left: 1.0rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    font-size: 13px;
+    &__item{
+        position: relative;
+        &:not(:last-child){
+            &::after{
+                font-family: FontAwesome;
+                content: "\f105";
+                padding: 0 0.5rem;
+            }
+        }
+        :last-child{
+            a{
+                pointer-events: none;
+                color: #8c8c8c;
+            }
+        }
+    }
+    &__link{
+        text-decoration: none;
+        &.-unlink{
+            color: #374767;
+            cursor: text;
+        }
+    }
+}

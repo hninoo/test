@@ -1,0 +1,71 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" *ngIf="block && block.type == blockClass.TYPE_EMAIL_NOTIFICATION">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailModalLabel">メール通知設定</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="emailAddress">TOメールアドレス</label>
+                    <input type="email" class="form-control" id="emailAddress" [(ngModel)]="block.to" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="emailAddress">CC メールアドレス</label>
+                    <!-- list -->
+                    <div class="input-group mb-3 row">
+                        <div class="col-md-12 row mb-1" *ngFor="let ccEmail of cc_a;let i=index">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control " style="width:100%" placeholder="" aria-label="" aria-describedby="basic-addon2" (change)="changeCcEmail(i,$event)"
+                                       [ngModel]="cc_a[i]"
+                                >
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger" type="button" (click)="removeCcEmail(i)">削除</button>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <button class="btn btn-success" type="button" (click)="addCcEmail()">追加</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="emailAddress">BCC メールアドレス</label>
+                    <!-- list -->
+                    <div class="input-group mb-3 row">
+                        <div class="col-md-12 row mb-1" *ngFor="let bccEmail of bcc_a;let i=index">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control " style="width:100%" placeholder="" aria-label="" aria-describedby="basic-addon2" [ngModel]="bcc_a[i]"
+                                       (change)="changeBccEmail(i,$event)"
+                                >
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger" type="button" (click)="removeBccEmail(i)">削除</button>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <button class="btn btn-success" type="button" (click)="addBccEmail()">追加</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailSubject">件名</label>
+                    <input type="text" class="form-control" id="emailSubject" [(ngModel)]="block.subject" placeholder="件名">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="emailMessage">メッセージ</label>
+                    <textarea class="form-control" id="emailMessage" [(ngModel)]="block.body" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="modal.hide()">閉じる</button>
+                <button type="button" class="btn btn-primary" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

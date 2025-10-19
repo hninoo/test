@@ -1,0 +1,24 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document" *ngIf="block && block.type == blockClass.TYPE_UPDATE">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">更新設定</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p> 入力された全てのデータが一括更新されます。</p>
+                </div>
+                <ng-container *ngIf="table_info">
+                    {{ table_info.getLabel() }}
+                    <select-field-and-value [table_info]="table_info" [form_and_values]="block.form_and_values" (valueChange)="onChangeUpdateValue($event)"></select-field-and-value>
+                </ng-container>
+                <!-- 省略: データイベントタイプの選択 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+

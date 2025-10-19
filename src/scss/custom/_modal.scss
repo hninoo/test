@@ -1,0 +1,82 @@
+@media (min-width: 880px) {
+    .modal-dialog {
+        max-width: 940px;
+        margin: 0 auto;
+    }
+}
+
+.shortcut_modal_form {
+    width: 50%;
+    margin: 0 auto;
+    background: lightgrey;
+    padding: 5px;
+    border-radius: 5px;
+    height: 50px;
+}
+
+.shortcut_modal_form .form-control{
+    position: relative;
+    font-size: large;
+    text-align: center;
+}
+
+
+.shortcut-input{
+    // width: 450px;
+    width: 83%;
+    height: 100%;
+    font-size: 16px;
+}
+
+.shortcut-icon-btn {
+    width: 13%;
+    height: 100%;
+    font-size: large;
+    border-radius: 10%;
+}
+
+.modal-large {
+    height: 88vh;
+    width: 95%;
+    max-width: none;
+
+    .modal-content {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+
+.modal-max {
+    width: 95%;
+    margin: 3% auto;
+    height: 95%;
+    max-width: none;
+
+    .modal-content {
+        overflow: scroll;
+    }
+}
+
+bs-modal-backdrop.modal-backdrop {
+    &:nth-of-type(2) {
+        //z-index:1055;
+    }
+
+}
+
+.modal-z-1060 {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+// 条件設定モーダルが権限設定モーダルの上に表示されるようにz-indexを設定
+// Set z-index to make condition modal appear above permission modal
+.condition-modal-higher-z-index {
+    z-index: 1080 !important; // 標準モーダルのz-index(1050)より高く設定
+}
+
+// テーブル管理モーダルのz-index
+// z-index for table management modal
+.modal-backdrop + .modal-backdrop {
+    z-index: 1070 !important;
+}

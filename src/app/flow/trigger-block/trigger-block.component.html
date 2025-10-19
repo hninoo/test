@@ -1,0 +1,34 @@
+<div class="trigger-body">
+    <!-- assign block as block -->
+    <div *ngIf="block.trigger_type === 'daily'">毎日 {{ block.time }}</div>
+    <div *ngIf="block.trigger_type === 'weekly'">
+        毎週<br>{{ convertDayOfWeek(block.dayOfWeek) }}, 時間: {{ block.time }}
+    </div>
+    <div *ngIf="block.trigger_type === 'monthly'">
+        毎月<br>
+        日: {{ block.day }}, 時間: {{ block.time }}
+    </div>
+    <div *ngIf="block.trigger_type === 'yearly'">
+        毎年<br>
+        日付: {{ block.month }}/{{ block.day }}, 時間: {{ block.time }}
+    </div>
+    <!-- データ変更時のトリガ設定 -->
+    <div *ngIf="block.trigger_type === 'insert'">
+        データ追加時
+    </div>
+    <div *ngIf="block.trigger_type === 'update'">
+        データ更新時
+    </div>
+    <div *ngIf="block.trigger_type === 'delete'">
+        データ削除時
+    </div>
+
+    <div *ngIf="block.trigger_type === 'workflowCompleted'">
+        ワークフロー完了時
+    </div>
+
+    <!-- 影響件数 -->
+    <div class="data_count" *ngIf="['insert','update','delete'].indexOf(block.trigger_type)==-1">
+        データ件数: {{ block._data_count ?? '-' }}
+    </div>
+</div>

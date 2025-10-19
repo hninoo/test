@@ -1,0 +1,31 @@
+<div class="callout callout-warning m-0 py-3 update-log-block" [ngClass]="{'callout-warning':log.action=='edit','callout-success':log.action=='add'}">
+    <div class="avatar float-right">
+        <img src="{{log.user.image_url}}" class="img-avatar" alt="{{log.user.email}}">
+    </div>
+    <div style="font-weight: bold;font-size: 19px;">{{log.action_text}} <strong></strong></div>
+    <div *ngIf="log.action==='edit'">
+        <ng-container *ngFor="let diff of log.diff_a">
+            <div *ngIf="diff['form_type']=='image'"><b>{{diff['label']}}</b>&nbsp;画像変更</div>
+            <ng-container *ngIf="diff['deleted'] && diff['deleted'].length>0">
+                <div>
+                    <b class="text-danger">{{diff['label']}}削除:</b> {{diff['deleted']}}
+                </div>
+            </ng-container>
+            <ng-container *ngIf="diff['added'] && diff['added'].length>0">
+                <div>
+                    <b class="text-primary">{{diff['label']}}追加:</b> {{diff['added']}}
+                </div>
+            </ng-container>
+            <ng-container *ngIf="diff['from']">
+                <div *ngIf="diff['form_type']!='image'"><b>{{diff['label']}}</b>&nbsp;{{getDataStr(diff['from'], diff)}}&ngsp;<i
+                    class="fa fa-arrow-right"></i>&ngsp;{{getDataStr(diff['to'], diff)}}</div>
+            </ng-container>
+        </ng-container>
+
+    </div>
+    <div *ngIf="comment" class="comment">
+        {{comment.content}}
+    </div>
+    <small class="text mr-3"><i class="icon-calendar"></i>&nbsp; {{log.date_str}}</small><br>
+    <small class="text"><i class="icon-user"></i>&nbsp; {{log.user.name}}</small>
+</div>

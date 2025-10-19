@@ -1,0 +1,792 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "genesisui-angular": {
+            "root": "",
+            "sourceRoot": "src",
+            "projectType": "application",
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-angular:browser",
+                    "options": {
+                        "outputPath": "dist",
+                        "index": "src/index.html",
+                        "main": "src/main.ts",
+                        "tsConfig": "src/tsconfig.app.json",
+                        "polyfills": "src/polyfills.ts",
+                        "assets": [
+                            "src/assets"
+                        ],
+                        "styles": [
+                            "node_modules/ladda/dist/ladda-themeless.min.css",
+                            "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+                            "src/scss/style.scss",
+                            "node_modules/froala-editor/css/froala_editor.pkgd.min.css",
+                            "node_modules/froala-editor/css/froala_style.min.css",
+                            "node_modules/ng-pick-datetime/assets/style/picker.min.css",
+                            "node_modules/@ng-select/ng-select/themes/material.theme.css",
+                            "node_modules/shepherd.js/dist/css/shepherd.css",
+                            "node_modules/ngx-lightbox/lightbox.css",
+                            "node_modules/font-awesome/css/font-awesome.min.css",
+                            "node_modules/simple-line-icons/css/simple-line-icons.css"
+                        ],
+                        "scripts": [
+                            "node_modules/jquery/dist/jquery.min.js",
+                            "node_modules/froala-editor/js/froala_editor.pkgd.min.js",
+                            "lang/froala.lang.ja.js",
+                            "node_modules/chart.js/dist/Chart.bundle.min.js",
+                            "node_modules/chart.js/dist/Chart.min.js"
+                        ],
+                        "vendorChunk": true,
+                        "extractLicenses": false,
+                        "buildOptimizer": false,
+                        "sourceMap": true,
+                        "optimization": false,
+                        "namedChunks": true
+                    },
+                    "configurations": {
+                        "production": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "optimization": true,
+                            "outputHashing": "all",
+                            "sourceMap": false,
+                            "namedChunks": false,
+                            "extractLicenses": true,
+                            "vendorChunk": false,
+                            "buildOptimizer": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.ts"
+                                }
+                            ]
+                        },
+                        "release_internal": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "optimization": true,
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "spohp": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.spohp.ts"
+                                }
+                            ]
+                        },
+                        "meispo": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.meispo.ts"
+                                }
+                            ]
+                        },
+                        "meispo_test": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.meispo_test.ts"
+                                }
+                            ]
+                        },
+                        "dawn": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.dawn.ts"
+                                }
+                            ]
+                        },
+                        "career": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.career.ts"
+                                }
+                            ]
+                        },
+                        "career_test": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.career_test.ts"
+                                }
+                            ]
+                        },
+                        "ph": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.ph.ts"
+                                }
+                            ]
+                        },
+                        "ph_prod": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.ph_prod.ts"
+                                }
+                            ]
+                        },
+                        "hana": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.hana.ts"
+                                }
+                            ]
+                        },
+                        "daimaru": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.daimaru.ts"
+                                }
+                            ]
+                        },
+                        "bus": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.bus.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "bus_obihiro": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.bus_obihiro.ts"
+                                }
+                            ]
+                        },
+                        "spj": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.spj.ts"
+                                }
+                            ]
+                        },
+                        "spj_test": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.spj_test.ts"
+                                }
+                            ]
+                        },
+                        "ezai": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.ezai.ts"
+                                }
+                            ]
+                        },
+                        "flower_moraine": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.flower_moraine.ts"
+                                }
+                            ]
+                        },
+                        "voice": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.voice.ts"
+                                }
+                            ]
+                        },
+                        "labo": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.labo.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "aidols": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.aidols.ts"
+                                }
+                            ]
+                        },
+                        "pigeon": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "local": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.local.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "dev2": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.dev2.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_demo": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_demo.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                },
+                                {
+                                    "replace": "src/app/components/login.component.ts",
+                                    "with": "src/custom/pigeon_demo/login.component.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_cmstest": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_cmstest.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_toan": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_toan.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_popo": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_popo.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_cloud": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_cloud.ts"
+                                }
+                            ]
+                        },
+                        "pigeon_sample": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.pigeon_sample.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "meguro": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.meguro.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "moraine": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.moraine.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "emeth_dev": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.emeth_dev.ts"
+                                }
+                            ]
+                        },
+                        "moe": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.moe.ts"
+                                },
+                                {
+                                    "replace": "src/app/services/check-license.ts",
+                                    "with": "src/app/services/check-license-skip.ts"
+                                }
+                            ]
+                        },
+                        "motoyoshi": {
+                            "budgets": [
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "6kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.motoyoshi.ts"
+                                }
+                            ]
+                        }
+                    },
+                    "defaultConfiguration": ""
+                },
+                "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "options": {
+                        "browserTarget": "genesisui-angular:build"
+                    },
+                    "configurations": {
+                        "production": {
+                            "browserTarget": "genesisui-angular:build:production"
+                        },
+                        "release_internal": {
+                            "browserTarget": "genesisui-angular:build:release_internal"
+                        },
+                        "spohp": {
+                            "browserTarget": "genesisui-angular:build:spohp"
+                        },
+                        "meispo": {
+                            "browserTarget": "genesisui-angular:build:meispo"
+                        },
+                        "meispo_test": {
+                            "browserTarget": "genesisui-angular:build:meispo_test"
+                        },
+                        "dawn": {
+                            "browserTarget": "genesisui-angular:build:dawn"
+                        },
+                        "career": {
+                            "browserTarget": "genesisui-angular:build:career"
+                        },
+                        "career_test": {
+                            "browserTarget": "genesisui-angular:build:career_test"
+                        },
+                        "ph": {
+                            "browserTarget": "genesisui-angular:build:ph"
+                        },
+                        "ph_prod": {
+                            "browserTarget": "genesisui-angular:build:ph_prod"
+                        },
+                        "hana": {
+                            "browserTarget": "genesisui-angular:build:hana"
+                        },
+                        "daimaru": {
+                            "browserTarget": "genesisui-angular:build:daimaru"
+                        },
+                        "bus": {
+                            "browserTarget": "genesisui-angular:build:bus"
+                        },
+                        "bus_obihiro": {
+                            "browserTarget": "genesisui-angular:build:bus_obihiro"
+                        },
+                        "spj": {
+                            "browserTarget": "genesisui-angular:build:spj"
+                        },
+                        "spj_test": {
+                            "browserTarget": "genesisui-angular:build:spj_test"
+                        },
+                        "ezai": {
+                            "browserTarget": "genesisui-angular:build:ezai"
+                        },
+                        "flower_moraine": {
+                            "browserTarget": "genesisui-angular:build:flower_moraine"
+                        },
+                        "voice": {
+                            "browserTarget": "genesisui-angular:build:voice"
+                        },
+                        "labo": {
+                            "browserTarget": "genesisui-angular:build:labo"
+                        },
+                        "aidols": {
+                            "browserTarget": "genesisui-angular:build:aidols"
+                        },
+                        "pigeon": {
+                            "browserTarget": "genesisui-angular:build:pigeon"
+                        },
+                        "local": {
+                            "browserTarget": "genesisui-angular:build:local"
+                        },
+                        "dev2": {
+                            "browserTarget": "genesisui-angular:build:dev2"
+                        },
+                        "pigeon_demo": {
+                            "browserTarget": "genesisui-angular:build:pigeon_demo"
+                        },
+                        "pigeon_sample": {
+                            "browserTarget": "genesisui-angular:build:pigeon_sample"
+                        },
+                        "pigeon_cmstest": {
+                            "browserTarget": "genesisui-angular:build:pigeon_cmstest"
+                        },
+                        "pigeon_toan": {
+                            "browserTarget": "genesisui-angular:build:pigeon_toan"
+                        },
+                        "pigeon_popo": {
+                            "browserTarget": "genesisui-angular:build:pigeon_popo"
+                        },
+                        "pigeon_cloud": {
+                            "browserTarget": "genesisui-angular:build:pigeon_cloud"
+                        },
+                        "meguro": {
+                            "browserTarget": "genesisui-angular:build:meguro"
+                        },
+                        "moraine": {
+                            "browserTarget": "genesisui-angular:build:moraine"
+                        },
+                        "emeth_dev": {
+                            "browserTarget": "genesisui-angular:build:emeth_dev"
+                        },
+                        "moe": {
+                            "browserTarget": "genesisui-angular:build:moe"
+                        },
+                        "motoyoshi": {
+                            "browserTarget": "genesisui-angular:build:motoyoshi"
+                        }
+                    }
+                },
+                "extract-i18n": {
+                    "builder": "@angular-devkit/build-angular:extract-i18n",
+                    "options": {
+                        "browserTarget": "genesisui-angular:build"
+                    }
+                },
+                "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                        "main": "src/test.ts",
+                        "karmaConfig": "./karma.conf.js",
+                        "polyfills": "src/polyfills.ts",
+                        "tsConfig": "src/tsconfig.spec.json",
+                        "scripts": [
+                            "node_modules/jquery/dist/jquery.min.js",
+                            "node_modules/froala-editor/js/froala_editor.pkgd.min.js",
+                            "node_modules/chart.js/dist/Chart.bundle.min.js",
+                            "node_modules/chart.js/dist/Chart.min.js"
+                        ],
+                        "styles": [
+                            "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+                            "src/scss/style.scss",
+                            "node_modules/froala-editor/css/froala_editor.pkgd.min.css",
+                            "node_modules/froala-editor/css/froala_style.min.css",
+                            "node_modules/ng-pick-datetime/assets/style/picker.min.css"
+                        ],
+                        "assets": [
+                            "src/assets"
+                        ]
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "src/tsconfig.app.json",
+                            "src/tsconfig.spec.json"
+                        ],
+                        "exclude": []
+                    }
+                }
+            }
+        },
+        "genesisui-angular-e2e": {
+            "root": "e2e",
+            "sourceRoot": "e2e",
+            "projectType": "application",
+            "architect": {
+                "e2e": {
+                    "builder": "@angular-devkit/build-angular:protractor",
+                    "options": {
+                        "protractorConfig": "./protractor.conf.js",
+                        "devServerTarget": "genesisui-angular:serve"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "e2e/tsconfig.e2e.json"
+                        ],
+                        "exclude": []
+                    }
+                }
+            }
+        }
+    },
+    "defaultProject": "genesisui-angular",
+    "schematics": {
+        "@schematics/angular:component": {
+            "prefix": "app",
+            "style": "scss"
+        },
+        "@schematics/angular:directive": {
+            "prefix": "app"
+        }
+    },
+    "cli": {
+        "analytics": "1670f02a-7eae-4409-9270-8757bb2dfcd4"
+    }
+}

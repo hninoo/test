@@ -1,0 +1,15 @@
+<div class="field-select-container">
+  <ng-select
+    class="custom form-control"
+    appendTo="body"
+    [items]="fieldItems"
+    [multiple]="multiValue"
+    [searchWhileComposing]="false"
+    [virtualScroll]="true"
+    bindLabel="label"
+    bindValue="value"
+    [(ngModel)]="value"
+    (change)="onChange()"
+    placeholder="フィールドを選択してください"
+  ></ng-select>
+</div>

@@ -1,0 +1,18 @@
+<div *ngIf="loading;">
+    <div class="loader_small">Loading...</div>
+</div>
+
+<ng-select
+    appendTo="body"
+    ng-required="true"
+    class="custom form-control"
+    [hidden]="loading"
+    [disabled]="disabled"
+    [items]="option_items"
+    [searchWhileComposing]="false"
+    [virtualScroll]="true"
+    bindLabel="label"
+    bindValue="value"
+    [(ngModel)]="admin_id"
+    (change)="onChange()"
+></ng-select>

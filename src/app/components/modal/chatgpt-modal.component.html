@@ -1,0 +1,131 @@
+<div bsModal #pigeonAiModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    PigeonAI(beta)
+                </h4>
+                <button type="button" class="close" (click)="hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div *ngIf="sending;then loading_block else loaded_block"></div>
+            <ng-template #loading_block>
+                <div class="loading-container">
+                    <div class="loading_text">
+                        <ng-container *ngIf="action=='new_table'">
+                            PigeonAIがテーブル作成中...
+                        </ng-container>
+                        <ng-container *ngIf="action=='search'">
+                            PigeonAIが検索条件作成中...
+                        </ng-container>
+                    </div>
+                    <div class="loader">Loading...</div>
+                </div>
+            </ng-template>
+            <ng-template #loaded_block>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-4 font-weight-bold mt-3">
+                            アクション
+                        </div>
+                        <div class="col-md-8 mt-3">
+                            <ng-container *ngIf="action=='new_table';else NotNewTable">
+                                テーブル新規作成
+                            </ng-container>
+                            <ng-template #NotNewTable>
+                                <select class="form-control" [(ngModel)]="action">
+                                    <option value="search">データ検索</option>
+                                    <option value="summary">データ集計</option>
+                                    <option value="chart">チャート</option>
+                                </select>
+                            </ng-template>
+                        </div>
+
+
+                        <ng-container *ngIf="action=='new_table'">
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                何を管理したいですか？~~管理 という形で入れて下さい。
+                            </div>
+
+                            <div class="col-md-8 mt-3">
+                                <input class="form-control" [(ngModel)]="group_name" (change)="changed()" placeholder="採用管理"/>
+                            </div>
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                サンプルデータ
+                            </div>
+
+                            <div class="col-md-8 mt-3">
+                                <label>
+                                    <input type="checkbox" class="mr-2" [(ngModel)]="sample_data" [value]="true"/>入れる
+                                </label>
+                            </div>
+
+
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                細かい要望(任意)
+                            </div>
+                            <div class="col-md-8 mt-3">
+                                <textarea class="form-control" [(ngModel)]="request" (change)="changed()" placeholder="氏名,電話番号は項目として入れて"></textarea>
+                                <div>
+                                    例1) テーブルとして、案件、顧客を作って。<br>
+                                    例2) 氏名,電話番号は項目として入れて。<br>
+                                </div>
+
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="action=='search'">
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                検索内容
+                            </div>
+                            <div class="col-md-8 mt-3">
+                                <input class="form-control" [(ngModel)]="search_text" (change)="changed()" placeholder="メールアドレスに@loftal.jpを含むデータ"/>
+                                <div>
+                                    例1)メールアドレスに@loftal.jpを含む<br>
+                                    例2)数量が500以上1000未満または数量が2000以上<br>
+                                </div>
+
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="action=='chart' || action=='summary'">
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                絞り込み内容(任意)
+                            </div>
+                            <div class="col-md-8 mt-3">
+                                <input class="form-control" [(ngModel)]="search_text" (change)="changed()" placeholder="メールアドレスに@loftal.jpを含むデータ"/>
+                                <div>
+                                    例1)メールアドレスに@loftal.jpを含む<br>
+                                    例2)数量が500以上1000未満または数量が2000以上<br>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4 font-weight-bold mt-3">
+                                集計・チャート内容
+                            </div>
+                            <div class="col-md-8 mt-3">
+                                <input class="form-control" [(ngModel)]="summary_text" (change)="changed()" placeholder="月ごとの売上合計データを出して"/>
+                                <div *ngIf="action=='summary'">
+                                    例)月ごとの売上合計データを出して<br>
+                                </div>
+                                <div *ngIf="action=='chart'">
+                                    例)全ての期間の採用職種の円グラフを出して<br>
+                                </div>
+
+                            </div>
+                        </ng-container>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="hide()">キャンセル</button>
+                    <button type="button" class="btn btn-primary" (click)="submit()" [ladda]="sending">PigeonAIに依頼する</button>
+                </div>
+            </ng-template>
+        </div>
+
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+

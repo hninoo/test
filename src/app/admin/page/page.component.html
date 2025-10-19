@@ -1,0 +1,21 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fa fa-th-list"></i> {{page_title}}
+            </div>
+            <div class="card-block">
+                <div *ngIf="loading;then loading_block else loaded_block"></div>
+                <ng-template #loading_block>
+                    <div class="loader">Loading...</div>
+                </ng-template>
+                <ng-template #loaded_block>
+                    <div class="card-block" [innerHTML]="html | safeHtml"></div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+    <!--/.col-->
+
+</div>
+<!--/.row-->

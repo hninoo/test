@@ -1,0 +1,66 @@
+<div *ngIf="table_info && table_info.saved_filters.length>0 || !!customFilter" class="btn-group mr-lg-0 ml-2 mb-2" dropdown placement="bottom-left" container="body">
+    <button dropdownToggle type="button"
+            class="btn btn-sm btn-default dropdown-toggle btn-filter"
+            *ngIf="table_info.saved_filters.length>0 || !!customFilter" aria-controls="dropdown-basic">
+        <i *ngIf="filter_type=='filter'" class="fa fa-filter"></i>
+        <i *ngIf="filter_type=='view'" class="fa fa-table"></i>
+        <span
+            class="filter-label pl-1">{{getFilterDisplayName()}}</span><span class="caret"></span>
+    </button>
+    <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu " role="menu"
+        aria-labelledby="button-basic" [ngStyle]="{'max-height':'390px'}">
+        <ng-container *ngIf="isFilterMode()">
+            <li role="menuitem" *ngIf="!customFilter.id || customFilter.editable || table_info.grant.table_author"><a class="dropdown-item" href="javascript:void(0)"
+                                                                                                                      (click)="editFilter()"><i class="fa fa-pencil"></i>表示中の{{getFilterTypeName()}}
+                を編集</a>
+            </li>
+            <ng-container *ngIf="mode==='index'">
+                <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                       (click)="duplicateFilter()"><i class="fa fa-save"></i>表示中の{{getFilterTypeName()}}を新規保存</a>
+                </li>
+                <ng-container *ngIf="customFilter.id!=null && customFilter.editable">
+                    <ng-container *ngIf="has_filter_params">
+                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)"
+                                               (click)="confirmFilterOverwriteConfirmModal.show()"><i
+                            class="fa fa-save"></i>表示中の{{getFilterTypeName()}}を上書き</a>
+                        </li>
+                    </ng-container>
+
+                </ng-container>
+            </ng-container>
+            <li role="menuitem" *ngIf="!customFilter.id || customFilter.editable || table_info.grant.table_author"><a class="dropdown-item" href="javascript:void(0)"
+                                                                                                                      (click)="deleteFilter()"><i
+                class="fa fa-trash-o"></i>表示中の{{getFilterTypeName()}}を削除</a>
+            </li>
+            <li role="menuitem "><a class="dropdown-item" href="javascript:void(0)"
+                                    (click)="resetSearch()"><i class="fa fa-times"></i>{{getFilterTypeName()}}を解除</a>
+            </li>
+
+            <li class="divider dropdown-divider"></li>
+        </ng-container>
+
+        <div cdkDropList [cdkDropListDisabled]="!dragMode" (cdkDropListDropped)="dropMenu($event)">
+            <ng-container *ngFor="let saved_filter of getFilters()">
+                <li role="menuitem" style="list-style: none" cdkDrag><a class="dropdown-item"
+                                                                        [class.active]="customFilter && customFilter.id==saved_filter.id"
+                                                                        href="javascript:void(0)"
+                                                                        (click)="selectFilter(saved_filter)">
+                    <!-- チャートの場合はチャートアイコン -->
+                    <i *ngIf="saved_filter.type === 'chart'" class="fa fa-line-chart mr-1"></i>
+                    <!-- テーブルの場合はsummarizeかどうかで分ける -->
+                    <i *ngIf="saved_filter.type === 'table' && saved_filter.isSetSummarizeParam()" class="fa fa-calculator mr-1"></i>
+                    <i *ngIf="saved_filter.type === 'table' && !saved_filter.isSetSummarizeParam()" class="fa fa-filter mr-1"></i>
+                    {{ saved_filter.name }}
+                </a>
+                </li>
+            </ng-container>
+        </div>
+        <ng-container *ngIf="getFilters().length==0">
+            <li role="menuitem"><a class="dropdown-item"
+                                   href="javascript:void(0)"
+            >{{getFilterTypeName()}}はありません</a>
+            </li>
+
+        </ng-container>
+    </ul>
+</div>

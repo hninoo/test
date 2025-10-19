@@ -1,0 +1,55 @@
+<div class="table-relation-container">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <h3>テーブル関係図</h3>
+      <button class="btn btn-sm btn-outline-primary mr-2" (click)="refreshDiagram()">
+        <i class="fa fa-refresh"></i> リフレッシュ
+      </button>
+    </div>
+    <div class="col-md-6 text-right">
+      <div class="form-inline float-right">
+        <label class="mr-2">表示深度:</label>
+        <button class="btn btn-sm btn-outline-secondary mr-1" (click)="decreaseDepth()" [disabled]="maxDepth <= 1">-</button>
+        <span class="mx-2">{{ maxDepth }}</span>
+        <button class="btn btn-sm btn-outline-secondary mr-3" (click)="increaseDepth()">+</button>
+
+          <select class="form-control form-control-sm" [(ngModel)]="selectedTable" (change)="selectTable(selectedTable)">
+          <option value="">テーブルを選択</option>
+          <option *ngFor="let table of tables" [value]="table.id">{{ getTableName(table) }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="legend">
+        <span class="legend-item">
+          <span class="color-box select-other-table"></span> 他テーブル参照
+        </span>
+        <span class="legend-item">
+          <span class="color-box relation-table"></span> 関連テーブル
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="diagram-container" #diagramContainer>
+    <div *ngIf="loading" class="loading-overlay">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngFor="let table of tables" [id]="table.id" class="table-node" [class.selected]="table.id === selectedTable">
+      <div class="table-header">{{ getTableName(table) }}</div>
+      <div class="table-body">
+        <ul class="field-list">
+          <li *ngFor="let field of getRelatedFields(table)" [id]="table.id + '_' + field.name" class="field-item">
+            {{ field.label || field.name }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

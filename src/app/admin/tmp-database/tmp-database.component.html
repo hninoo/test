@@ -1,0 +1,289 @@
+<div class="tmp-database-container">
+    <div class="header">
+        <h1>コピー環境管理</h1>
+        <p class="description">確認用のコピー環境を管理します</p>
+    </div>
+
+    <!-- 新規作成セクション -->
+    <mat-card class="create-section">
+        <mat-card-header>
+            <mat-card-title>新規コピー環境作成</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="create-form">
+                <div class="source-db-field">
+                    <label class="field-label">コピー元DB</label>
+                    <ng-select
+                        class="custom form-control"
+                        appendTo="body"
+                        [items]="availableDatabases"
+                        [searchable]="true"
+                        [clearable]="false"
+                        [disabled]="isCreating"
+                        [(ngModel)]="selectedSourceDb"
+                        (change)="onDatabaseChange($event)"
+                        placeholder="データベースを選択">
+                    </ng-select>
+                </div>
+
+                <div class="environment-field">
+                    <label class="field-label">コピー先環境</label>
+                    <ng-select
+                        class="custom form-control"
+                        appendTo="body"
+                        [items]="[{value: 'production', label: '本番環境'}, {value: 'staging', label: 'ステージング環境'}, {value: 'develop', label: '開発環境'}]"
+                        bindLabel="label"
+                        bindValue="value"
+                        [searchable]="false"
+                        [clearable]="false"
+                        [disabled]="isCreating"
+                        [(ngModel)]="selectedTargetEnvironment"
+                        placeholder="環境を選択">
+                    </ng-select>
+                    <div class="warning-message" *ngIf="selectedTargetEnvironment !== 'production'">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        ステージング/開発環境へのコピーでは、個人情報が完全に削除されます
+                    </div>
+                </div>
+
+                <div class="table-field">
+                    <label class="field-label">コピー対象テーブル（オプション）</label>
+                    <ng-select
+                        class="custom form-control"
+                        appendTo="body"
+                        [items]="datasets"
+                        [multiple]="true"
+                        [searchable]="true"
+                        [clearable]="true"
+                        [disabled]="isCreating || !selectedSourceDb"
+                        bindLabel="display"
+                        bindValue="value"
+                        [(ngModel)]="selectedTables"
+                        placeholder="選択しない場合は全テーブルをコピー">
+                        <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                            <div class="ng-value" *ngFor="let item of items | slice:0:2">
+                                <span class="ng-value-label">{{ item.label }}</span>
+                                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+                            </div>
+                            <div class="ng-value" *ngIf="items.length > 2">
+                                <span class="ng-value-label">他{{ items.length - 2 }}件</span>
+                            </div>
+                        </ng-template>
+                    </ng-select>
+                </div>
+
+                <button mat-raised-button color="primary"
+                        (click)="createTmpDatabase()"
+                        [disabled]="isCreating || !selectedSourceDb"
+                        class="create-button">
+                    <i *ngIf="isCreating" class="fa fa-spinner fa-spin"></i>
+                    <i *ngIf="!isCreating" class="fa fa-plus"></i>
+                    {{ isCreating ? '作成中...' : 'コピー環境作成' }}
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- 作成中のローディング表示 -->
+    <div *ngIf="isCreating" class="creating-overlay">
+        <mat-card class="creating-card">
+            <mat-card-content>
+                <div class="creating-content">
+                    <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+                    <p class="creating-message">コピー環境を作成中です...<br>完了までしばらくお待ちください</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- 作成完了ダイアログ -->
+    <mat-card *ngIf="lastCreatedDatabase" class="created-info">
+        <mat-card-header>
+            <mat-card-title class="success-title">
+                <i class="fa fa-check-circle"></i>
+                コピー環境作成完了
+            </mat-card-title>
+            <button mat-icon-button (click)="closeCreatedDialog()" class="close-button">
+                <i class="fa fa-times"></i>
+            </button>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="created-details">
+                <div class="detail-item">
+                    <strong>作成したDB名:</strong> {{ lastCreatedDatabase.db_name }}
+                </div>
+                <div class="detail-item">
+                    <strong>元DB:</strong> {{ lastCreatedDatabase.original_db }}
+                </div>
+                <div class="detail-item" *ngIf="lastCreatedDatabase.status !== 'started'">
+                    <strong>作成時間:</strong> {{ lastCreatedDatabase.created_date }}
+                </div>
+                <div class="detail-item" *ngIf="lastCreatedDatabase.status !== 'started'">
+                    <strong>有効期限:</strong> {{ lastCreatedDatabase.expiry_date }} (約1ヶ月後)
+                </div>
+                <div class="detail-item" *ngIf="lastCreatedDatabase.status === 'started'">
+                    <strong>状態:</strong> {{ lastCreatedDatabase.message }}
+                </div>
+            </div>
+            <div class="actions">
+                <button mat-raised-button color="primary"
+                        (click)="accessTmpDatabase(lastCreatedDatabase)">
+                    <i class="fa fa-external-link"></i>
+                    コピー環境にアクセス
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- 一覧セクション -->
+    <mat-card class="list-section">
+        <mat-card-header>
+            <mat-card-title>
+                コピー環境一覧
+                <span class="count-badge">{{ totalCount }}個</span>
+            </mat-card-title>
+            <button mat-icon-button (click)="loadTmpDatabases()" [disabled]="isLoading">
+                <i class="fa fa-refresh"></i>
+            </button>
+        </mat-card-header>
+        <mat-card-content>
+            <div *ngIf="isLoading" class="loading-section">
+                <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+                <p>読み込み中...</p>
+            </div>
+
+            <div *ngIf="!isLoading && tmpDatabases.length === 0" class="empty-state">
+                <i class="fa fa-database"></i>
+                <p>コピー環境はありません</p>
+            </div>
+
+            <div class="table-container" *ngIf="!isLoading && tmpDatabases.length > 0">
+                <table mat-table [dataSource]="tmpDatabases" class="tmp-db-table mat-elevation-z1">
+
+                <!-- アクセス -->
+                <ng-container matColumnDef="access">
+                    <th mat-header-cell *matHeaderCellDef>アクセス</th>
+                    <td mat-cell *matCellDef="let database">
+                        <button mat-icon-button color="primary"
+                                (click)="accessTmpDatabase(database)"
+                                matTooltip="コピー環境にアクセス">
+                            <i class="fa fa-external-link"></i>
+                        </button>
+                        <div class="db-name-small">{{ database.db_name }}</div>
+                    </td>
+                </ng-container>
+
+                <!-- 元データベース -->
+                <ng-container matColumnDef="original_db">
+                    <th mat-header-cell *matHeaderCellDef>元データベース</th>
+                    <td mat-cell *matCellDef="let database">{{ database.original_db }}</td>
+                </ng-container>
+
+                    <!-- 環境 -->
+                    <ng-container matColumnDef="target_environment">
+                        <th mat-header-cell *matHeaderCellDef>環境</th>
+                        <td mat-cell *matCellDef="let database">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span *ngIf="database.target_environment === 'production'" class="badge badge-primary">本番</span>
+                                <span *ngIf="database.target_environment === 'staging'" class="badge badge-warning">ステージング</span>
+                                <span *ngIf="database.target_environment === 'develop'" class="badge badge-info">開発</span>
+                                <span *ngIf="!database.target_environment" class="badge badge-secondary">本番</span>
+                                <i *ngIf="database.privacy_deleted" class="fa fa-shield" matTooltip="個人情報削除済み" style="color: #28a745;"></i>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- 作成日時 -->
+                <ng-container matColumnDef="created_date">
+                    <th mat-header-cell *matHeaderCellDef>作成日時</th>
+                    <td mat-cell *matCellDef="let database">{{ database.created_date }}</td>
+                </ng-container>
+
+                <!-- コピーしたテーブル -->
+                <ng-container matColumnDef="copied_tables">
+                    <th mat-header-cell *matHeaderCellDef>コピーしたテーブル</th>
+                    <td mat-cell *matCellDef="let database">
+                        <span *ngIf="database.copied_tables === 'all'" class="badge badge-info">全テーブル</span>
+                        <span *ngIf="database.copied_tables && database.copied_tables !== 'all'"
+                              class="badge badge-secondary"
+                              [matTooltip]="database.copied_tables"
+                              style="white-space: pre-line;">
+                            {{ getTruncatedTables(database.copied_tables) }}
+                        </span>
+                        <span *ngIf="!database.copied_tables" class="text-muted">-</span>
+                    </td>
+                </ng-container>
+
+                <!-- ステータス -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>ステータス</th>
+                    <td mat-cell *matCellDef="let database">
+                        <span *ngIf="database.status === 'creating'" class="badge badge-warning">
+                            <i class="fa fa-spinner fa-spin"></i> 作成中
+                        </span>
+                        <span *ngIf="database.status === 'completed' || !database.status" class="badge badge-success">
+                            <i class="fa fa-check"></i> 正常
+                        </span>
+                        <span *ngIf="database.status === 'failed'" class="badge badge-danger">
+                            <i class="fa fa-times"></i> 失敗
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- 状態・経過日数 -->
+                <ng-container matColumnDef="age_days">
+                    <th mat-header-cell *matHeaderCellDef>経過日数</th>
+                    <td mat-cell *matCellDef="let database" [ngClass]="getAgeDaysClass(database)">
+                        <div class="status-container">
+                            <span class="age-text">{{ database.age_days }}日経過</span>
+                            <i *ngIf="database.is_expired" class="fa fa-exclamation-triangle warning-icon"></i>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- 有効期限 -->
+                <ng-container matColumnDef="expiry_date">
+                    <th mat-header-cell *matHeaderCellDef>有効期限</th>
+                    <td mat-cell *matCellDef="let database">{{ database.expiry_date }}</td>
+                </ng-container>
+
+                <!-- 操作 -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>操作</th>
+                    <td mat-cell *matCellDef="let database">
+                        <button mat-icon-button color="primary"
+                                (click)="showDebugInfo(database)"
+                                matTooltip="デバッグ情報"
+                                [disabled]="isLoading">
+                            <i class="fa fa-bug"></i>
+                        </button>
+                        <button mat-icon-button color="warn"
+                                (click)="deleteTmpDatabase(database)"
+                                matTooltip="削除"
+                                [disabled]="isLoading">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- 注意事項 -->
+    <mat-card class="info-section">
+        <mat-card-header>
+            <mat-card-title>注意事項</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <ul class="info-list">
+                <li>30日以上経過した環境は<span class="age-danger">赤色</span>で表示されます（自動削除対象）</li>
+                <li>20日以上経過した環境は<span class="age-warning">オレンジ色</span>で表示されます</li>
+                <li>削除を実行すると、データベースとS3ファイルがすべて削除されます</li>
+            </ul>
+        </mat-card-content>
+    </mat-card>
+</div>

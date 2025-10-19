@@ -1,0 +1,409 @@
+<div class="warning"
+     *ngIf="_share && _share.cloud_setting&& _share.cloud_setting['display_master_on_dashboard']=='true' && _share.isMasterUser()"
+     style="text-align: center">
+    管理者
+</div>
+<div class="animated fadeIn mt-1 dashboard">
+    <div class="row">
+        <div class="col-sm-12 col-lg-12">
+            <button *ngIf="(db_name=='sokensha' || db_name == 'sokensha-test') && _share.isMasterUser()" (click)="postFtp()" class="btn-warning btn ftp">FTP連携をする</button>
+            <div *ngIf="loading;then loading_block else loaded_block"></div>
+            <ng-template #loading_block>
+                <div class="card">
+                    <div class="card-block">
+                        <div class="loader">Loading...</div>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #loaded_block>
+                <div class="card p-3" *ngIf="html">
+                    <div class="card-block" [innerHTML]="html | safeHtml">
+                    </div>
+                </div>
+                <!-- <div class="row">
+                    <div class="col-sm-12 col-lg-12">
+                        <admin-file-storage [storage]="storage" [origin]="storage" [db_name]="db_name"></admin-file-storage>
+                    </div>
+                </div> -->
+                <div>
+                    <nav ngbNav #nav="ngbNav" [(activeId)]="selectedDashboardId" class="nav-tabs">
+
+                        <ng-container *ngFor="let dashboard of dashboard_a;let nav_index = index;let firstIndex = first;let lastIndex=last;" [ngbNavItem]="dashboard.id">
+                            <a draggable="false" class="btn-group  example-box" (click)="onTabChange(dashboard)" dropdown ngbNavLink>
+                                {{dashboard.name}}
+                                <button *ngIf="!changeDragDrop && dashboard.id==selectedDashboardId" class="btn btn-sm btn-outline-primary pl-2 mr-2 ng-star-inserted" (click)="isDragDrop(true)">
+                                    並び替え終了
+                                </button>&nbsp;
+                                &nbsp;
+                                <ng-container *ngIf="dashboard.has_edit_grant">
+                                    <i dropdownToggle class="fa  fa-chevron-circle-down"></i>
+                                    <ul *dropdownMenu class="dropdown-menu dropdown-menu-left" role="menu">
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="changeDashboardName(dashboard)">設定</a></li>
+                                        <li role="menuitem" *ngIf="dashboard.id!=1"><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="confirmDeleteDashboardModal.show()">削除</a>
+                                        </li>
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="isDragDrop(false)">並び替え</a></li>
+                                        <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="addDashBoardContent()">掲示板を追加</a></li>
+                                        <li role="menuitem" *ngIf="!firstIndex"><a class="dropdown-item" href="javascript:void(0)" (click)="handleMoveButton(nav_index,last)">左に移動</a></li>
+                                        <li role="menuitem" *ngIf="!lastIndex"><a class="dropdown-item" href="javascript:void(0)" (click)="handleMoveButton(nav_index,'next')">右に移動</a></li>
+                                    </ul>
+                                </ng-container>
+                            </a>
+                            <ng-template ngbNavContent>
+                                <div *ngIf="!changeDragDrop" cdkDropListGroup>
+                                    <div *ngFor="let row_contents of group_dashboard_contents; let row_index = index"
+                                         cdkDropList
+                                         [cdkDropListData]="row_contents"
+                                         cdkDropListOrientation="horizontal"
+                                         [ngClass]="{order_list:row_contents.length!=0 ,empty_list:row_contents.length==0 &&  placeholder_visible,'row':true}"
+                                         (cdkDropListDropped)="dropcontents($event,row_contents,row_index)">
+                                        <div *ngIf="row_contents.length==0 && placeholder_visible" style="text-align: center; "></div>
+                                        <ng-container *ngFor="let contents of row_contents; let field_index = index">
+                                            <div
+                                            *ngIf="isShowContents(contents)"
+                                            class='col ng-star-inserted'
+                                            [ngStyle]="{'cursor':is_custom_table_definition && dataset_edit_mode== 'dataset_field' && 'move' }"
+                                            cdkDrag
+                                            [cdkDragData]='contents'
+
+                                            [cdkDragDisabled]=" group_dashboard_contents.length==1 && row_contents.length==1"
+                                            (cdkDragStarted)="placeholder_visible=true"
+                                            >
+                                                <div class="col" *cdkDragPlaceholder></div>
+                                            <ng-container *ngIf="isShowContents(contents);then showForm else notShowForm"></ng-container>
+                                            <ng-template *ngIf="true" #notShowForm>
+                                            </ng-template>
+                                            <ng-template #showForm>
+                                                <div class="dashboard-chart-box p-1">
+
+                                                    <div class="custom-placeholder" *cdkDragPlaceholder></div>
+                                                    <ng-container [ngSwitch]="contents.content.type">
+                                                        <div *ngSwitchCase="'board'" class="col-md-12">
+                                                            <div class="card ">
+                                                                <div class="card-header" style="background-color: #f9f9fa;">
+                                                                    掲示板
+                                                                    <small>{{contents.content['updated']}}</small>
+
+                                                                    <i *ngIf="dashboard.has_edit_grant"
+                                                                    class="fa fa-trash float-right text-danger" style="cursor:pointer" (click)="deleteDashboardContentConfirm(contents.content)"></i>
+                                                                    <div class="pull-right mr-2">
+                                                                        <i *ngIf="dashboard.has_edit_grant"
+                                                                        class="fa fa-pencil float-right" style="cursor:pointer" (click)="enableEditMode(contents.content)"></i>
+                                                                    </div>
+                                                                    <!--                                                                    <a class="btn-group" *ngIf="dashboard.has_edit_grant" dropdown>-->
+                                                                    <!--                                                                        <i dropdownToggle class="fa  fa-chevron-circle-down"></i>-->
+                                                                    <!--                                                                        <ul *dropdownMenu class="dropdown-menu dropdown-menu-left" role="menu">-->
+                                                                    <!--&lt;!&ndash;                                                                            <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="changeDashboardName(dashboard)">設定</a></li>&ndash;&gt;-->
+                                                                    <!--                                                                            <li role="menuitem" *ngIf="dashboard.id!=1"><a class="dropdown-item text-danger" href="javascript:void(0)"-->
+                                                                    <!--                                                                                                                        (click)="confirmDeleteDashboardModal.show()">削除</a></li>-->
+                                                                    <!--                                                                        </ul>-->
+                                                                    <!--                                                                    </a>-->
+                                                                    <div class="card-block">
+                                                                        <ng-container *ngIf="!editMode">
+                                                                            <div [froalaView]="contents.content.content"></div>
+                                                                        </ng-container>
+                                                                        <ng-container *ngIf="editMode">
+                                                                            <div [froalaEditor]="getFroalaOption()" [(froalaModel)]="contents.content.content"></div>
+                                                                            <br/>
+                                                                            <button class="btn btn-primary" (click)="update()">保存</button>
+                                                                        </ng-container>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ng-container *ngSwitchCase="'filter'" >
+                                                            <dashboard-chart [dashboard]="dashboard" [dashboard_content]="contents.content" [_share]="_share" [editting_id]="editting_id"
+                                                                            (onClickDelete)="deleteDashboardContentConfirm(contents.content)"
+                                                                            (onClickEdit)="showEditModal(contents.content)"
+                                                                            [parentComponent]="getThis()"
+                                                                            (reordering)=loadingModal.show() (reordering_done)=loadingModal.hide()>
+
+                                                            </dashboard-chart>
+                                                        </ng-container>
+                                                    </ng-container>
+                                                </div>
+                                            </ng-template>
+
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                                <div  *ngIf="changeDragDrop" >
+                                    <div *ngFor="let row_contents of group_dashboard_contents; let row_index = index"
+
+                                         [ngClass]="{order_list:row_contents.length!=0 ,empty_list:row_contents.length==0 &&  placeholder_visible,'row':true}"
+                                    >
+                                        <div *ngIf="row_contents.length==0 && placeholder_visible" style="text-align: center; "></div>
+                                        <ng-container *ngFor="let contents of row_contents; let field_index = index">
+                                            <div
+                                                *ngIf="isShowContents(contents)"
+                                                class='col-lg-{{contents.col_size}} ng-star-inserted'
+                                                [ngStyle]="{'cursor':is_custom_table_definition && dataset_edit_mode== 'dataset_field' && 'move' }"
+                                            >
+                                                <ng-container *ngIf="isShowContents(contents);then showForm else notShowForm"></ng-container>
+                                                <ng-template *ngIf="true" #notShowForm>
+                                            </ng-template>
+                                            <ng-template #showForm>
+                                                <div class="cdk-drag dashboard-chart-box p-1">
+
+                                                    <div class="custom-placeholder" *cdkDragPlaceholder></div>
+                                                    <ng-container [ngSwitch]="contents.content.type">
+                                                        <div *ngSwitchCase="'board'" class="col-md-12 p-0">
+                                                            <div class="card ">
+                                                                <div class="card-header" style="background-color: #f9f9fa;">
+                                                                    掲示板
+                                                                    <small>{{contents.content['updated']}}</small>
+
+                                                                    <i *ngIf="dashboard.has_edit_grant"
+                                                                    class="fa fa-trash float-right text-danger" style="cursor:pointer" (click)="deleteDashboardContentConfirm(contents.content)"></i>
+                                                                    <div class="pull-right mr-2">
+                                                                        <i *ngIf="dashboard.has_edit_grant"
+                                                                        class="fa fa-pencil float-right" style="cursor:pointer" (click)="enableEditMode(contents.content)"></i>
+                                                                    </div>
+                                                                    <!--                                                                    <a *ngIf="dashboard.has_edit_grant && dashboard.id!=1" class="btn-group" dropdown>-->
+                                                                    <!--                                                                        <i dropdownToggle class="fa  fa-chevron-circle-down"></i>-->
+                                                                    <!--                                                                        <ul *dropdownMenu class="dropdown-menu dropdown-menu-left" role="menu">-->
+                                                                    <!--&lt;!&ndash;                                                                            <li role="menuitem"><a class="dropdown-item" href="javascript:void(0)" (click)="changeDashboardName(dashboard)">設定</a></li>&ndash;&gt;-->
+                                                                    <!--                                                                            <li role="menuitem" ><a class="dropdown-item text-danger" href="javascript:void(0)"-->
+                                                                    <!--                                                                                                                        (click)="confirmDeleteDashboardModal.show()">削除</a></li>-->
+                                                                    <!--                                                                        </ul>-->
+                                                                    <!--                                                                    </a>-->
+                                                                    <div class="card-block">
+                                                                        <ng-container *ngIf="!editMode || (editMode && editingDashBoardContentId != contents.content.id)">
+                                                                            <div [froalaView]="contents.content.content"></div>
+                                                                        </ng-container>
+                                                                        <ng-container *ngIf="editMode && editingDashBoardContentId == contents.content.id">
+                                                                            <div [froalaEditor]="getFroalaOption()" [(froalaModel)]="contents.content.content"></div>
+                                                                            <br/>
+                                                                            <button class="btn btn-warning mr-2" (click)="cancelEditMode(contents.content)">キャンセル</button>
+                                                                            <button class="btn btn-primary" (click)="update()">保存</button>
+                                                                        </ng-container>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ng-container *ngSwitchCase="'filter'" >
+                                                            <dashboard-chart [dashboard]="dashboard" [dashboard_content]="contents.content" [_share]="_share" [editting_id]="editting_id"
+                                                                            (onClickDelete)="deleteDashboardContentConfirm(contents.content)"
+                                                                            (onClickEdit)="showEditModal(contents.content)"
+                                                                            [parentComponent]="getThis()"
+                                                                            (reordering)=loadingModal.show() (reordering_done)=loadingModal.hide()>
+
+                                                            </dashboard-chart>
+                                                        </ng-container>
+                                                    </ng-container>
+                                                </div>
+                                            </ng-template>
+
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                                <!-- 追加ボタン-->
+                                <div class="d-flex justify-content-end col-md-12 mt-2" *ngIf="dashboard.has_edit_grant">
+                                    <button class="btn btn-success btn-sm d-flex align-items-center" (click)="addChart(dashboard)"><i class="fa fa-plus"></i></button>
+                                </div>
+                            </ng-template>
+                        </ng-container>
+                        <button *ngIf="_share.common_grant.dashboard_editable" (click)="changeDashboardName()" class="btn-group example-box nav-link nav-item" style="background: #fff;color:#000;border-top:1px solid #e1e6ef;"><i
+                            class="fa fa-plus"></i>
+                        </button>
+                    </nav>
+                </div>
+
+
+                <div [ngbNavOutlet]="nav" class=""></div>
+            </ng-template>
+        </div>
+        <!--/.col-->
+    </div>
+    <!--/.row-->
+</div>
+
+<confirm-modal #deleteModal [submit_button_text]="'削除する'" [text]="'本当に削除してもよろしいですか？'" (onOk)="deleteChart()"
+               [type]="'danger'" [sending]="sending"></confirm-modal>
+
+
+<div *ngIf="selectedDashboardId" bsModal #chartModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <charts-modal *ngIf="customFilter" [dashboardContent]="selectedDashboardContent" [dashboard_id]="selectedDashboardId" [customFilter]="customFilter" [chart_index]="cloud_charts.length + 1"
+                  (onClickCancelButton)="closeFunc()" [parent]="getThis()" (onClickSaveButton)="closeFunc($event,true)"
+                  [show_preview]="false" [mode]="selectedDashboardContent ? 'setDetail' : 'setCustomFilter'"></charts-modal>
+
+</div><!-- /.modal -->
+
+<div bsModal #loadingModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>アップデート中...</p>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div bsModal #tutorialModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+
+    <div class="modal-dialog " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    テンプレートからインストール
+                </h4>
+                <button type="button" class="close" (click)="tutorialModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <!-- STEP1 -->
+            <div *ngIf="selected_template===null">
+                <div class="modal-body">
+                    <div style="padding:20px">
+                        <p>
+                            まずは利用目的に合ったテンプレートをインストールしましょう。<br>
+                            スキップして、右上のテーブル管理メニューから自身でテーブルを作成することも可能です。
+                        </p>
+
+                    </div>
+                    <div id="templates" class="row">
+                        <ng-container *ngFor="let template of template_a">
+                            <ng-container *ngIf="template['type'] == null">
+                                <div class="template_icon col-md-3" (click)="selected_template = template">
+                                    <div class="p-3">
+                                        <div class="text">{{template['name']}}</div>
+                                        <i class="fa fa-{{template['icon']}} p-2 "></i>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngIf="template['type'] == 'freee' && _share && _share.useFreee()">
+                                <div class="template_icon col-md-3" (click)="selected_template = template">
+                                    <div class="p-3">
+                                        <div class="text">{{template['name']}}</div>
+                                        <i class="fa fa-{{template['icon']}} p-2 "></i>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                    <div class="text-bold" style="text-align: center">
+                        上記にない場合は、<a href="" (click)="goPigeonAi($event)">PigeonAI</a>から生成を試してください。
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="tutorialModalHide()">スキップ</button>
+                </div>
+            </div>
+
+            <div *ngIf="selected_template!==null ">
+                <!-- STEP2 -->
+                <div class="modal-body" style="padding:20px">
+                    <h4>
+                        <i class="fa fa-{{selected_template['icon']}} p-1 "></i>
+                        {{selected_template['explain_title']}}
+                    </h4>
+                    <div class="p-2">
+                        <p [innerHTML]="selected_template['explain_body'] | nl2br"></p>
+                    </div>
+
+
+                    <!-- STEP3 -->
+                    <progressbar *ngIf="template_install_status=='installing'"
+                                 class="progress-bar progress-bar-striped progress-bar-animated active"
+                                 [value]="template_install_percent" [max]="100">
+                    </progressbar>
+
+                    <!--STEP4-->
+                    <div class="p-3" *ngIf="template_install_status=='complete'">
+                        インストールが完了しました。メニューを確認してください。
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <ng-container *ngIf="template_install_status=='installing'">
+                        <button class="btn-default btn">インストール中...</button>
+                    </ng-container>
+                    <ng-container *ngIf="template_install_status=='wait'">
+                        <button type="button" class="btn btn-secondary" (click)="selected_template = null;">戻る</button>
+                        <button type="button" class="btn btn-warning"
+                                (click)="installTemplate(selected_template)">テンプレートをインストール
+                        </button>
+                    </ng-container>
+                    <ng-container *ngIf="template_install_status=='complete'">
+                        <button class="btn-default btn" (click)="tutorialModalClose()">閉じる</button>
+                    </ng-container>
+                </div>
+                <ng-container *ngIf="template_install_status=='wait'">
+                </ng-container>
+
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
+
+</div><!-- /.modal -->
+
+<div bsModal #dashboardNameModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    ダッシュボード
+                </h4>
+                <button type="button" class="close" (click)="hideDashboardModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <edit-component [_id]="editDashboardId" (onSubmit)="onSaveDashboardName($event)" (onCancel)="dashboardNameModal.hide()" [IS_EMBED_MODE]="true" [_table]="'dashboards'"></edit-component>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- <toaster-container [toasterconfig]="toasterconfig"></toaster-container> -->
+
+<confirm-modal #confirmDeleteDashboardModal [submit_button_text]="'はい'" [title]="'ダッシュボード削除'" [text]="'ダッシュボードを本当に削除しますか？'" (onOk)="deleteDashboard()"
+               [sending]="sending" [type]="'danger'"></confirm-modal>
+
+<confirm-modal #confirmDeleteDashboardConetntModal [submit_button_text]="'はい'" [title]="'削除'" [text]="'本当に削除しますか？'" (onOk)="deleteDashboardContent()"
+               [sending]="sending" [type]="'danger'"></confirm-modal>
+
+<div bsModal #viewModal="bs-modal" class="modal fadeInOverlay modal-z-1060" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true" (onHide)="resetUrl()">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header ">
+                <h4 class="modal-title">詳細情報</h4>
+                <button type="button" class="close" (click)="viewmodalhide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <app-view-modal [table_info]="table_info" [data]="selectedData"></app-view-modal>
+            </div>
+            <div class="modal-footer">
+                <ng-container>
+                    <button type="button" class="btn btn-warning"
+                        *ngIf="table_info && table_info.grant.edit && selectedData && selectedData.isEditable()"
+                        (click)="goToEdit()">編集</button>
+                </ng-container>
+                <button type="button" class="btn" (click)="viewModal.hide()">閉じる</button>
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- ファイル検索チャットボット -->
+<chat-bot
+    *ngIf="_share && _share.cloud_setting && _share.cloud_setting['enable_filesearch'] === 'true'"
+    [table]="'dashboard'"
+    [type]="'file_search'"
+    [resetOnInit]="false"
+></chat-bot>

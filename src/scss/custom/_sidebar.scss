@@ -1,0 +1,17 @@
+.sidebar .nav .nav-item .nav-link .badge {
+    /*
+    position: absolute;
+    top: 5px;
+    right: 12px;
+     */
+}
+
+
+.sidebar.smart-sidebar .nav .nav-item .nav-link.nav-dropdown-toggle::before, .sidebar.smart-sidebar .nav .nav-item .navbar .nav-dropdown-toggle.dropdown-toggle::before, .navbar .sidebar.smart-sidebar .nav .nav-item .nav-dropdown-toggle.dropdown-toggle::before {
+    top: 0.8rem;
+}
+
+.sidebar .nav .nav-item.nav-dropdown.open > ul, .sidebar .nav .nav-item.nav-dropdown.open > ol {
+    max-height: 10000px;
+}
+

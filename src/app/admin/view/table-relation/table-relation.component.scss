@@ -1,0 +1,139 @@
+.table-relation-container {
+  padding: 15px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.diagram-container {
+  position: relative;
+  flex: 1;
+  min-height: 600px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  overflow: auto;
+  padding: 20px;
+}
+
+.table-node {
+  position: absolute;
+  width: 200px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  cursor: default;
+}
+
+.table-node.selected {
+  border: 2px solid #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+.table-header {
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  border-radius: 4px 4px 0 0;
+}
+
+.table-body {
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden; // 横方向のスクロールを防止
+}
+
+.field-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.field-list li {
+  padding: 3px 0;
+  font-size: 12px;
+  border-bottom: 1px dotted #eee;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.legend {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  font-size: 12px;
+}
+
+.color-box {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+}
+
+.color-box.select-other-table {
+  background-color: #007bff;
+}
+
+.color-box.relation-table {
+  background-color: #28a745;
+}
+
+.field-item {
+  cursor: default;
+  padding: 3px 5px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  position: relative; // 位置を相対的に設定
+  display: flex;     // フレックスボックスを使用
+  justify-content: space-between; // 内容を両端に配置
+  align-items: center; // 垂直方向に中央揃え
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  &:after {
+    content: '';
+    width: 4px; // 6pxから4pxに縮小
+    height: 4px; // 6pxから4pxに縮小
+    margin-left: 5px;
+    border-radius: 50%;
+    background-color: transparent;
+    position: absolute;
+    right: 5px; // 0から5pxに変更
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.connection-label {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  z-index: 20;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* jsPlumb connection styles will be applied through the component */

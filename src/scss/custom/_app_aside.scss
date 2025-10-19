@@ -1,0 +1,72 @@
+.aside-menu {
+    // overflow: scroll;
+    padding-bottom: 200px;
+}
+
+.comments {
+    margin-top: 30px;
+
+    #comment-input {
+        position: relative;
+    }
+
+    .message {
+        position: relative;
+
+    }
+
+    hr {
+        margin: 4px 0;
+    }
+
+    .workflow_status {
+        border-radius: 10px;
+        padding: 2px 7px;
+        font-size: 12px;
+    }
+
+    .user_name {
+        font-size: 13px;
+    }
+
+    .date {
+        color: #808080;
+    }
+
+
+    .commentdiv {
+        display: block;
+        text-align: left;
+        padding: vertical 2px;
+        float: left;
+        height: 70px;
+        overflow-y: scroll;
+    }
+
+    .mentionstyle {
+        font-size: 13px;
+        font-weight: bold;
+        color: #384042;
+    }
+
+    &.comments-merged {
+        height: calc(100vh - 2.375rem - 60px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    mention-list {
+        top: 44px !important;
+    }
+}
+
+
+.update-log-block {
+    .comment {
+        padding-bottom: 5px;
+        margin-top: 7px;
+    }
+}
+
+

@@ -1,0 +1,120 @@
+$indent: 0.75rem;
+$blue: #20a8d8;
+$hover-bg: rgb(38, 43, 44);
+.nav-menus{
+    list-style: none;
+    padding-left: 0;
+    font-size: 13px;
+    &__item{
+        display: block;
+        overflow: hidden;
+        &.open{
+            > .nav-menus__lower-menus{
+                // max-height: 2000px;
+                max-height: fit-content;
+            }
+            > .nav-menus__link.-toggle::before{
+                transform: rotate(90deg);
+            }
+            > .nav-menus__dir-wrap{
+                i::before{
+                    content: "\f147" !important;
+                }
+            }
+        }
+        &:hover{
+            cursor: pointer;
+        }
+    }
+    &__link{
+        padding: 0.5rem 1.0rem 0.5rem $indent+1.5rem;
+        display: block;
+        position: relative;
+        color: #ffffff;
+        text-decoration: none;
+        &.menu_with_badge_text{
+            display: flex;
+        }
+        >.menu_item_name{
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        &.-nowrap{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        >.fa, .icon{
+            position: absolute;
+            left: $indent;
+            top: 0.7rem;
+        }
+        &:hover{
+            background-color: $hover-bg;
+        }
+        &.active{
+            background-color: $blue;
+        }
+        &.-toggle{
+            padding-right: 1.5rem;
+            &::before{
+                position: absolute;
+                left: $indent;
+                width: 13px;
+                text-align: center;
+                font-family: FontAwesome;
+                content: "\f105" !important;
+                //content: "\f196" !important;
+                transition: .3s;
+            }
+        }
+        &.-root{
+            padding-left: 0.5rem;
+        }
+    }
+    &__dir-wrap{
+        padding-left: $indent+1.0rem;
+        display: block;
+        position: relative;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    &__dir-toggle{
+        position: absolute;
+        top: 0.5rem;
+        left: $indent;
+        >i{
+            &::before{
+                font-family: FontAwesome;
+                content: "\f196" !important;
+                transition: .3s;
+            }
+        }
+    }
+    &__dir-no-toggle{
+        position: absolute;
+        top: 0.5rem;
+        left: $indent;
+        color: #ffffff;
+    }
+    &__dir-link{
+        padding:  0.5rem 0.5rem;
+        display: block;
+        position: relative;
+        color: #ffffff;
+        text-decoration: none;
+        &:hover{
+            background-color: $hover-bg;
+        }
+        &.-nowrap{
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+    &__lower-menus{
+        transition: max-height .3s ease-in-out;
+        max-height: 0;
+        padding-left: $indent;
+    }
+}

@@ -1,0 +1,122 @@
+<div *ngIf="loading || !data;then loading_block else loaded_block"></div>
+<ng-template #loading_block>
+    <div class="loader">Loading...</div>
+
+</ng-template>
+<ng-template #loaded_block>
+    <ng-container *ngIf="data==null">
+        <div class="data_not_found" style="padding:40px;text-align:center">
+            DATA NOT FOUND
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="data!=null">
+        <admin-view-table [filter]="customFilter" [table]="table_info.table" [fields]="fields" [forms]="table_info.forms" [data]="data"
+                          [extend_headers]="extend_headers" [selectDataMode]="selectDataMode" [relation_table_a]="data.relation_table_a"></admin-view-table>
+
+        <!-- 子テーブル -->
+        <ng-container *ngFor="let child of data?.getFilteredChildAry(this.customFilter) || []">
+            <ng-template
+                [ngIf]="data?.child_data_by_table && data.child_data_by_table[child.table] && data.child_data_by_table[child.table].length > 0 && child.is_child_form">
+                <h4 class="mt-5">{{ child.getLabel() }}</h4>
+
+                <!-- 表形式表示モード -->
+                <ng-container *ngIf="this.table_info.getFormOfChildTable(child.table)?.show_child_table_as_table">
+                    <div *ngIf="!isEditMode" class="child-table-actions mt-2 mb-2">
+                        <button class="btn btn-sm btn-primary" (click)="toggleEditMode(child.table)">
+                            <i class="fa fa-pencil mr-1"></i>一括編集
+                        </button>
+                    </div>
+                    <div *ngIf="isEditMode" class="child-table-actions mt-2 mb-2">
+                        <button class="btn btn-sm btn-success mr-2" [disabled]="isSaving" (click)="saveChanges(child.table)">
+                            <i class="fa fa-save mr-1"></i>保存
+                        </button>
+                        <button class="btn btn-sm btn-danger" [disabled]="isSaving" (click)="cancelEdit()">
+                            <i class="fa fa-times mr-1"></i>キャンセル
+                        </button>
+                    </div>
+                    <!-- Add horizontal scrolling support for child table -->
+                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-bordered table-hover child-table" style="min-width: fit-content;">
+                            <thead class="child-table-header">
+                                <tr>
+                                    <th *ngFor="let field of getDisplayFields(child)">{{field.label}}</th>
+                                    <th *ngIf="!isEditMode" style="width: 120px;">アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let item of data.child_data_by_table[child.table]; let i = index">
+                                <!-- Enhanced cell rendering with proper data type handling -->
+                                <td *ngFor="let field of getDisplayFields(child)" 
+                                    dataset-table-cell 
+                                    [form]="getFormForField(child, field.Field)" 
+                                    [field]="field"
+                                    [dataType]="getDataType(field, child)"
+                                    [data]="item" 
+                                    [primary_key]="'id'"
+                                    [cellId]="item.raw_data['id'] + '_' + field.Field"
+                                    [selectedCellId]="''"
+                                    [showFormEditModal]="showFormEditModal"
+                                    [table_info]="child" 
+                                    [data_index]="i"
+                                    [child_a]="[]"
+                                    [isEditMode]="isEditMode" 
+                                    [selectOptionItemsFilter]="null"
+                                    [update]="update$" 
+                                    [embedMode]="false"
+                                    [viewDataMode]="false"
+                                    [customFilter]="customFilter"
+                                    (valueChanged)="onValueChanged($event, item)"
+                                    (onFormatViewData)="onFormatViewData($event, child?.table)"
+                                    (ctrlClickEvent)="onCtrlClick($event)"
+                                    [crossTableHeader]="null"
+                                    style="min-width: 120px; max-width: 300px; word-wrap: break-word; vertical-align: top;">
+                                </td>
+                                <td *ngIf="!isEditMode" class="action-buttons" style="white-space: nowrap; min-width: 120px;">
+                                    <button class="btn btn-info btn-sm mr-1" title="詳細" (click)="viewChildDetail(child.table, item.raw_data['id'] || item.id)"><i class="fa fa-search-plus fa-sm"></i>
+                                    </button>
+                                    <button class="btn btn-warning btn-sm mr-1" title="編集" (click)="editChildDetail(child.table, item.raw_data['id'] || item.id)"><i class="fa fa-edit fa-sm"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" title="削除" (click)="deleteChildDetail(child.table, item.raw_data['id'] || item.id)"><i class="fa fa-trash fa-sm"></i>
+                                    </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-container>
+
+                <!-- 通常表示モード -->
+                <ng-container *ngIf="child.menu.multiple_mode=='normal' && !this.table_info.getFormOfChildTable(child.table)?.show_child_table_as_table">
+                    <ng-container *ngFor="let data of data.child_data_by_table[child.table]">
+                        <div class="" *ngIf="child.forms != undefined">
+                            <admin-view-table class="view-children" [ignore_fieldname_a]="['created','updated','id','order','admin_id','updated_admin_id']"
+                                              [fields]="child.fields" [forms]="child.forms" [data]="data" [table]="child.menu.table" [selectDataMode]="selectDataMode">
+                            </admin-view-table>
+                        </div>
+                        <div style="display:flex;justify-content: flex-end; flex-direction: row;">
+                            <div class="" style="display:flex; flex-direction: row;margin-left:8px;" *ngFor="let button of child.menu.button_functions">
+                                <input *ngIf="button.input_field_type=='number'" class="form-control" style="width:40px"
+                                       [OnlyNumber] type="text"
+                                       [(ngModel)]="button.value">
+                                <button class="btn btn-info ml-1 mt-0 {{button.class ?? 'btn-primary'}}" (click)="call_func(button,data.raw_data['id'])">{{ button.button_label }}</button>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="child.menu.multiple_mode=='table'">
+                    <admin-view-table-list [fields]="child.fields" [forms]="child.forms" [table]="child.menu.table"
+                                           [data_a]="data.child_data_by_table[child.table]"></admin-view-table-list>
+                </ng-container>
+                <ng-container *ngIf="child.menu.multiple_mode=='image'">
+                    <admin-view-image-list [fields]="child.fields" [forms]="child.forms" [table]="child.menu.table"
+                                           [data_a]="data.child_data_by_table[child.table]"></admin-view-image-list>
+                </ng-container>
+                <ng-container *ngIf="child.menu.multiple_mode=='chip' || child.menu.multiple_mode=='chip_toxi'">
+                    <admin-view-chip-list [fields]="child.fields" [forms]="child.forms" [table]="child.menu.table"
+                                          [data_a]="data.child_data_by_table[child.table]"></admin-view-chip-list>
+                </ng-container>
+            </ng-template>
+        </ng-container>
+    </ng-container>
+</ng-template>

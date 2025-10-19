@@ -1,0 +1,20 @@
+<div bsModal #editFormFieldModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" (onHide)="onhide()" [config]="{backdrop:'static'}"
+     aria-hidden="true">
+    <div *ngIf="form" class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{form.label}}</h4>
+                <button type="button" class="close" (click)="editFormFieldModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- only one field -->
+                <admin-forms [table_info]="table_info" [data]="data" [forms]="getForms()" [fields]="[field]" [mode]="'edit'" (valueChanged)="onChange($event)" [error_a]="error_a"></admin-forms>
+                <!-- <admin-forms-field [form]="form" [field]="field" [grant]="grant" [grant_menu_a]="grant_menu_a" [is_setting]="is_setting" [value]="data[field.Field]"  [view_value]="view_data[field.Field]" (valueChanged)="onChange($event)"></admin-forms-field> -->
+                <button class="btn-md btn btn-success pull-right" style="margin-left:20px" (click)="complete()">完了</button>
+                <button class="btn-md btn btn-default pull-right" (click)="cancel()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+</div>

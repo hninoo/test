@@ -1,0 +1,15 @@
+@media (min-width: 576px) {
+    .small-dialog {
+        max-width: 500px;
+        margin: 30px auto;
+    }
+}
+
+.modal-body .col-lg-7 {
+    max-width: none;
+}
+
+.modal {
+    overflow: auto;
+    max-height: 90%;
+}

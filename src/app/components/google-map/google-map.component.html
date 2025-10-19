@@ -1,0 +1,18 @@
+<div class="card" *ngIf="isDisplay">
+    <div class="card-header">
+        <i class="fa fa-map-marker"></i> Google Map
+    </div>
+    <div class="card-block">
+        <div id="map" style="height: 400px; width: 100%; position: relative; overflow: hidden; background: #f8f9fa;"></div>
+        
+        <!-- 選択した緯度経度情報を表示 -->
+        <div *ngIf="selectedLocation" class="alert alert-info mt-3">
+            <strong>緯度経度を取得しました</strong>
+            <div>緯度: {{selectedLocation.lat | number:'1.' + latDecimalPlaces + '-' + latDecimalPlaces}}</div>
+            <div>経度: {{selectedLocation.lng | number:'1.' + lngDecimalPlaces + '-' + lngDecimalPlaces}}</div>
+            <div class="mt-2">
+                <small class="text-muted">※ 緯度経度はフォームに自動的に反映されています</small>
+            </div>
+        </div>
+    </div>
+</div> 

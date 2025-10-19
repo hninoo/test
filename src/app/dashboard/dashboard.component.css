@@ -1,0 +1,187 @@
+.dashboard-chart-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+}
+
+.dashboard-chart-box {
+    /* display: flex; */
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-chart-box1 {
+    width: 200px;
+    height: 200px;
+    border: solid 1px #ccc;
+    font-size: 30pt;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.87);
+    cursor: move;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: #fff;
+    border-radius: 4px;
+    position: relative;
+    z-index: 1;
+    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.example-list {
+    max-width: 100%;
+    display: flex;
+    /* flex-wrap: wrap; */
+    flex-direction: row;
+    overflow: hidden;
+}
+
+
+.order_list {
+  border: solid 1px transparent;
+  /* border: solid 1px; */
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
+.empty_list_transparent {
+/* height:100px; */
+border: solid 1px transparent;
+border-radius: 4px;
+margin-bottom: 10px;
+overflow: hidden;
+display: flex;
+flex-direction: row;
+}
+
+.empty_list {
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    min-height: 14px;
+    background: #eeeeee;
+    /* border: 1px solid #999; */
+    border-radius: 4px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+.order_box {
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 0px 20px;
+}
+
+.empty_placeHolder{
+border: 1px;
+border-radius: 10px;
+background-color:rgb(128, 128, 128,.2) ;
+/* opacity: 20%; */
+display: flex;
+height:50px;
+width: 100%;
+flex-direction: row;
+align-items: center;
+justify-content: space-between;
+box-sizing: border-box;
+padding:0px 30px;
+}
+
+.cdk-drag-preview {
+box-sizing: border-box;
+border-radius: 4px;
+box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+  0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+opacity: 1;
+background-color: #A9A9A9;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.example-box:last-child {
+  border: none;
+}
+
+.order_list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.order_list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+
+transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.empty_placeHolder.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.dashboard ::ng-deep dashboard-chart .card-header {
+  padding-bottom: 0.75rem!important;
+}
+.dashboard ::ng-deep .trash-icon.dashboard-content-icon {
+  margin-top: 3px;
+}
+.cdk-drag-placeholder {
+  opacity: 1;
+  background: #ccc;
+  border: dotted 3px #999;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  width: 100%;
+
+}
+.empty_list .cdk-drag-placeholder{
+  height: 50px;
+}
+
+.cdk-drop-list dashboard-chart ::ng-deep .card-header i.fa.fa-list-ol,
+.cdk-drag-preview dashboard-chart ::ng-deep .card-header i.fa.fa-list-ol {
+  display: inline-block;
+}
+
+.cdk-drop-list dashboard-chart ::ng-deep .sticky-table-wrapper .pc-list-view{
+  table-layout: fixed;
+}
+.cdk-drop-list dashboard-chart ::ng-deep .card-header i,
+.cdk-drag-preview dashboard-chart ::ng-deep .card-header i,
+.cdk-drop-list dashboard-chart ::ng-deep .loader1,
+.cdk-drag-preview dashboard-chart ::ng-deep .card-block1,
+.cdk-drop-list dashboard-chart ::ng-deep .card-block1 {
+  display: none;
+}
+.cdk-drag-preview dashboard-chart ::ng-deep .card-block,
+.empty_list .cdk-drag-placeholder dashboard-chart ::ng-deep .card-block,
+.cdk-drag-preview dashboard-chart ::ng-deep .card-block .chart-wrapper,
+.cdk-drop-list dashboard-chart ::ng-deep .card-block .chart-wrapper,
+.cdk-drop-list dashboard-chart ::ng-deep .card-block{
+  max-height: 350px;
+}
+.cdk-drag-preview dashboard-chart ::ng-deep .card-block .chart-wrapper canvas,
+.cdk-drop-list dashboard-chart ::ng-deep .card-block .chart-wrapper canvas{
+  height: 300px!important;
+}
+
+
+
+.ftp {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

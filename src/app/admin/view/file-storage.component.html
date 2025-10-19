@@ -1,0 +1,38 @@
+<div class="card">
+    <div class="card-header">
+        <span class="text-primary btn-link" (click)="getOrigin(origin)">Amazon S3</span>
+        <span> > {{ db_name }}</span>
+        <span *ngFor="let folder of current_folders">
+            > {{ folder }}
+        </span>
+    </div>
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-striped table-md w-auto pc-list-view mb-0">
+                <thead>
+                <tr>
+                    <th>
+                        <span class="ml-5">名前</span>
+                    </th>
+                    <th>
+                        <span>サイズ</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container>
+                    <tr *ngFor="let data of storage">
+                        <td style="width: 50%;">
+                            <i class="fa fa-folder-open"></i>
+                            <span class="ml-3 btn-link" (click)="getFileSize(data.folder, data.name)">{{ data.name }}</span>
+                        </td>
+                        <td style="width: 50%;">
+                            {{ data.size }}
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

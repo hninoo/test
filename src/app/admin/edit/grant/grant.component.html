@@ -1,0 +1,473 @@
+<div>
+    <div class="permission-section">
+        <h5 class="mb-3">管理者権限</h5>
+
+        <div class="permission-row">
+            <div class="permission-label">
+                テーブル項目管理者
+                <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="テーブルの項目や通知を設定可能"></i>
+            </div>
+            <div class="permission-controls">
+                <label class="switch switch-text switch-pill switch-primary">
+                    <input type="checkbox" class="switch-input"
+                           [(ngModel)]="grant_value['table_editable']"
+                           [checked]="isCheckGrant('table_editable')"
+                           (change)="onChangeGrant()">
+                    <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                    <span class="switch-handle"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="permission-row" *ngIf="grant_value['table_editable']">
+            <div class="permission-label">
+                テーブル総合管理者
+                <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="テーブルの総合的な管理権限を付与します"></i>
+            </div>
+            <div class="permission-controls">
+                <label class="switch switch-text switch-pill switch-primary">
+                    <input type="checkbox" class="switch-input"
+                           [(ngModel)]="grant_value['table_author']"
+                           [checked]="isCheckGrant('table_author')"
+                           (change)="onChangeGrant()">
+                    <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                    <span class="switch-handle"></span>
+                </label>
+                <button *ngIf="table_info && table_info.table==='admin'" class="btn btn-sm btn-primary" (click)="openTableManagement()">
+                    管理
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="permission-settings mb-3 grant-modal-container" [hidden]="isCheckGrant('table_editable')" #detailCard>
+
+        <div class="permission-section">
+            <h5 class="mb-3">基本権限設定</h5>
+
+            <!-- 閲覧権限 -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    閲覧
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="データの閲覧を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['view']"
+                               [disabled]="view_grant_force_true"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <button *ngIf="isCheckGrant('view') && is_show_table_grant"
+                            class="btn btn-sm"
+                            [class.btn-primary]="hasCondition('view')"
+                            [class.btn-outline-secondary]="!hasCondition('view')"
+                            (click)="toggleConditionForm('view')">
+                        条件設定 {{ hasCondition('view') ? '(設定済)' : '' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- 閲覧条件フォーム -->
+            <div class="condition-form-container" *ngIf="grant_value['view'] && showConditionForms['view'] && is_show_table_grant">
+                <conditions-form
+                    [is_grant_condition_form]="true"
+                    [grant_permission_type]="'view'"
+                    [table]="table"
+                    [default_condition_json]="getConditionJson('view')"
+                    [output_json]="false"
+                    (valueChanged)="onConditionsChanged($event, 'view')">
+                </conditions-form>
+            </div>
+
+            <!-- 編集権限 -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    編集
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="データの編集を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['edit']"
+                               [disabled]="!isCheckGrant('view')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <button *ngIf="isCheckGrant('edit') && is_show_table_grant"
+                            class="btn btn-sm"
+                            [class.btn-primary]="hasCondition('edit')"
+                            [class.btn-outline-secondary]="!hasCondition('edit')"
+                            (click)="toggleConditionForm('edit')">
+                        条件設定 {{ hasCondition('edit') ? '(設定済)' : '' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- 編集条件フォーム -->
+            <div class="condition-form-container" *ngIf="grant_value['edit'] && showConditionForms['edit'] && is_show_table_grant">
+                <conditions-form
+                    [is_grant_condition_form]="true"
+                    [grant_permission_type]="'edit'"
+                    [table]="table"
+                    [default_condition_json]="getConditionJson('edit')"
+                    [output_json]="false"
+                    (valueChanged)="onConditionsChanged($event, 'edit')">
+                </conditions-form>
+            </div>
+
+            <!-- 追加権限 -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    追加
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="新規データの追加を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['add']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <button *ngIf="isCheckGrant('add') && is_show_table_grant"
+                            class="btn btn-sm"
+                            [class.btn-primary]="hasCondition('add')"
+                            [class.btn-outline-secondary]="!hasCondition('add')"
+                            (click)="toggleConditionForm('add')">
+                        条件設定 {{ hasCondition('add') ? '(設定済)' : '' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- 追加条件フォーム -->
+            <div class="condition-form-container" *ngIf="grant_value['add'] && showConditionForms['add'] && is_show_table_grant">
+                <conditions-form
+                    [is_grant_condition_form]="true"
+                    [grant_permission_type]="'add'"
+                    [table]="table"
+                    [default_condition_json]="getConditionJson('add')"
+                    [output_json]="false"
+                    [ignore_field_name_a]="['id']"
+                    (valueChanged)="onConditionsChanged($event, 'add')">
+                </conditions-form>
+            </div>
+
+            <!-- 削除権限 -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    削除
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="データの削除を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['delete']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <button *ngIf="isCheckGrant('delete') && is_show_table_grant"
+                            class="btn btn-sm"
+                            [class.btn-primary]="hasCondition('delete')"
+                            [class.btn-outline-secondary]="!hasCondition('delete')"
+                            (click)="toggleConditionForm('delete')">
+                        条件設定 {{ hasCondition('delete') ? '(設定済)' : '' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- 削除条件フォーム -->
+            <div class="condition-form-container" *ngIf="grant_value['delete'] && showConditionForms['delete'] && is_show_table_grant">
+                <conditions-form
+                    [is_grant_condition_form]="true"
+                    [grant_permission_type]="'delete'"
+                    [table]="table"
+                    [default_condition_json]="getConditionJson('delete')"
+                    [output_json]="false"
+                    (valueChanged)="onConditionsChanged($event, 'delete')">
+                </conditions-form>
+            </div>
+
+            <!-- その他の権限（条件設定なし） -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    集計
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="データの集計機能の利用を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['summarize']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    複製
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="既存データの複製を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['duplicate']"
+                               [disabled]="!isCheckGrant('add') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    一括編集
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="複数データの一括編集を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['update_all']"
+                               [disabled]="!isCheckGrant('edit') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 制限設定 -->
+        <div class="permission-section mt-4">
+            <h5 class="mb-3">制限設定</h5>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    1データのみ登録可能
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="1つのデータのみ登録を許可します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['only_one']"
+                               [disabled]="!isCheckGrant('view')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    CSVダウンロード不可
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="CSVでのデータダウンロードを制限します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['disable_csv_dl']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    CSVアップロード不可
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="CSVでのデータアップロードを制限します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['disable_csv_up']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="permission-row">
+                <div class="permission-label">
+                    ZIPアップロード不可
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="ZIPでのデータアップロードを制限します"></i>
+                </div>
+                <div class="permission-controls">
+                    <label class="switch switch-text switch-pill switch-primary">
+                        <input type="checkbox" class="switch-input"
+                               [(ngModel)]="grant_value['disable_zip_up']"
+                               [disabled]="!isCheckGrant('view') || isCheckGrant('only_one')"
+                               (change)="onChangeGrant()">
+                        <span class="switch-label" data-on="ON" data-off="OFF"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- フィールド管理設定 -->
+        <div class="permission-section mt-4" *ngIf="is_show_table_grant">
+            <h5 class="mb-3">フィールド管理設定</h5>
+
+            <!-- 非表示項目設定 -->
+            <div class="mt-3">
+                <h6>非表示項目設定 <span class="badge badge-info" *ngIf="grant_value.hide_fields && grant_value.hide_fields.length > 0">{{ grant_value.hide_fields.length }}件</span></h6>
+                <!-- 通常のテーブル用の表示 -->
+                <admin-field-select
+                    [table_info]="table_info"
+                    [multiValue]="true"
+                    [field_name]="'hide_fields'"
+                    [value]="grant_value.hide_fields || []"
+                    (valueChanged)="onChangeGrantFromModal($event)"
+                ></admin-field-select>
+
+            </div>
+
+            <!-- 編集不可項目設定 -->
+            <div class="mt-4">
+                <h6>編集不可項目設定 <span class="badge badge-info" *ngIf="grant_value.only_view_fields && grant_value.only_view_fields.length > 0">{{ grant_value.only_view_fields.length }}件</span>
+                </h6>
+                <admin-field-select
+                    [table_info]="table_info"
+                    [multiValue]="true"
+                    [field_name]="'only_view_fields'"
+                    [value]="grant_value.only_view_fields || []"
+                    (valueChanged)="onChangeGrantFromModal($event)"
+                ></admin-field-select>
+
+            </div>
+        </div>
+
+        <!-- adminテーブル用デフォルト項目設定 -->
+        <div class="permission-section mt-4" *ngIf="table_info && table_info.table==='admin'">
+            <h5 class="mb-3">デフォルト項目設定</h5>
+
+            <!-- 非表示項目設定（デフォルト項目） -->
+            <div class="permission-row">
+                <div class="permission-label">
+                    非表示項目（デフォルト項目）
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="デフォルトで非表示にする項目を設定します"></i>
+                </div>
+                <div class="permission-controls">
+                    <button (click)="addAdminTableHideField()" class="btn btn-sm btn-success">
+                        <i class="fa fa-plus"></i> 追加
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <ng-container *ngFor="let admin_table_hide_field of admin_table_hide_fields; let cond_i = index;">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-grow-1">
+                            <select class="form-control" (change)="onChangeGrant()" [(ngModel)]="admin_table_hide_field['field']">
+                                <ng-container *ngFor="let field of table_info.fields">
+                                    <option *ngIf="showForDfault(field)" value="{{field.Field}}">{{table_info.forms.byFieldName(field.Field).label}}</option>
+                                </ng-container>
+                            </select>
+                        </div>
+                        <div class="ml-2">
+                            <button class="btn btn-danger btn-sm" (click)="delAdminTableHideField(cond_i)">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+
+            <!-- 編集不可項目設定（デフォルト項目） -->
+            <div class="permission-row mt-3">
+                <div class="permission-label">
+                    編集不可項目（デフォルト項目）
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="デフォルトで編集不可にする項目を設定します"></i>
+                </div>
+                <div class="permission-controls">
+                    <button (click)="addAdminTableNoEditField()" class="btn btn-sm btn-success">
+                        <i class="fa fa-plus"></i> 追加
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <ng-container *ngFor="let admin_table_no_edit_field of admin_table_no_edit_fields; let cond_i = index;">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="flex-grow-1">
+                            <select class="form-control" (change)="onChangeGrant()" [(ngModel)]="admin_table_no_edit_field['field']">
+                                <ng-container *ngFor="let field of table_info.fields">
+                                    <option *ngIf="showForDfault(field)" value="{{field.Field}}">{{table_info.forms.byFieldName(field.Field).label}}</option>
+                                </ng-container>
+                            </select>
+                        </div>
+                        <div class="ml-2">
+                            <button class="btn btn-danger btn-sm" (click)="delAdminTableNoEditField(cond_i)">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+
+
+
+    <style>
+        .permission-settings {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+
+        .permission-section {
+            margin-bottom: 20px;
+        }
+
+        .permission-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .permission-label {
+            width: 200px;
+            font-weight: 500;
+        }
+
+        .permission-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .condition-form-container {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+
+
+</div>

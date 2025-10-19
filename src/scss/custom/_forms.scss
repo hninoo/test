@@ -1,0 +1,839 @@
+// DateTimePickerModuleをbootstrapのフォームに合わせる
+.form-group {
+    .owl-datetime-main-input {
+        height: 39px;
+        border: 1px solid #e1e6ef;
+        border-radius: 0;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+// DateTimePickerModuleのアイコンが表示されないので
+.icon-up-open:before {
+    content: '▲';
+}
+
+.icon-down-open:before {
+    content: '▼';
+}
+
+.icon-cancel:before {
+    content: '×';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.admin-forms {
+    position: relative;
+
+    &__image {
+        max-width: 200px;
+        max-height: 200px;
+    }
+
+    .form-control-label {
+        padding: 0;
+        padding-left: 1rem;
+        font-size: 17px;
+        margin-bottom: 5px;
+        //border: $table-border-width solid $table-border-color;
+        //background-color: $table-bg-accent;
+    }
+}
+
+#search_form {
+    .owl-dateTime-input[_ngcontent-c2] {
+        max-width: 200px;
+    }
+
+    .datetime_set {
+        owl-date-time {
+            float: left;
+        }
+
+        .owl-dateTime-inputWrapper, .owl-dateTime {
+            display: inline !important;;
+        }
+
+    }
+}
+
+input.datetime {
+    border: 1px solid #ccc;
+    width: 140px;
+    height: 35.5px;
+    text-align: center;
+}
+
+.overSetting {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1001;
+
+    .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        background: #84bcff;
+    }
+
+    .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        border: 1px solid #3883ff;
+    }
+
+    .dragger {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        zoom: 1.1;
+        color: #777;;
+        z-index: 100000;
+        top: 5px;
+        right: 0;
+    }
+
+    .icon-container {
+        position: relative;
+        right: 30px;
+
+        i {
+            font-size: 28px;
+            position: absolute;
+            top: 5px;
+            color: gray;
+            opacity: 0;
+
+            &.fa {
+                &:hover {
+                    opacity: 0.65;
+                }
+            }
+
+            &.fa-gear {
+                right: 60px;
+                color: $brand-primary;
+            }
+
+            &.fa-trash {
+                right: 35px;
+                color: $brand-danger;
+            }
+
+            &.fa-clone {
+                right: 90px;
+                color: $brand-info;
+                font-size: 26px;
+            }
+
+            &.fa-toggle-up {
+                right: 100px;
+
+                &:hover {
+                    color: $brand-primary;
+                }
+            }
+
+            &.fa-toggle-down {
+                right: 75px;
+
+                &:hover {
+                    color: $brand-danger;
+                }
+            }
+
+        }
+
+
+    }
+
+    &:hover {
+        .back, .border {
+            opacity: 0.2;
+        }
+
+        i, .dragger {
+            opacity: 1;
+        }
+
+    }
+}
+
+
+/*
+テーブル項目、date設定用
+ */
+.cdk-overlay-container {
+    z-index: 10000 !important;
+
+}
+
+.multiple-box {
+    padding: 10px;
+    padding-left:20px;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.25)
+}
+
+.error-box {
+    border: 5px solid #ff7f7f !important;
+}
+
+
+.questionnaire {
+    label {
+        font-size: 20px;
+    }
+}
+
+.border-info {
+    border: 1px solid !important;
+    border-color: #39f !important;
+}
+
+
+.form-control {
+    min-width: 100px;
+}
+
+
+.workflow_template {
+    margin: 22px;
+    margin-left: 40px;
+    border: 2px solid #ccc;
+    padding: 30px;
+}
+
+
+.message {
+    text-align: center;
+    padding: 50px;
+    font-size: 20px;
+    border: 1px solid #e1e6ef;
+
+    &.no-border {
+        border: none !important;
+    }
+}
+
+.auto-complete-font {
+    text-align: left;
+    padding: 30px;
+    font-size: 13px;
+    border: 1px solid #e1e6ef;
+
+    &.no-border {
+        border: none !important;
+    }
+}
+
+
+.iframe {
+    .card {
+        border: none !important;;
+    }
+
+    .card-footer {
+        background-color: transparent !important;
+        border-top: none !important;
+        text-align: center;
+
+        button {
+            font-weight: bold;
+            padding: 10px 41px;
+            border-radius: 5px;
+
+            i {
+                display: none;
+            }
+        }
+    }
+
+}
+
+.iframe.public-form {
+    .main-card {
+        margin-top: 65px;
+        border-radius: 10px;
+        min-width: 915px;
+        width: min-content;
+    }
+
+    @media (max-width: 915px) {
+        .main-card {
+            width: 100%;
+            min-width: 100%;
+        }
+    }
+
+    .iframe-ex {
+        padding: 22px;
+        margin-bottom: 0px;
+
+        .iframe-title {
+            padding-bottom: 6px;
+            border-bottom: 1px solid #20a8d8;
+
+        }
+
+        .iframe-description {
+            margin-top: 20px;
+            white-space: pre-wrap;
+
+        }
+    }
+    
+
+
+}
+
+
+input.form-control {
+    height: 35.5px;
+}
+
+ng-select {
+    padding: 0 10px !important;
+}
+
+ng-dropdown-panel {
+    padding: 0 !important;
+}
+
+.ng-select .ng-select-container {
+    min-height: 0 !important;
+}
+
+
+.ng-select.ng-select-multiple .ng-select-container.ng-has-value .ng-clear-wrapper, .ng-select.ng-select-multiple .ng-select-container.ng-has-value .ng-arrow-wrapper {
+    border-top: none !important;
+}
+
+/**
+GROUP
+ */
+
+.add_group_container {
+    font-weight: bold;
+    border: 1px solid #ccc;
+    background: #efefef;
+    text-align: center;
+    padding-top: 13px;
+}
+
+.delete_group_container {
+    font-weight: bold;
+    border: 1px solid #909090;
+    background: #ffbbbb;
+    text-align: center;
+    padding-top: 13px;
+}
+
+
+.condition-item {
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #eee;
+
+    .drag-handle {
+
+    }
+
+}
+
+.form-control-label {
+    label {
+        max-width: 100%;
+    }
+}
+
+
+.color_select_block {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #aaa;
+    float: left;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.ng-select .ng-select-container .ng-value-container {
+    padding-top: 0 !important;;
+    min-height: 33.5px;
+}
+
+
+.field-select-dragdrop {
+    display: flex;
+
+    h3 dataset_definitiondataset_definition {
+        font-size: 1.35rem;
+    }
+
+    .cdk-drop-list {
+        width: 100%;
+        min-height: 100px;
+        height: 100%;
+    }
+
+    > div {
+        width: 50%;
+        max-width: 300px;
+        margin: 5px;
+        padding: 15px;
+        border: 1px solid #ccc;
+
+        .field-list {
+            > div {
+                border: 1px solid #ccc;
+                padding: 3px 7px;
+                margin-bottom: 2px;
+                border-radius: 3px;
+
+            }
+        }
+    }
+
+}
+
+
+.form-control-label {
+    label {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+}
+
+.form-group {
+    margin-bottom: 0.5rem !important;
+}
+
+.form-field-container, .multiple-form-field-container {
+    max-width: 700px;
+}
+
+@media screen and (max-width: 991px) {
+    .form-field-container:not(.fieldname_grant_type){
+        max-width: 100%;
+    }
+
+}
+
+.ng-dropdown-panel {
+    min-width: 240px !important;
+}
+
+
+.ng-select.ng-select-single {
+    padding-bottom: 0 !important;
+    padding-top: 0;
+    max-height: 35.5px !important;
+}
+
+
+#dataset_definition {
+    .admin-forms .form-control-label {
+        font-size: 15px;
+
+    }
+
+    .form-group {
+        margin-bottom: 21px !important;
+    }
+}
+
+
+.ng-select .ng-select-container:after {
+    border-bottom: 0 !important;
+}
+
+
+.ng-select.ng-select-single .ng-select-container .ng-clear-wrapper, .ng-select .ng-arrow-wrapper {
+    //padding-top: 15px;
+}
+
+
+.ng-select .ng-select-container .ng-value-container {
+    border-top: 8px solid transparent !important;
+}
+
+
+
+.year_month {
+    > input {
+        width: 110px;
+        display: inline;;
+    }
+}
+
+.iframe {
+    .card-footer {
+        padding-right: 30px;
+    }
+}
+
+#pc-edit-view.iframe {
+    margin: 0 auto;
+}
+
+#pc-edit-view.iframe.public-form {
+    overflow: auto;
+    max-height: 80vh;
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+}
+
+.modal-dialog.iframe {
+    width: 80%;
+    top: 5%;
+}
+
+.num-unit-first {
+    vertical-align: middle;
+    line-height: 36px;
+    text-align: right;
+}
+
+.num-unit-end {
+    vertical-align: middle;
+    line-height: 36px;
+    text-align: left;
+}
+
+.width60per {
+    width: 60%;
+}
+
+
+.input-number {
+    display: inline;
+}
+
+.preview_thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+.custom-40-height {
+    height: 40px;
+}
+
+// .custom-search-select-input {
+//     padding: 1px
+// }
+
+/**
+以下、デザイン修正
+ */
+//  checked only when click on the check box or the text.
+.admin-forms div.checkbox > label{
+    width: max-content;
+}
+div.radio > label, div.checkbox > label {
+    display: flex;
+    font-weight: normal;
+
+    > input {
+        margin-top: 3.5px;
+        margin-right: 5px;
+    }
+
+}
+
+
+button.btn {
+    border-radius: 3px;
+
+}
+
+
+.modal-title {
+    font-weight: bold;
+}
+
+.modal-content {
+    h5 {
+        font-weight: bold;
+    }
+}
+
+
+.width-max-50 {
+    max-width: 50px;
+    min-width: 0 !important;
+}
+
+.width-max-100 {
+    max-width: 50px;
+}
+
+
+.width-100 {
+    width: 100px;
+
+}
+
+.width-50 {
+    width: 50px !important;;
+
+}
+
+
+.flex {
+    display: -webkit-flex;
+    display: flex;
+
+    .flex-basis25 {
+        flex-basis: 25%;
+    }
+}
+
+.flex-c-right {
+    margin-left: auto;
+
+}
+
+
+.lh-30 {
+    line-height: 30px;
+
+}
+
+
+.close {
+    font-size: 1.8rem !important;
+}
+
+
+.condition-wrap {
+    display: flex;
+    //height: 35.5px;
+
+    condition-form {
+        width: calc(100% - 50px);
+    }
+
+}
+
+.buttons {
+    width: 50px;
+    /*コレ*/
+    display: flex;
+    /*コレ*/
+    align-items: center;
+    /*コレ*/
+    justify-content: center;
+}
+
+
+input[type=checkbox].pg-checkbox {
+    display: none;
+}
+
+.checkbox-custom {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 30px;
+    position: relative;
+    width: auto;
+    margin-bottom: 0;
+}
+
+.checkbox-custom::before {
+    background: #fff;
+    border: 1px solid $form-border-color;
+    content: '';
+    display: block;
+    height: 16px;
+    left: 5px;
+    margin-top: -8px;
+    position: absolute;
+    top: 50%;
+    width: 16px;
+}
+
+.checkbox-custom::after {
+    border-right: 3px solid $brand-primary;
+    border-bottom: 3px solid $brand-primary;
+    content: '';
+    display: block;
+    height: 11px;
+    left: 10px;
+    margin-top: -7px;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    transform: rotate(45deg);
+    width: 6px;;
+}
+
+input[type=checkbox]:checked + .checkbox-custom::after {
+    opacity: 1;
+}
+
+/* ラジオボタン01 */
+input[type=radio].pg-radio {
+    display: none;
+}
+
+.radio-custom {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 30px;
+    position: relative;
+    width: auto;
+    margin-bottom: 0;
+}
+
+.radio-custom::before {
+    background: #fff;
+    border: 1px solid $form-border-color;;
+    border-radius: 50%;
+    content: '';
+    display: block;
+    height: 16px;
+    left: 5px;
+    margin-top: -8px;
+    position: absolute;
+    top: 50%;
+    width: 16px;
+}
+
+.radio-custom::after {
+    background: $brand-primary;
+    border-radius: 50%;
+    content: '';
+    display: block;
+    height: 8px;
+    left: 9px;
+    margin-top: -4px;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    width: 8px;
+}
+
+input[type=radio]:checked + .radio-custom::after {
+    opacity: 1;
+}
+
+.form-control {
+    border: 1px solid #e1e6ef;
+}
+
+
+.chart-setting {
+    .col-md-2 {
+        padding-top: 6px;
+        padding-left: 5px;
+    }
+
+}
+
+
+.input-group-addon {
+    color: #374767;;
+}
+
+
+.quick-button {
+    width: 100%;
+    border: 1px solid #e1e6ef;
+    background: #f2f4f8;
+    margin-bottom: -1px;
+    padding: 30px 0px 10px 0px;
+    font-size: 14px;
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    color: #c0cadd;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+
+    &.active {
+        background: #daf0fb;
+        border-color: #67c2ef;
+        color: #106894;
+    }
+}
+
+.quick-button i {
+    font-size: 32px;
+}
+
+
+.order_list {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.pc-field-block {
+    margin-bottom: 5px;
+}
+
+.checkbox {
+    padding-top: 0;
+}
+
+textarea.form-control {
+    height: 100px;
+}
+
+input.error {
+
+    border: 3px solid #ff5454;
+}
+
+.ng-select .ng-spinner-loader {
+    position: absolute;
+    top: 9px;
+    left: 50%;
+}
+
+
+mention-list {
+    z-index: 10000;
+}
+
+
+.order_list {
+    overflow: visible;
+}
+
+
+/*
+dataset_grantのテストのとき、外す。
+ */
+.invisible-child {
+    position: fixed;
+    top: 9999px;
+    z-index: 100000;
+}
+
+.ng-dropdown-panel {
+    z-index: 100000 !important;
+}
+
+.child-dataset_grant, #child-dataset_group_grant {
+    position: fixed;
+    top: -9999px;
+    z-index: 1050;
+}

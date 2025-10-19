@@ -1,0 +1,22 @@
+<div class="card">
+    <div class="card-header"><i class="fa fa-line-chart"></i> {{chart.title}}</div>
+    <div class="card-block">
+        <div class="row justify-content-end">
+            <div class="col-lg-6 pb-3">
+                <select *ngIf="chart.group=='day'" class="form-control form-control-sm" [(ngModel)]="display" (change)="onChange($event)">
+                    <option value="30">Last 30 days</option>
+                    <option value="">All</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas baseChart class="chart"
+                    [datasets]="chart.lineChartData"
+                    [labels]="chart_labels"
+                    [options]="chart.lineChartOptions"
+                    [colors]="chart.lineChartColours"
+                    [legend]="chart.lineChartLegend"
+                    [chartType]="chart.lineChartType"></canvas>
+        </div>
+    </div>
+</div>

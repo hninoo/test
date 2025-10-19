@@ -1,0 +1,337 @@
+<div class="row condition-row">
+    <div class="col-md-11 offset-md-1" *ngIf="is_grant_condition_form">
+        <label>
+            <input [disabled]="disabled" type="radio" name="cond_type_{{grant_permission_type}}_{{index}}" value="field" [(ngModel)]="condition.type" (change)="onChange()">&nbsp;項目条件
+        </label>
+        <label class="ml-4">
+            <input [disabled]="disabled" type="radio" name="cond_type_{{grant_permission_type}}_{{index}}" value="select" [(ngModel)]="condition.type" (change)="onChange()">&nbsp;その他条件指定
+        </label>
+    </div>
+    <div class="col-md-8 mr-auto" *ngIf="is_grant_condition_form && condition.type == 'select'; else isOtherSelect">
+        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.select_condition" (change)="onChange()">
+            <option value="">条件を選択</option>
+            <option value="in_division">ログインユーザーが、作成者が属している組織またはその子組織に属している場合</option>
+            <option value="in_division_include_parent">ログインユーザーが、作成者が属している組織(親組織含む)またはその子組織に属している場合</option>
+        </select>
+    </div>
+    <ng-template #isOtherSelect>
+        <ng-container *ngIf="table_info!=null && getFields(this.table_info).length>0; else NoCondition">
+            <div *ngIf="no_workflow_select" class="row col-md-12">
+                <div class="col-md-2 font-weight-bold mb-1" *ngIf="index>0" style="min-width: 70px;">AND/OR<span class="text-danger ml-1 required">※</span></div>
+                <div class="col-md-2 font-weight-bold mb-1 pl-0" *ngIf="index<=0" style="min-width: 70px;">&nbsp;</div>
+                <div class="col-md-3 font-weight-bold mb-1">項目<span class="text-danger ml-1 required">※</span></div>
+                <div class="col-md-3 font-weight-bold mb-1">条件<span class="text-danger ml-1 required">※</span></div>
+                <div class="col-md-4 font-weight-bold mb-1">値<span class="text-danger ml-1 required">※</span></div>
+            </div>
+
+            <div class="col-md-12 row" *ngIf="condition">
+
+                <div class="col-md-2">
+                    <ng-container *ngIf="index>0 && condition_type=='timing_condition';else notTimingCondition;">
+                        <div style="font-size: 17px; text-align: center; line-height: 30px;">
+                            OR
+                        </div>
+                    </ng-container>
+                    <ng-template #notTimingCondition>
+                        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.and_or" (change)="onChange()"
+                            *ngIf="index>0" [id]="id_prefix + 'and_or'" style="min-width: 70px;">
+                            <option value="and">AND</option>
+                            <option value="or">OR</option>
+                        </select>
+                    </ng-template>
+                </div>
+                <div class="col-md-3">
+                    <select [disabled]="disabled" style="width:100%" class="form-control" (change)="setForm(true)"
+                        [(ngModel)]="condition.field" [id]="id_prefix + 'field'">
+                        <ng-container *ngIf="condition.isSummarizeField();else NotSummarizeField">
+                            <ng-container *ngFor="let summary of filter.summarizeFilter.summary_a; let i = index">
+                                <option value="y{{i + 1}}">集計項目{{i + 1 }}</option>
+                            </ng-container>
+                        </ng-container>
+                        <ng-template #NotSummarizeField>
+                            <ng-container *ngIf="show_admin_or_division_select || show_admin_division_and_fields;">
+                                <option value="{{this.loggedin_admin_id_value}}">ログインユーザー</option>
+                                <option value="{{this.loggedin_admin_division_id_value}}">ログインユーザーの組織</option>
+                                <option value="{{this.loggedin_admin_position_id_value}}">ログインユーザーの役職</option>
+                            </ng-container>
+
+                            <ng-container *ngIf="!show_admin_or_division_select">
+                                <option value="_all" *ngIf="!isTimingCondition()">いずれかの項目</option>
+                                <ng-container *ngIf="!show_admin_division_and_fields && !no_workflow_select">
+                                    <option *ngIf="table_info.menu.is_workflow && !isTimingCondition()" value="workflow_status">
+                                        ワークフロー</option>
+                                </ng-container>
+
+                                <ng-container *ngFor="let field of getFields(table_info)">
+                                    <ng-container
+                                        *ngIf="isConditionField(table_info, field) && !table_info.forms.byFieldName(field.Field).is_child_form">
+                                        <option value="{{field.Field}}">{{table_info.forms.byFieldName(field.Field).label}}</option>
+                                    </ng-container>
+                                </ng-container>
+                                <!-- テーブルの権限のときだけ表示 -->
+                                <ng-container
+                                    *ngIf="table_info.menu.is_workflow && !isTimingCondition() && is_grant_condition_form">
+                                    <option value="workflow_assined_admin_id_all">承認者</option>
+                                </ng-container>
+
+                                <ng-container *ngIf="isNofield()">
+                                    <option value="{{condition.field}}">!! 存在しない項目 !!</option>
+                                </ng-container>
+
+                                <!-- 子テーブル -->
+                                <ng-container *ngFor="let child of table_info.child_a">
+                                    <ng-container *ngIf="child.is_child_form">
+                                        <ng-container *ngFor="let field of getFields(child)">
+                                            <option *ngIf="isConditionField(child,field)" value="{{child.table}}.{{field.Field}}">
+                                                【{{child.getLabel()}}】{{child.forms.byFieldName(field.Field).getLabel()}}</option>
+                                        </ng-container>
+                                    </ng-container>
+
+                                </ng-container>
+                            </ng-container>
+
+                        </ng-template>
+                    </select>
+                    <!--                 他データセットの場合に、下層の項目を指定できるようにする-->
+                    <ng-container *ngFor="let sub_field of condition.sub_fields;let i=index">
+                        <div class="row mt-2">
+                            <div class="col-md-1">
+                                <span class="pull-left">の</span>
+                            </div>
+                            <div class="col-md-8">
+                                <select [disabled]="disabled" *ngIf="condition_subtableinfo_by_table[sub_field.table]"
+                                    style="width:100%" class="form-control " (change)="setForm(true,i)"
+                                    [(ngModel)]="sub_field.field">
+                                    <option value="_all">全ての項目</option>
+                                    <option
+                                        *ngIf="condition_subtableinfo_by_table[sub_field.table].menu.is_workflow && !isTimingCondition()"
+                                        value="workflow_status">ワークフロー</option>
+
+                                    <ng-container *ngFor="let field of getFields(condition_subtableinfo_by_table[sub_field.table])">
+                                        <option *ngIf=" isConditionField(condition_subtableinfo_by_table[sub_field.table],field)"
+                                            value="{{field.Field}}">
+                                            {{condition_subtableinfo_by_table[sub_field.table].forms.byFieldName(field.Field).label}}
+                                        </option>
+
+                                    </ng-container>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button [disabled]="disabled" class="btn btn-danger btn-sm " (click)="deleteSubField(i)"><i
+                                        class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <!--                 他データセットの場合に、下層の項目を指定できるようにする END-->
+                    <button [disabled]="disabled" *ngIf="form && form.isSelectOtherTable() && !no_workflow_select"
+                        (click)="addSubField()" class="btn btn-primary btn-sm p-1 mt-2">参照先テーブルの項目を指定</button>
+                    <button [disabled]="disabled" *ngIf="form && form.isSelectOtherTable() && no_workflow_select"
+                        (click)="addSubField()" class="btn btn-sm btn-outline-primary p-1 mt-2">参照先テーブルの項目を指定</button>
+
+                </div>
+                <div class="col-md-3">
+                    <ng-container *ngIf="condition_type=='condition' && form">
+                        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.condition" (change)="onChange()"
+                            [id]="id_prefix + 'condition'">
+                            <option value="">条件選択</option>
+                            <option *ngIf="showEmpty(condition)" value="null">空</option>
+                            <option *ngIf="showEmpty(condition)" value="not_null">空でない</option>
+                            <option *ngIf="showEqual(condition)" value="eq">が次と一致</option>
+                            <option *ngIf="showEqual(condition)" value="noteq">が次と一致しない</option>
+                            <ng-container *ngIf="!is_admin_or_division_select()">
+                                <option *ngIf="showIncludesCon(condition)" value="inc">が次を含む</option>
+                                <option *ngIf="showIncludesCon(condition) && !condition.isAllField()" value="notinc">が次を含まない
+                                </option>
+                            </ng-container>
+                            <option *ngIf="showGreaterThan(condition)" value="gt">が次の値以上</option>
+                            <option *ngIf="showGreaterThan(condition)" value="lt">が次の値以下</option>
+                            <option *ngIf="showGreaterThan(condition)" value="gt_ne">が次の値より大きい</option>
+                            <option *ngIf="showGreaterThan(condition)" value="lt_ne">が次の値より小さい</option>
+                            <!-- <option *ngIf="showSelectDate(condition)" value="date_ago">が○日後より前</option>
+                                    <option *ngIf="showSelectDate(condition)" value="date_later">が○日後より後</option>
+                                    <option *ngIf="showSelectDate(condition)" value="week_ago">が○週後より前</option>
+                                    <option *ngIf="showSelectDate(condition)" value="week_later">が○週後より後</option>
+                                    <option *ngIf="showSelectDate(condition)" value="month_ago">が○月後より前</option>
+                                    <option *ngIf="showSelectDate(condition)" value="month_later">が○月後より後</option>
+                                    <option *ngIf="showSelectDate(condition)" value="year_ago">が○年後より前</option>
+                                    <option *ngIf="showSelectDate(condition)" value="year_later">が○年後より後</option> -->
+                            <!-- <option *ngIf="showSelectDate(condition)" value="today">が今日</option>
+                                    <option *ngIf="showSelectDate(condition)" value="yesterday">が昨日</option>
+                                    <option *ngIf="showSelectDate(condition)" value="tomorrow">が明日</option>
+                                    <option *ngIf="showSelectDate(condition)" value="this_week">が今週</option>
+                                    <option *ngIf="showSelectDate(condition)" value="last_week">が先週</option>
+                                    <option *ngIf="showSelectDate(condition)" value="next_week">が来週</option>
+                                    <option *ngIf="showSelectDate(condition)" value="this_month">が今月</option>
+                                    <option *ngIf="showSelectDate(condition)" value="last_month">が先月</option>
+                                    <option *ngIf="showSelectDate(condition)" value="next_month">が来月</option>
+                                    <option *ngIf="showSelectDate(condition)" value="this_year">が今年</option>
+                                    <option *ngIf="showSelectDate(condition)" value="last_year">が去年</option>
+                                    <option *ngIf="showSelectDate(condition)" value="next_year">が来年</option> -->
+                            <option *ngIf="condition.field === 'id'" value="include_other_table">別のテーブルに含まれる</option>
+                            <option *ngIf="condition.field === 'id'" value="not_include_other_table">別のテーブルに含まれない</option>
+                            <!--<option *ngIf="showBeforeDay()" value="before_days">が次の日数前</option>-->
+                        </select>
+                    </ng-container>
+                    <ng-container *ngIf="condition_type=='timing_condition'">
+                        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.condition" (change)="onChange()"
+                            [id]="id_prefix + 'condition'">
+                            <option value="">条件選択</option>
+                            <!--<option  value="before_minutes">の次の分前</option>-->
+                            <option value="before_hours" *ngIf="form['type']=='datetime' && !condition.isSystemField()">の次の時間前
+                            </option>
+                            <option value="before_minutes" *ngIf="form['type']=='datetime' && !condition.isSystemField()">の次の分前
+                            </option>
+                            <option value="before_days" *ngIf="!condition.isSystemField()">の次の日数前</option>
+                            <option value="after_hours" *ngIf="form['type']=='datetime'">の次の時間後</option>
+                            <option value="after_minutes" *ngIf="form['type']=='datetime'">の次の分後</option>
+                            <option value="after_days">の次の日数後</option>
+                            <!--                <option  value="day">が次の日時</option>-->
+                        </select>
+                    </ng-container>
+                </div>
+                <div class="col-md-4">
+                    <ng-contaner *ngIf="isUseTargetForm() && condition.use_dynamic_condition_value;else NotTargetFormArray">
+                        <ng-select [disabled]="disabled" [items]="p_garget_form_a" [bindLabel]="'label'" [bindValue]="'field_name'"
+                            [ngModel]="condition.value" (change)="onChangeTargetFormSelect($event)"
+                            [id]="id_prefix + 'condition_value'" class="form-control custom">
+                        </ng-select>
+                        <!--
+                                <select [disabled]="disabled" [(ngModel)]="condition.value" class="form-control" (change)="onChange()">
+                                    <option *ngFor="let form of target_form_a"
+                                            value="{{form.field['Field']}}">{{form.label}}
+                                    </option>
+                                </select>
+                                -->
+                    </ng-contaner>
+                    <ng-template #NotTargetFormArray>
+                        <ng-container
+                            *ngIf="condition.condition !== 'null' && condition.condition !== 'not_null' && condition.condition && form">
+                            <ng-container *ngIf="use_variable">
+                                <label>
+                                    <input [disabled]="disabled" [(ngModel)]="condition.use_variable" (change)="onChange()"
+                                        type="radio" [value]="true" name="condition_form_use_variable_{{index}}" />
+                                    変数
+                                    &nbsp;&nbsp;
+                                </label>
+                                <label>
+                                    <input [disabled]="disabled" [(ngModel)]="condition.use_variable" (change)="onChange()"
+                                        type="radio" [value]="false" name="condition_form_use_variable_{{index}}" /> 値入力
+                                </label>
+
+                                <ng-container *ngIf="condition.use_variable">
+                                    <select [disabled]="disabled" [(ngModel)]="condition.variable_id" class="form-control"
+                                        (change)="onChange()">
+                                        <option *ngFor="let variable of variables" value="{{variable.id}}">{{variable.name}}
+                                        </option>
+                                    </select>
+                                </ng-container>
+                            </ng-container>
+
+
+                            <ng-container *ngIf="!use_variable || !condition.use_variable">
+                                <ng-container *ngIf="condition.field === loggedin_admin_id_value">
+                                    <user-forms-field [default_admin_id]="condition.value"
+                                        (valueChanged)="LoogedinAdminValueChanged($event)"></user-forms-field>
+                                </ng-container>
+                                <ng-container *ngIf="condition.field === loggedin_admin_division_id_value">
+                                    <division-forms-field [default_division_id]="condition.value"
+                                        (valueChanged)="LoogedinDivisionValueChanged($event)"></division-forms-field>
+                                </ng-container>
+                                <ng-container *ngIf="condition.field === loggedin_admin_position_id_value">
+                                    <position-forms-field [default_position_id]="condition.value"
+                                        (valueChanged)="LoggedinPositionValueChanged($event)"></position-forms-field>
+                                </ng-container>
+                                <ng-container *ngIf="!is_admin_or_division_select()">
+                                    <ng-container *ngIf="isIncludeOtherTable();else IsNotIncludeOtherTable">
+                                        テーブル:
+                                        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.inc_table"
+                                            (change)="onSelectTable($event)" [id]="id_prefix + 'inc_table'">
+                                            <option value="">テーブル選択</option>
+                                            <option *ngFor="let _tableinfo of _share.exist_table_a" value="{{_tableinfo.table}}">
+                                                {{_tableinfo.getLabel()}}
+                                            </option>
+                                        </select>
+
+                                        <ng-container *ngIf="selected_inc_table">
+                                            項目:
+                                            <ng-select [disabled]="disabled" [items]="incTableSelectableFields"
+                                                [bindLabel]="'Comment'" [bindValue]="'Field'" [id]="id_prefix + 'inc_field'"
+                                                [(ngModel)]="condition.inc_field" appendTo="body" class="custom form-control"
+                                                (change)="onChange()">
+                                            </ng-select>
+
+                                            フィルタ:
+                                            <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.inc_filter_id"
+                                                (change)="onChange()">
+                                                <option value="">フィルタ選択(任意)</option>
+                                                <option *ngFor="let _filter of selected_inc_table.saved_filters"
+                                                    value="{{_filter['id']}}">{{_filter['name']}}
+                                                </option>
+                                            </select>
+
+                                        </ng-container>
+
+                                    </ng-container>
+
+                                    <!-- input form -->
+                                    <ng-template #IsNotIncludeOtherTable>
+                                        <ng-container *ngIf="condition.field === 'workflow_assined_admin_id_all'">
+                                            <user-forms-field [added_values]="getUserAddedValues()"
+                                                [default_admin_id]="condition.value"
+                                                (valueChanged)="LoogedinAdminValueChanged($event)"></user-forms-field>
+                                        </ng-container>
+                                        <!-- start [totaling] condition -->
+                                        <ng-container
+                                            *ngIf="!condition.use_dynamic_condition_value && !condition.isTermConditionValue() && condition.field !== 'workflow_assined_admin_id_all'">
+                                            <search-field [disabled]="disabled" [id_prefix]="id_prefix"
+                                                [table_info]="getSearchFieldTableInfo() | async" [value]="condition.value"
+                                                [form]="getSearchForm()" [is_timing_condition]="condition_type=='timing_condition'"
+                                                [force_use_textfield]="condition.isIncludeOrNotInclude()"
+                                                [placeholder]="'値を入力してください'" (valueChange)="onChangeValue($event)"
+                                                (changeSetTimeFlg)="changeSetTimeFlg($event)" [min_num]="getMinNum()"
+                                                [condition]="condition"></search-field>
+                                        </ng-container>
+                                        <ng-container *ngIf="condition.use_dynamic_condition_value">
+                                            <select [disabled]="disabled" [(ngModel)]="condition.value" class="form-control"
+                                                (change)="onChange()">
+                                                <ng-container
+                                                    *ngFor="let form of condition.getSameTypeForms(table_info, form, _share )">
+                                                    <ng-container
+                                                        *ngIf="isConditionField(table_info, form.field) && !table_info.forms.byFieldName(form.field.Field).is_child_form">
+                                                        <option value="{{form.field_name}}">
+                                                            {{form.label}}</option>
+                                                    </ng-container>
+                                                </ng-container>
+                                            </select>
+                                        </ng-container>
+                                        <!-- end [totaling] condition -->
+                                    </ng-template>
+                                    <!-- input form end -->
+                                </ng-container>
+                            </ng-container>
+                        </ng-container>
+                    </ng-template>
+
+                </div>
+            </div>
+
+            <!-- start Use other items as conditions checkbox -->
+            <ng-contaner class="col-12 row mt-2" *ngIf="showUseDynamicConditionValue()">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <label>
+                        <input (change)="onChangeDynamicConditionValue($event,condition)" type="checkbox" name="use_dynamic_condition_value"
+                            [(ngModel)]="condition.use_dynamic_condition_value">&nbsp;他の項目を条件で利用する
+                    </label>
+                </div>
+            </ng-contaner>
+            <!-- end Use other items as conditions checkbox -->
+
+        </ng-container>
+    </ng-template>
+
+    <ng-template #NoCondition>
+        {{table_info}}
+        <div class="col-md-12">指定のテーブルで設定出来る条件がありません。</div>
+    </ng-template>
+</div>

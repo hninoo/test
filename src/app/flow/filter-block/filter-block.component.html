@@ -1,0 +1,15 @@
+<ng-container *ngIf="table_info">
+    <ng-container *ngFor="let condition of block.conditions.condition_a; let i = index">
+        <div class="condition-group" [style.margin-left.px]="calculateIndentationLevel(block.conditions.condition_a, i)">
+            <div *ngIf="i > 0" class="condition-logic">
+                <div class="condition-logic-item text-primary" *ngIf="condition.and_or == 'and'">AND</div>
+                <div class="condition-logic-item text-danger" *ngIf="condition.and_or == 'or'">OR</div>
+            </div>
+            <app-condition-explain [style.margin-left.px]="condition.and_or=='or' ?20:0" [condition]="condition" [table_info]="table_info" [editable]="false"></app-condition-explain>
+        </div>
+
+    </ng-container>
+    <div class="data_count">
+        データ件数: {{ block._data_count ?? '-' }}
+    </div>
+</ng-container>

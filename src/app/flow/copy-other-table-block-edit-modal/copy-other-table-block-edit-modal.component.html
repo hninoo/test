@@ -1,0 +1,111 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document" *ngIf="block && block.type == blockClass.TYPE_COPY_OTHER_TABLE">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">コピー設定</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>以下で選択した項目の値がコピーされます。</p>
+                    <div *ngIf="hasError()">
+                        <div class="alert alert-danger">
+                            <strong>エラー</strong>
+                            <ul>
+                                <li *ngFor="let error of errors">
+                                    {{ error }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <ng-select
+                            appendTo="body"
+                            ng-required="true"
+                            [items]="target_table_a"
+                            [searchWhileComposing]="false"
+                            bindLabel="view_label"
+                            bindValue="table"
+                            [(ngModel)]="block.target_table" class="form-control"
+                            (change)="targetTableChanged($event)"
+                        >
+                        </ng-select>
+                    </div>
+                    <div class="row" *ngIf="target_table_info">
+                        <div class="col-md-12 row mt-2">
+                            <div class="col-md-12 mt-2">
+                                <h5>
+                                    アウトプットするデータを指定
+                                </h5>
+
+                                <div class="col-md-9 col-lg-7">
+                                    <label>
+                                        <input type="radio" name="output_data_type" class="input_style" [(ngModel)]="this.block.output_data_type" [value]="'copy_base_data'"> コピー元データ
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="output_data_type" class="input_style" [(ngModel)]="this.block.output_data_type" [value]="'copy_data'"> コピーしたデータ
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-2">
+                                <h5>
+                                    コピーする項目を設定
+                                    <button class="btn btn-primary btn-md btn-sm" (click)="addCopyField()">追加</button>
+                                </h5>
+                                <ng-container *ngFor="let copy_field of block.copy_from_to_fields;let i=index">
+                                    <div class="col-md-12 row">
+                                        <div class="col-md-4">
+                                            <select [(ngModel)]="copy_field.from" class="form-control" (change)="copyFromSelected(copy_field)">
+                                                <option *ngFor="let field of table_info.fields"
+                                                        value="{{field.Field}}">{{ field.Comment }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1"><i style="font-size: 23px; margin-top: 3px;" class="fa fa-arrow-right"></i></div>
+                                        <div class="col-md-4">
+                                            <ng-container *ngIf="can_copy_fields_by_from[copy_field.from] && can_copy_fields_by_from[copy_field.from].length>0;else FieldNotExist">
+                                                <select [(ngModel)]="copy_field.to" class="form-control" (change)="check()">
+                                                    <ng-container *ngFor="let hash of can_copy_fields_by_from[copy_field.from]">
+                                                        <option [ngValue]="hash['value']"
+                                                        >{{ hash['label'] }}
+                                                        </option>
+                                                    </ng-container>
+                                                </select>
+                                            </ng-container>
+                                            <ng-template #FieldNotExist>
+                                                コピー可能なフィールドがありません
+                                            </ng-template>
+                                        </div>
+
+
+                                        <div class="col-md-1">
+                                            <button class="btn btn-danger btn-sm" (click)="delCopyField(i)"><i class="fa fa-minus"></i></button>
+                                        </div>
+
+                                        <hr style="width:90%">
+                                    </div>
+                                </ng-container>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <h5>
+                                    コピー時に更新する値を設定
+                                    <button class="btn btn-primary btn-md btn-sm" (click)="addUpdateField()">追加</button>
+                                </h5>
+                                <select-field-and-value [table_info]="target_table_info" [form_and_values]="block.update_fields" [add_default]="false"
+                                                        (valueChange)="onChangeUpdateValue($event)"></select-field-and-value>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+

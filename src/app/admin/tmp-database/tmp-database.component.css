@@ -1,0 +1,544 @@
+.tmp-database-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.description {
+    color: #666;
+    margin: 0;
+}
+
+/* 作成セクション */
+.create-section {
+    margin-bottom: 20px;
+}
+
+.create-form {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.source-db-field {
+    min-width: 250px;
+    flex: 1;
+}
+
+.table-field {
+    min-width: 300px;
+    flex: 1.5;
+}
+
+.environment-field {
+    min-width: 200px;
+    flex: 1;
+}
+
+.warning-message {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.field-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* ng-select styles */
+::ng-deep .custom.ng-select {
+    min-height: 40px;
+    border-radius: 4px;
+}
+
+::ng-deep .custom.ng-select.ng-select-disabled {
+    background-color: #f5f5f5;
+}
+
+::ng-deep .custom.ng-select .ng-select-container {
+    min-height: 40px;
+}
+
+::ng-deep .custom.ng-select .ng-placeholder {
+    color: #999;
+    display: block;
+    line-height: 40px;
+}
+
+::ng-deep .custom.ng-select .ng-value-container {
+    padding-left: 12px;
+    padding-top: 5px;
+}
+
+::ng-deep .custom.ng-select .ng-value {
+    background-color: #1976d2;
+    border-radius: 2px;
+    color: #fff;
+    padding: 2px 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+::ng-deep .custom.ng-select .ng-value-icon {
+    display: inline-block;
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+::ng-deep .custom.ng-select .ng-value-icon:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+::ng-deep .custom.ng-select .ng-input {
+    top: 5px;
+}
+
+::ng-deep .custom.ng-select .ng-dropdown-panel {
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+::ng-deep .custom.ng-select .ng-dropdown-panel .ng-option {
+    padding: 8px 12px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+::ng-deep .custom.ng-select .ng-dropdown-panel .ng-option:hover {
+    background-color: #f5f5f5;
+}
+
+::ng-deep .custom.ng-select .ng-dropdown-panel .ng-option.ng-option-highlighted {
+    background-color: #e3f2fd;
+}
+
+::ng-deep .custom.ng-select .ng-dropdown-panel .ng-option.ng-option-selected {
+    background-color: #e3f2fd;
+    font-weight: 600;
+}
+
+.create-button {
+    height: 40px;
+    min-width: 120px;
+    font-size: 14px;
+}
+
+/* 作成完了ダイアログ */
+/* バッジスタイル */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.created-info {
+    margin-bottom: 20px;
+    border: 2px solid #4caf50;
+    background-color: #f1f8e9;
+}
+
+.success-title {
+    color: #4caf50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.close-button {
+    margin-left: auto;
+}
+
+.created-details {
+    margin-bottom: 16px;
+}
+
+.detail-item {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.password-item {
+    background-color: #fff3e0;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 4px solid #ff9800;
+}
+
+.password-code {
+    font-family: 'Courier New', monospace;
+    background-color: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+.security-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    color: #666;
+    font-size: 14px;
+}
+
+.security-info mat-icon {
+    color: #ff9800;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* テーブルの基本スタイル */
+.tmp-db-table {
+    width: 100%;
+    min-width: 1200px;
+}
+
+/* Material Angular Tableのセルスタイル */
+.mat-header-cell,
+.mat-cell {
+    padding: 8px 12px !important;
+}
+
+/* 各カラムの幅設定 - Material Tableに対応 */
+::ng-deep .mat-column-access {
+    flex: 0 0 120px !important;
+    max-width: 120px !important;
+}
+
+::ng-deep .mat-column-original_db {
+    flex: 0 0 140px !important;
+    max-width: 140px !important;
+}
+
+::ng-deep .mat-column-target_environment {
+    flex: 0 0 130px !important;
+    max-width: 130px !important;
+}
+
+::ng-deep .mat-column-created_date {
+    flex: 0 0 160px !important;
+    max-width: 160px !important;
+}
+
+::ng-deep .mat-column-copied_tables {
+    flex: 1 1 200px !important;
+    min-width: 200px !important;
+}
+
+::ng-deep .mat-column-status {
+    flex: 0 0 100px !important;
+    max-width: 100px !important;
+}
+
+::ng-deep .mat-column-age_days {
+    flex: 0 0 110px !important;
+    max-width: 110px !important;
+}
+
+::ng-deep .mat-column-expiry_date {
+    flex: 0 0 160px !important;
+    max-width: 160px !important;
+}
+
+::ng-deep .mat-column-actions {
+    flex: 0 0 120px !important;
+    max-width: 120px !important;
+    text-align: center;
+}
+
+/* 一覧セクション */
+.list-section {
+    margin-bottom: 20px;
+}
+
+/* テーブルコンテナ */
+.table-container {
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px;
+}
+
+mat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.count-badge {
+    background-color: #2196f3;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.loading-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    color: #666;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    color: #999;
+}
+
+.empty-state mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+}
+
+/* テーブル */
+.tmp-db-table {
+    width: 100%;
+    margin-top: 16px;
+    table-layout: fixed;
+}
+
+.tmp-db-table td,
+.tmp-db-table th {
+    word-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;
+    vertical-align: top;
+    padding: 8px 12px;
+}
+
+/* 列幅指定 */
+.tmp-db-table .mat-column-access {
+    width: 15%;
+}
+
+.tmp-db-table .mat-column-original_db {
+    width: 12%;
+}
+
+.tmp-db-table .mat-column-created_date {
+    width: 15%;
+}
+
+.tmp-db-table .mat-column-copied_tables {
+    width: 15%;
+}
+
+.tmp-db-table .mat-column-status {
+    width: 10%;
+}
+
+.tmp-db-table .mat-column-age_days {
+    width: 10%;
+}
+
+.tmp-db-table .mat-column-expiry_date {
+    width: 15%;
+}
+
+.tmp-db-table .mat-column-actions {
+    width: 8%;
+}
+
+.db-name {
+    font-family: 'Courier New', monospace;
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+.db-name-small {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.status-text {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.age-text {
+    font-size: 12px;
+    color: #666;
+}
+
+/* 状態の色分け */
+.age-warning .status-text {
+    color: #ff6600;
+}
+
+.age-danger .status-text {
+    color: #dc3545;
+}
+
+.warning-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+}
+
+/* 注意事項セクション */
+.info-section {
+    background-color: #f8f9fa;
+}
+
+.info-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-list li {
+    margin-bottom: 8px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .create-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .create-button {
+        height: 48px;
+    }
+
+    .tmp-db-table {
+        font-size: 14px;
+    }
+
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+/* Angular Material のオーバーライド */
+::ng-deep .success-snackbar {
+    background-color: #4caf50;
+    color: white;
+}
+
+::ng-deep .error-snackbar {
+    background-color: #f44336;
+    color: white;
+}
+
+/* 作成中のオーバーレイ */
+.creating-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.creating-card {
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 2px solid #2196f3;
+}
+
+.creating-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.creating-message {
+    margin-top: 16px;
+    margin-bottom: 0;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* ローディングスピナーの色 */
+::ng-deep .creating-content .mat-progress-spinner circle {
+    stroke: #2196f3;
+}

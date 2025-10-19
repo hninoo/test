@@ -1,0 +1,32 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary" role="document" *ngIf="block && block.type == blockClass.TYPE_COPY">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">コピー設定</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>以下で選択した項目の値がコピーされます。<br>コピーされたデータがこのブロックのアウトプットとなります。</p>
+                </div>
+                <div *ngIf="hasError()">
+                    <div class="alert alert-danger">
+                        <strong>エラー</strong>
+                        <ul>
+                            <li *ngFor="let error of errors">
+                                {{ error }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <field-select-dragdrop [ignore_field_a]="['id','created','updated','admin_id','updated_admin_id']" [unselected_header]="'コピーしない項目'" [selected_header]="'コピーする項目'"
+                                       [table_info]="table_info" [selected_field_name_a]="block.copy_fields"
+                                       (onChangeValue)="onShowFieldChanged($event)"></field-select-dragdrop>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+

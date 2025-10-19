@@ -1,0 +1,702 @@
+<div id="paypal_script">
+
+</div>
+<div class="card" *ngIf="!loading">
+    <div class="loader" *ngIf="loading || sending || notiSending;else NotLoading">Loading...</div>
+    <ng-template #NotLoading>
+        <div class="form-group row card-header text-center">
+            <h1 style="font-size: 20px;" class="w-100 plan-header">利用料金のお支払い</h1>
+        </div>
+        <!--        <div class="card-body" *ngIf="current_payment_service=='paypal'">-->
+        <!--            <div class="form-group row">-->
+        <!--                <div class="col-md-12">-->
+        <!--                    <div class="white-box m-4">-->
+        <!--                        <div *ngIf="is_update" class="row">-->
+        <!--                            <div class="col-md-4">-->
+        <!--                                <h5>現在のプラン</h5>-->
+        <!--                            </div>-->
+        <!--                            <div class="col-md-6">-->
+        <!--                                <div>-->
+        <!--                                    <b>プラン</b>: {{_share.cloud_setting['contract_type'] == 'user_num' ? 'ユーザー数プラン' : 'ログイン数プラン'}}-->
+        <!--                                </div>-->
+        <!--                                <div>-->
+        <!--                                    <b>ユーザー数</b>: {{_share.cloud_setting['max_user']}}-->
+        <!--                                </div>-->
+        <!--                                <div>-->
+        <!--                                    <b>追加容量</b>: {{_share.cloud_setting['add_size']}}GB-->
+        <!--                                </div>-->
+        <!--                                <div>-->
+        <!--                                    <b>オプション</b>:-->
+        <!--                                    <ng-container *ngFor="let op of options">-->
+        <!--                                        <div *ngIf="_share.cloud_setting[op['type']] == 'true'" style="margin-left:15px">-->
+        <!--                                            ・{{op['name']}}-->
+        <!--                                        </div>-->
+        <!--                                    </ng-container>-->
+        <!--                                </div>-->
+        <!--                            </div>-->
+        <!--                            <hr style="width:100%">-->
+        <!--                        </div>-->
+
+        <!--                        <div>-->
+        <!--                            決済方法がpaypalから変更となりました。<br>-->
+        <!--                            ユーザー数変更の場合、お手数ですが下記よりお問い合わせください。<br>-->
+        <!--                            sales@loftal.jp-->
+        <!--                        </div>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--            </div>-->
+
+        <!--        </div>-->
+        <div class="card-body" style="min-height: 80vh;">
+            <div class="form-group row">
+                <div class="col-md-12 ml-4">
+                    <img style="width: 240px; " src="https://pigeon-fw.com//assets/cloud2/img/logo.png" class="pigeon-logo" alt="PigeonCloud">
+                </div>
+
+                <div class="row col-md-12 mb-4 justify-content-center" *ngIf="is_update">
+                    <div class="col-md-5">
+                        <div class="white-box" *ngIf="_share.stripe_credit_card['last4'] != undefined">
+                            <h5 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 20px; position: relative;">登録カード</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                <tr>
+                                    <th> 登録カード番号</th>
+                                    <td>
+                                        xxxx {{ _share.stripe_credit_card['last4'] }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>有効期限</th>
+                                    <td>
+                                        {{ _share.stripe_credit_card['exp_month'] }} / {{ _share.stripe_credit_card['exp_year'] }}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="text-center mt-3" *ngIf="current_payment_service!='paypal'">
+                                <button *ngIf="!sentRequest" class="btn btn-info" (click)="makePayment(true)">
+                                    クレジットカード情報更新
+                                </button>
+                                <div *ngIf="current_payment_service=='paypal'" style="margin-top: 10px;">
+                                    ※決済サービスがpaypalからstripeに変更となります。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="white-box">
+                            <h5 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 20px; position: relative;">現在のプラン</h5>
+                            <table class="table table-bordered current-plan-table">
+                                <tbody>
+                                <tr>
+                                    <th>プラン</th>
+                                    <td>{{ _share.cloud_setting['contract_type'] == 'user_num' ? 'ユーザー数プラン' : 'ログイン数プラン' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>ユーザー数</th>
+                                    <td>{{ _share.cloud_setting['max_user'] }}</td>
+                                </tr>
+                                <tr>
+                                    <th>追加容量</th>
+                                    <td>{{ _share.cloud_setting['add_size'] }}GB</td>
+                                </tr>
+                                <tr>
+                                    <th>オプション</th>
+                                    <td>
+                                        <ng-container *ngFor="let op of options">
+                                            <span *ngIf="_share.cloud_setting[op['type']] == 'true'" class="badge badge-info mr-1">{{ op['name'] }}</span>
+                                        </ng-container>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>クライアント証明書数</th>
+                                    <td>{{ _share.cloud_setting['max_client_secure_user_num'] || 0 }}</td>
+                                </tr>
+                                <tr>
+                                    <th>月間コネクトステップ数上限</th>
+                                    <td>{{ _share.cloud_setting['monthly_rpa_step_limit'] || 100 }}</td>
+                                </tr>
+                                <tr *ngIf="current_amount">
+                                    <th>金額内訳</th>
+                                    <td>
+                                        <table class="table table-sm">
+                                            <tbody>
+                                            <tr>
+                                                <td><strong>基本料金（{{ _share.cloud_setting['contract_type'] == 'user_num' ? 'ユーザー数' : 'ログイン数' }}プラン
+                                                    × {{ _share.cloud_setting['max_user'] }}ユーザー）</strong></td>
+                                                <td class="text-right">
+                                                    <!-- plan_versionを考慮した料金計算（現在のプラン用） -->
+                                                    <span *ngIf="_share.cloud_setting['contract_type'] == 'user_num'">
+                                                            <span *ngIf="_share.cloud_setting['plan_version'] == '2023'">
+                                                                <span *ngIf="_share.cloud_setting['max_user'] < 11">
+                                                                    <span *ngIf="_share.cloud_setting['max_user'] < 5">
+                                                                        5,000円
+                                                                    </span>
+                                                                    <span *ngIf="_share.cloud_setting['max_user'] >= 5">
+                                                                        {{ _share.cloud_setting['max_user'] * 1000 | number }}円
+                                                                    </span>
+                                                                </span>
+                                                                <span *ngIf="_share.cloud_setting['max_user'] >= 11">
+                                                                    {{ 10000 + (_share.cloud_setting['max_user'] - 10) * 800 | number }}円
+                                                                </span>
+                                                            </span>
+                                                            <span *ngIf="_share.cloud_setting['plan_version'] != '2023'">
+                                                                {{ _share.cloud_setting['max_user'] * 1100 | number }}円
+                                                            </span>
+                                                        </span>
+                                                    <span *ngIf="_share.cloud_setting['contract_type'] != 'user_num'">
+                                                            <span *ngIf="_share.cloud_setting['plan_version'] == '2023'">
+                                                                <span *ngIf="_share.cloud_setting['max_user'] <= 20">
+                                                                    {{ _share.cloud_setting['max_user'] * 2200 | number }}円
+                                                                </span>
+                                                                <span *ngIf="_share.cloud_setting['max_user'] > 20">
+                                                                    {{ 20 * 2200 + (_share.cloud_setting['max_user'] - 20) * 1800 | number }}円
+                                                                </span>
+                                                            </span>
+                                                            <span *ngIf="_share.cloud_setting['plan_version'] != '2023'">
+                                                                {{ _share.cloud_setting['max_user'] * 2200 | number }}円
+                                                            </span>
+                                                        </span>
+                                                </td>
+                                            </tr>
+                                            <tr *ngIf="_share.cloud_setting['add_size'] > 0">
+                                                <td><strong>追加容量（+{{ _share.cloud_setting['add_size'] }}GB）</strong></td>
+                                                <td class="text-right">{{ Math.ceil(_share.cloud_setting['add_size'] / 100) * 10000 | number }}円</td>
+                                            </tr>
+                                            <ng-container *ngFor="let op of options">
+                                                <tr *ngIf="_share.cloud_setting[op['type']] == 'true'">
+                                                    <td><strong>{{ op.name }}
+                                                        <span *ngIf="op['type'] === 'mail_option' && _share.cloud_setting['mail_delivery_monthly_limit'] > 5000">
+                                                            ({{ _share.cloud_setting['mail_delivery_monthly_limit'] | number }}件/月)
+                                                        </span>
+                                                    </strong></td>
+                                                    <td class="text-right">
+                                                        <ng-container *ngIf="op['type'] === 'mail_option' && _share.cloud_setting['mail_delivery_monthly_limit'] > 5000">
+                                                            {{ op.price + (Math.ceil((_share.cloud_setting['mail_delivery_monthly_limit'] - 5000) / 5000) * 5000) | number }}円
+                                                        </ng-container>
+                                                        <ng-container *ngIf="op['type'] !== 'mail_option' || _share.cloud_setting['mail_delivery_monthly_limit'] <= 5000">
+                                                            {{ op.price | number }}円
+                                                        </ng-container>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                            <tr *ngIf="_share.cloud_setting['max_client_secure_user_num'] > 0">
+                                                <td><strong>クライアント証明書（{{ _share.cloud_setting['max_client_secure_user_num'] }}ユーザー）</strong></td>
+                                                <td class="text-right">{{ _share.cloud_setting['max_client_secure_user_num'] * 200 | number }}円</td>
+                                            </tr>
+                                            <tr *ngIf="_share.cloud_setting['monthly_rpa_step_limit'] > 100">
+                                                <td><strong>月間コネクトステップ数（{{ _share.cloud_setting['monthly_rpa_step_limit'] }}ステップ）</strong></td>
+                                                <td class="text-right">{{ Math.ceil((_share.cloud_setting['monthly_rpa_step_limit'] - 100) / 200) * 5000 | number }}円</td>
+                                            </tr>
+                                            <tr class="table-active">
+                                                <td><strong>合計</strong></td>
+                                                <td class="text-right"><strong>{{ current_amount| number }}円 (税込み)</strong></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="white-box mb-4 plan-card" style="max-width:690px; margin: 6vh auto;">
+                        <h2 class="text-center mt-2 plan-header" style="font-size: 23px; margin-bottom: 38px;">有料プラン契約
+                        </h2>
+                        <ng-container *ngIf="sentRequest || notiSent;else NotPaid;">
+                            <div *ngIf="is_update">
+                                <div style="text-align: center">
+                                    <ng-container *ngIf="updated_status==='update_success'">
+                                        プランの変更リクエストが完了しました。<br>
+                                        <a href="/admin/dashboard">ダッシュボードに戻る</a>
+                                    </ng-container>
+                                    <ng-container *ngIf="updated_status==='update_cancel'">
+                                        <div class="text-danger">プラン変更リクエストに失敗しました。</div>
+                                        <a href="/admin/dashboard">ダッシュボードに戻る</a>
+
+                                    </ng-container>
+                                    <!--                                    <ng-container *ngIf="!updated_status">-->
+                                    <!--                                        <ng-container *ngIf="approve_url;else NoApproveUrl;">-->
+                                    <!--                                            <div class="text-danger">※まだ変更処理は完了していません。</div>-->
+                                    <!--                                            下記より支払いを行うとユーザー数リクエストが送信されます。<br>-->
+                                    <!--                                            <br>-->
+                                    <!--                                            <button class="btn btn-success" (click)="open_approval()">-->
+                                    <!--                                                支払い変更設定-->
+                                    <!--                                            </button>-->
+                                    <!--                                        </ng-container>-->
+                                    <!--                                        <ng-template #NoApproveUrl>-->
+                                    <!--                                            ユーザー数変更リクエストを送信しました。<br>-->
+                                    <!--                                            <a href="/admin/dashboard">ダッシュボードに戻る</a>-->
+                                    <!--                                        </ng-template>-->
+
+                                    <!--                                    </ng-container>-->
+                                </div>
+                            </div>
+                            <div *ngIf="!is_update && sentRequest">
+                                <div style="text-align: center">
+                                    お支払いが完了しました。<br>
+                                    ご契約頂き、ありがとうございます。<br>
+                                    <a href="/admin/dashboard">ダッシュボードに戻る</a>
+
+                                </div>
+                            </div>
+                            <div *ngIf="!is_update && notiSent">
+                                <div style="text-align: center">
+                                    有料登録申請が完了しました。<br>
+                                    担当者よりご連絡致します。<br>
+                                    <a href="/admin/dashboard">戻る</a>
+
+                                </div>
+                            </div>
+
+                        </ng-container>
+                        <ng-template #NotPaid>
+
+                            <div *ngIf="is_update && next_plan" class="row">
+                                <div class="col-md-4">
+                                    <h5>翌月からのプラン</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                        <tr>
+                                            <th>決済予定日</th>
+                                            <td>{{next_plan['next_payment_date']}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>プラン</th>
+                                            <td>{{next_plan['contract_type'] == 'user_num' ? 'ユーザー数プラン' : 'ログイン数プラン'}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>ユーザー数</th>
+                                            <td>{{next_plan['max_user']}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>追加容量</th>
+                                            <td>{{next_plan['add_size']}}GB</td>
+                                        </tr>
+                                        <tr>
+                                            <th>オプション</th>
+                                            <td>
+                                                <ng-container *ngFor="let op of options">
+                                                    <div *ngIf="next_plan['options'][op['type']]">・{{op['name']}}</div>
+                                                </ng-container>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>金額</th>
+                                            <td>{{next_plan['amount']| number}}円 (税込み)</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <hr style="width:100%">
+                            </div>
+
+                            <h3 class="mt-3 plan-header">プラン変更</h3>
+                            <div class="mt-4">
+                                <ng-container *ngIf="is_update;else IsAdd;">
+                                    <span class="text-danger text-bold mt-3 d-block">※プランを変更する場合、即時適用されます。</span>
+                                    <span
+                                        class="d-block">※増額分は日割り計算され、次回支払時に請求が行われます. (ユーザー数を減らした場合等、減額分の日割りの返金はございませんので、ご注意ください。）</span>
+                                </ng-container>
+                                <span class="d-block mt-2">※最低5ユーザーからの契約となります。</span>
+                                <ng-template #IsAdd>
+                                    <span class="d-block mt-2">※毎月の費用発生となり、自動継続となります。</span>
+                                </ng-template>
+                            </div>
+                            <div class="row p-4">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th style="vertical-align: middle;" class="option-title">
+                                            変更後ユーザー数
+                                        </th>
+                                        <td>
+                                            <div class="option-card">
+                                                <div class="option-title">プラン選択</div>
+                                                <ng-container>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="radio" name="contract_type" id="user_num"
+                                                               [(ngModel)]="contract_type" (change)="onChangePlan()"
+                                                               value="user_num">
+                                                        <label class="form-check-label" for="user_num">
+                                                            ユーザー数
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="contract_type" id="login_num"
+                                                               [(ngModel)]="contract_type" (change)="onChangePlan()"
+                                                               value="login_num">
+                                                        <label class="form-check-label" for="login_num">
+                                                            ログイン数
+                                                        </label>
+                                                    </div>
+                                                </ng-container>
+                                                <div class="option-description mt-2">
+                                                    <strong>ユーザー数プラン</strong>: 登録可能なアカウント数に応じた課金です。すべてのユーザーが同時利用可能です。(1ユーザー3端末まで)<br>
+                                                    <strong>ログイン数プラン</strong>: 同時にログインできるユーザー数に応じた課金です。ユーザー数が多いが同時利用が少ない場合に最適です。
+                                                </div>
+                                            </div>
+                                            <div class="form-group mt-3">
+                                                <label for="user_input">ユーザー数を入力:</label>
+                                                <div class="input-group">
+                                                    <input style="width: 120px;" type="number" id="user_input" class="form-control mr-3" [(ngModel)]="quantity" (input)="onQuantityChange()">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">ユーザー</span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-danger mt-2" *ngIf="!is_valid_num">
+                                                    ※ユーザー数は5~3000の範囲で選択して下さい。
+                                                </div>
+                                                <!-- Per-user pricing display -->
+                                                <div class="text-muted mt-2" *ngIf="contract_type == 'user_num'">
+                                                    1ユーザーあたり{{ getUserPrice() }}円 + 税/月
+                                                </div>
+                                                <div class="text-muted" *ngIf="contract_type == 'login_num'">
+                                                    1ユーザーあたり{{ getLoginPrice() }}円 + 税/月
+                                                </div>
+                                                <div class="text-muted mt-2">
+                                                    ユーザー数料金合計: <strong>{{ getUserPriceOnly() | number }}円 + 税/月</strong>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="vertical-align: middle;" class="option-title">
+                                            追加容量オプション
+                                        </th>
+                                        <td>
+                                            <div class="option-card">
+                                                <div class="option-title">追加ストレージ容量</div>
+                                                <div class="option-description mb-3">
+                                                    デフォルトで100GBのストレージが含まれています。データ量が多い場合は追加容量を選択できます。
+                                                </div>
+                                                <select
+                                                    class="form-control custom"
+                                                    style="width:300px"
+                                                    (change)="onChangePlan()"
+                                                    [(ngModel)]="add_size"
+                                                >
+                                                    <option [value]="0">無し</option>
+                                                    <option *ngFor="let value of size_a" [value]="value">+{{ value }}GB</option>
+                                                </select>
+                                                <!-- Add storage pricing display -->
+                                                <div class="text-muted mt-2" *ngIf="add_size > 0">
+                                                    追加容量料金: <strong>{{ Math.ceil(add_size / 100) * 10000 | number }}円 + 税/月</strong>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="vertical-align: middle;" class="option-title">
+                                            オプション
+                                        </th>
+                                        <td>
+                                            <ng-container *ngFor="let op of options">
+                                                <div class="option-card">
+                                                    <mat-checkbox class="btn-block"
+                                                                  labelPosition="after"
+                                                                  [(ngModel)]="op.checked" (change)="onChangePlan()">
+                                                        {{ op.name }}{{ op.price_str }}
+                                                    </mat-checkbox>
+
+                                                    <!-- オプションの説明追加 -->
+                                                    <div class="option-description mt-2">
+                                                        <ng-container *ngIf="op.type === 'mail_option'">
+                                                            ユーザーや顧客に自動メール通知を送信できます。レコード更新時の通知やリマインダーなど、コミュニケーションを自動化します。
+                                                            <div class="text-muted">基本: 5,000件/月まで含まれます</div>
+                                                        </ng-container>
+                                                        <ng-container *ngIf="op.type === 'enable_api'">
+                                                            外部システムとデータ連携するためのAPI機能です。他社サービスとの連携や独自システムの開発が可能になります。
+                                                        </ng-container>
+                                                        <ng-container *ngIf="op.type === 'google_map'">
+                                                            地図上でデータを視覚化できます。位置情報を含むデータの管理や分析に最適です。
+                                                        </ng-container>
+                                                        <ng-container *ngIf="op.type === 'enable_filesearch'">
+                                                            アップロードしたファイルをAIが検索・要約します。膨大な文書から必要な情報を素早く見つけることができます。
+                                                            <div class="text-muted mt-2">
+                                                                料金: {{ getFileSearchPricePerUser() }}円/ユーザー × {{ user_num }}ユーザー = <strong>{{ getFileSearchTotalPrice() | number }}円 +
+                                                                税/月</strong>
+                                                            </div>
+                                                            <div class="mt-2">
+                                                                <a href="https://pigeon-fw.com/ai-file-search" target="_blank" class="btn btn-sm btn-outline-info">詳細はこちら</a>
+                                                            </div>
+                                                        </ng-container>
+                                                    </div>
+
+                                                    <!-- メール配信追加購入設定 -->
+                                                    <div *ngIf="op.checked && op.type === 'mail_option'" style="margin-left: 25px; margin-top: 10px; margin-bottom: 15px;">
+                                                        <label>月間配信件数：</label>
+                                                        <select class="form-control" style="width: 350px; display: inline-block; margin-left: 10px;"
+                                                                [(ngModel)]="mailDeliveryAdditionalUnits" (change)="onQuantityChange(quantity.toString())">
+                                                            <option [ngValue]="0">5,000件/月（基本プラン）</option>
+                                                            <option [ngValue]="1">10,000件/月 (+5,000円)</option>
+                                                            <option [ngValue]="2">15,000件/月 (+10,000円)</option>
+                                                            <option [ngValue]="3">20,000件/月 (+15,000円)</option>
+                                                            <option [ngValue]="4">25,000件/月 (+20,000円)</option>
+                                                            <option [ngValue]="5">30,000件/月 (+25,000円)</option>
+                                                            <option [ngValue]="6">35,000件/月 (+30,000円)</option>
+                                                            <option [ngValue]="7">40,000件/月 (+35,000円)</option>
+                                                            <option [ngValue]="8">45,000件/月 (+40,000円)</option>
+                                                            <option [ngValue]="9">50,000件/月 (+45,000円)</option>
+                                                            <option [ngValue]="10">55,000件/月 (+50,000円)</option>
+                                                            <option [ngValue]="11">60,000件/月 (+55,000円)</option>
+                                                            <option [ngValue]="12">65,000件/月 (+60,000円)</option>
+                                                            <option [ngValue]="13">70,000件/月 (+65,000円)</option>
+                                                            <option [ngValue]="14">75,000件/月 (+70,000円)</option>
+                                                            <option [ngValue]="15">80,000件/月 (+75,000円)</option>
+                                                            <option [ngValue]="16">85,000件/月 (+80,000円)</option>
+                                                            <option [ngValue]="17">90,000件/月 (+85,000円)</option>
+                                                            <option [ngValue]="18">95,000件/月 (+90,000円)</option>
+                                                            <option [ngValue]="19">100,000件/月 (+95,000円)</option>
+                                                        </select>
+                                                        <div class="text-muted">※5,000件毎に税別5,000円/月で追加されます</div>
+                                                    </div>
+
+                                                    <!-- GoogleMap呼び出し回数設定 -->
+                                                    <div *ngIf="op.checked && op.type === 'google_map'" style="margin-left: 25px; margin-top: 10px; margin-bottom: 15px;">
+                                                        <label>GoogleMap呼び出し回数：</label>
+                                                        <select class="form-control" style="width: 300px; display: inline-block; margin-left: 10px;"
+                                                                [(ngModel)]="googleMapCallCount" (change)="onChangePlan()">
+                                                            <option [ngValue]="1">デフォルト（3,000回/月）</option>
+                                                            <option [ngValue]="2">6,000回/月 (+5,000円)</option>
+                                                            <option [ngValue]="3">9,000回/月 (+10,000円)</option>
+                                                            <option [ngValue]="4">12,000回/月 (+15,000円)</option>
+                                                            <option [ngValue]="5">15,000回/月 (+20,000円)</option>
+                                                        </select>
+                                                        <div class="text-muted">※3,000回表示毎に税別5,000円/月で追加されます</div>
+                                                    </div>
+                                                </div>
+                                            </ng-container>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="vertical-align: middle;" class="option-title">
+                                            クライアント証明書ユーザー数
+                                        </th>
+                                        <td>
+                                            <div class="option-card">
+                                                <div class="option-description mb-3">
+                                                    セキュリティ強化のためのクライアント証明書を設定するユーザー数を指定します。
+                                                    重要な情報を扱う場合に強く推奨されます。
+                                                </div>
+                                                <div class="input-group" style="width: 200px;">
+                                                    <input style="width: 120px;"
+                                                           type="number"
+                                                           class="form-control mr-3"
+                                                           [(ngModel)]="certificateUserCount"
+                                                           (input)="onQuantityChange($event.target.value)">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">ユーザー</span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted mt-2">
+                                                    ※1ユーザーあたり200円/月
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="vertical-align: middle;" class="option-title">
+                                            月間コネクトステップ数上限
+                                        </th>
+                                        <td>
+                                            <div class="option-card">
+                                                <div class="option-description mb-3">
+                                                    コネクトやワークフロー自動化に使用できる月間のステップ数です。
+                                                    業務の自動化レベルに合わせて選択できます。
+                                                </div>
+                                                <select
+                                                    class="form-control custom"
+                                                    style="width:300px"
+                                                    (change)="onChangePlan()"
+                                                    [(ngModel)]="monthly_rpa_step_limit"
+                                                >
+                                                    <option [value]="100">100ステップ (無料)</option>
+                                                    <option [value]="300">300ステップ (5,000円 + 税/月)</option>
+                                                    <option [value]="500">500ステップ (10,000円 + 税/月)</option>
+                                                    <option [value]="700">700ステップ (15,000円 + 税/月)</option>
+                                                    <option [value]="900">900ステップ (20,000円 + 税/月)</option>
+                                                    <option [value]="1100">1,100ステップ (25,000円 + 税/月)</option>
+                                                    <option [value]="2100">2,100ステップ (50,000円 + 税/月)</option>
+                                                    <option [value]="3100">3,100ステップ (75,000円 + 税/月)</option>
+                                                    <option [value]="5100">5,100ステップ (125,000円 + 税/月)</option>
+                                                    <option [value]="10100">10,100ステップ (250,000円 + 税/月)</option>
+                                                </select>
+                                                <div class="text-muted mt-2">
+                                                    ※100ステップまでは無料、それ以上は+200ステップごとに5000円(税抜)
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- 料金明細テーブル -->
+                                <div class="col-md-12 mb-4">
+                                    <h4 class="mb-3 text-center">料金明細</h4>
+                                    <table class="table table-bordered">
+                                        <thead class="thead-light">
+                                        <tr>
+                                            <th>項目</th>
+                                            <th class="text-right">金額（税抜）</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>基本料金（{{ contract_type == 'user_num' ? 'ユーザー数' : 'ログイン数' }}プラン × {{ quantity }}ユーザー）</td>
+                                            <td class="text-right">{{ getUserPriceOnly() | number }}円</td>
+                                        </tr>
+                                        <tr *ngIf="add_size > 0">
+                                            <td>追加容量（+{{ add_size }}GB）</td>
+                                            <td class="text-right">{{ Math.ceil(add_size / 100) * 10000 | number }}円</td>
+                                        </tr>
+                                        <tr *ngFor="let op of options">
+                                            <td *ngIf="op.checked && op.type !== 'enable_filesearch'">
+                                                {{ op.name }}
+                                                <span *ngIf="op.type === 'mail_option' && mailDeliveryAdditionalUnits > 0">
+                                                    ({{ 5000 + (mailDeliveryAdditionalUnits * 5000) | number }}件/月)
+                                                </span>
+                                            </td>
+                                            <td *ngIf="op.checked && op.type !== 'enable_filesearch'" class="text-right">
+                                                <ng-container *ngIf="op.type === 'mail_option' && mailDeliveryAdditionalUnits > 0">
+                                                    {{ op.price + (mailDeliveryAdditionalUnits * 5000) | number }}円
+                                                </ng-container>
+                                                <ng-container *ngIf="op.type !== 'mail_option' || mailDeliveryAdditionalUnits === 0">
+                                                    {{ op.price | number }}円
+                                                </ng-container>
+                                            </td>
+                                        </tr>
+                                        <tr *ngIf="options[3].checked">
+                                            <td>{{ options[3].name }}（{{ getFileSearchPricePerUser() }}円/ユーザー × {{ user_num }}ユーザー）</td>
+                                            <td class="text-right">{{ getFileSearchTotalPrice() | number }}円</td>
+                                        </tr>
+                                        <tr *ngIf="googleMapCallCount > 1 && options[2].checked">
+                                            <td>GoogleMap追加呼び出し回数</td>
+                                            <td class="text-right">{{ (googleMapCallCount - 1) * 5000 | number }}円</td>
+                                        </tr>
+                                        <tr *ngIf="certificateUserCount > 0">
+                                            <td>クライアント証明書（{{ certificateUserCount }}ユーザー）</td>
+                                            <td class="text-right">{{ certificateUserCount * 200 | number }}円</td>
+                                        </tr>
+                                        <tr *ngIf="monthly_rpa_step_limit > 100">
+                                            <td>月間コネクトステップ数（{{ monthly_rpa_step_limit }}ステップ）</td>
+                                            <td class="text-right">{{ Math.ceil((monthly_rpa_step_limit - 100) / 200) * 5000 | number }}円</td>
+                                        </tr>
+                                        </tbody>
+                                        <tfoot>
+                                        <tr class="table-active">
+                                            <th>合計（税抜）</th>
+                                            <th class="text-right">{{ Math.round(price / 1.1) | number }}円</th>
+                                        </tr>
+                                        <tr>
+                                            <th>消費税（10%）</th>
+                                            <th class="text-right">{{ price - Math.round(price / 1.1) | number }}円</th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <!-- お支払い金額 -->
+                                <div class="col-md-12 price-summary">
+                                    <div class="row">
+                                        <div class="col-md-6 text-center">
+                                            <h4>お支払い金額（税込）</h4>
+                                        </div>
+                                        <div class="col-md-6 text-center price-summary-total">
+                                            <span id="price_calc">{{ price | number }}</span> &nbsp; 円
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <ng-container *ngIf="is_update;else NotUpdate">
+                                <ng-container *ngIf="is_valid_num">
+                                    <ng-container *ngIf="current_payment_service=='paypal'">
+                                        <button class="btn btn-success cta-button mt-4"
+                                                (click)="makePayment()"
+                                                style="background: linear-gradient(45deg, #ffc439, #f7b731);">
+                                            契約更新を行う
+                                        </button>
+                                        <div style="margin-top: 10px; text-align: center;">
+                                            ※決済サービスがpaypalからstripeに変更となります。
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="current_payment_service=='stripe'">
+                                        <button class="btn btn-success cta-button mt-4" (click)="updatePaymentModal.show()">
+                                            契約更新を行う
+                                        </button>
+                                    </ng-container>
+                                </ng-container>
+                                <br style="clear:both">
+
+                            </ng-container>
+                            <ng-template #NotUpdate>
+                                <div class="form-group row" *ngIf="is_valid_num">
+                                    <div class="col-md-12 text-center mt-4">
+                                        <div class="option-card">
+                                            <mat-checkbox class="btn-block" id="aggrement_checkbox"
+                                                          labelPosition="after"
+                                                          [(ngModel)]="agreed">
+                                                <a href="https://pigeon-fw.com/terms" target="_blank">利用規約</a>に同意する
+                                            </mat-checkbox>
+                                            <div class="mt-3">
+                                                <a href="https://pigeon-fw.com/privacy" target="_blank" class="btn btn-sm btn-outline-info mr-2">プライバシーポリシー</a>
+                                                <a href="https://pigeon-fw.com/specified" target="_blank" class="btn btn-sm btn-outline-info">特定商取引法に基づく表記</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="radio-group m-auto text-center mt-4" *ngIf="agreed">
+                                    <h4 class="mb-3">お支払い方法を選択</h4>
+                                    <div class="d-inline-block mr-4">
+                                        <input class="pg-radio" type="radio" name="pay_type" id="pay_as_stripe"
+                                               value="pay_as_stripe" [(ngModel)]="pay_type">
+                                        <label class="radio-custom" for="pay_as_stripe">クレジットカード支払い</label>
+                                    </div>
+                                    <div class="d-inline-block">
+                                        <input class="pg-radio" type="radio" name="pay_type" id="pay_as_bank"
+                                               value="pay_as_bank" [(ngModel)]="pay_type">
+                                        <label class="radio-custom" for="pay_as_bank">銀行振込</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 text-center paypal-btn-padding" [hidden]="!agreed || pay_type != 'pay_as_credit_card'">
+                                        <div id="{{getPaypalButtonId()}}">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center mt-4" [hidden]="!agreed || pay_type != 'pay_as_stripe' ">
+                                        <div class="stripe-subscription">
+
+
+                                            <button class="btn btn-success cta-button"
+                                                    (click)="makePayment()">
+                                                クレジットカード支払いに進む
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center mt-4" *ngIf="agreed && pay_type == 'pay_as_bank' ">
+                                        <button class="btn btn-success cta-button"
+                                                (click)="sendNotiToUserPayAsBank.show()">銀行振込で有料登録申請を行う
+                                        </button>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+</div>
+
+<confirm-modal #updatePaymentModal [submit_button_text]="'契約更新を行う'"
+               [text]="'プランを更新します。よろしいですか？'" (onOk)="sendUpdateRequest()" [sending]="sending"></confirm-modal>
+
+<confirm-modal #sendNotiToUserPayAsBank [submit_button_text]="'Yes'"
+               [text]="'銀行振込で有料登録を行います。よろしいですか？'" (onOk)="sendNotiToUserAsPayAsBank()" [sending]="notiSending"></confirm-modal>

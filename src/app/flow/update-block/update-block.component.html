@@ -1,0 +1,7 @@
+<ng-container *ngFor="let form_and_value of block.form_and_values">
+    <div>{{ form_and_value.toText() }}</div>
+</ng-container>
+<!-- 影響件数 -->
+<div class="data_count">
+    データ件数: {{ block._data_count ?? '-' }}
+</div>

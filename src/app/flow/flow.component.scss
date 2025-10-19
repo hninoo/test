@@ -1,0 +1,87 @@
+.rpa_container {
+    margin-top: 20px;
+    position: relative;
+    height: 150vh;
+    width: 100vw;
+    background: white;
+
+    .trigger-body {
+
+    }
+}
+
+
+.block-box {
+    width: 220px;
+    min-height: 80px;
+    position: absolute;
+    background-color: white;
+    border-radius: 8px;
+    padding: 10px;
+    border: 2px solid #999; /* 濃いボーダー */
+    background-color: white;
+
+}
+
+
+.edit-icon {
+    position: absolute;
+    top: 8px; /* 上端からの距離 */
+    right: 8px; /* 右端からの距離 */
+    cursor: pointer; /* ホバーした際にカーソルをポインタに変更 */
+}
+
+.preview-icon {
+    position: absolute;
+    top: 8px; /* 上端からの距離 */
+    right: 30px; /* 右端からの距離 */
+    cursor: pointer; /* ホバーした際にカーソルをポインタに変更 */
+}
+
+
+/* タイプ別の背景色 */
+.block-box.COPY {
+    //background-color: rgba(255, 99, 71, 0.1); /* 薄い赤（COPY用） */
+    //background-color: rgba(123, 104, 238, 0.1); /* 薄いスレートブルー（SLACK_NOTIFICATION用） */
+    background-color: rgba(30, 144, 255, 0.1); /* 薄い青（TRIGGER用） */
+}
+
+.block-box.TRIGGER {
+    //background-color: rgba(30, 144, 255, 0.1); /* 薄い青（TRIGGER用） */
+}
+
+.block-box.EMAIL_NOTIFICATION {
+    //background-color: rgba(50, 205, 50, 0.1); /* 薄い緑（EMAIL_NOTIFICATION用） */
+}
+
+.block-box.FILTER {
+    //background-color: rgba(255, 215, 0, 0.1); /* 薄い黄色（FILTER用） */
+    //background-color: rgba(30, 144, 255, 0.1); /* 薄い青（TRIGGER用） */
+}
+
+.block-box.SLEEP {
+    //background-color: rgba(218, 112, 214, 0.1); /* 薄い紫（SLEEP用） */
+}
+
+.block-box.CREATE_DATA {
+}
+
+.block-box.UPDATE_DATA {
+    background-color: rgba(255, 165, 0, 0.1); /* 薄いオレンジ（CREATE_DATA用） */
+    //background-color: rgba(32, 178, 170, 0.1); /* 薄いティール（UPDATE_DATA用） */
+}
+
+.block-box.DELETE_DATA {
+    background-color: rgba(255, 99, 71, 0.1); /* 薄い赤（COPY用） */
+    //background-color: rgba(255, 69, 0, 0.1); /* 薄い赤オレンジ（DELETE_DATA用） */
+}
+
+.block-box.CONDITION {
+    background-color: rgba(30, 144, 255, 0.1); /* 薄い青（TRIGGER用） */
+    //background-color: rgba(219, 112, 147, 0.1); /* 薄いピンク（CONDITION用） */
+}
+
+.block-box.SLACK_NOTIFICATION, .block-box.EMAIL_NOTIFICATION {
+    //background-color: rgba(123, 104, 238, 0.1); /* 薄いスレートブルー（SLACK_NOTIFICATION用） */
+    background-color: rgba(255, 215, 0, 0.1); /* 薄い黄色（FILTER用） */
+}

@@ -1,0 +1,39 @@
+.dataset-add-modal {
+    .card-block {
+
+        h4 {
+            margin-top: 36px;
+            color: #20a8d8;
+            border-bottom: 1px solid #ddd;
+            /* width: 89%; */
+            padding-bottom: 5px;
+            margin-bottom: 23px;
+        }
+    }
+}
+
+.icon-custom-center {
+    position:absolute;
+    right:0;
+    cursor: pointer;
+}
+
+@media(max-width: 767px) {
+    .fc-toolbar.fc-header-toolbar {
+      display: flex;
+      flex-direction: column;
+    }
+    .fc-toolbar.fc-header-toolbar .fc-left {
+      order: 3;
+    }
+    .fc-toolbar.fc-header-toolbar .fc-center {
+      order: 1;
+    }
+    .fc-toolbar.fc-header-toolbar .fc-right {
+      order: 2;
+    }
+    .fc-today-button {
+      display: block;
+    }
+  }
+  

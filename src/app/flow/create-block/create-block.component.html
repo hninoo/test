@@ -1,0 +1,25 @@
+<div class="create-block-display">
+    <!-- 対象テーブル表示 -->
+    <div class="target-table" *ngIf="block.target_table">
+        <strong>追加先テーブル:</strong> {{ block.getTargetTableInfo()?.getLabel() || block.target_table }}
+    </div>
+
+    <!-- フィールド値設定表示 -->
+    <div class="field-values" *ngIf="block.form_and_values && block.form_and_values.length > 0">
+        <div class="field-value-list">
+            <div *ngFor="let form_and_value of block.form_and_values" class="field-value-item">
+                {{ form_and_value.toText() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定なしの場合 -->
+    <div class="no-settings" *ngIf="!block.target_table || !block.form_and_values || block.form_and_values.length === 0">
+        <span class="text-muted">設定なし</span>
+    </div>
+
+    <!-- 常に1件追加 -->
+    <div class="data_count">
+        追加件数: 1件
+    </div>
+</div>

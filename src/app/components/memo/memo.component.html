@@ -1,0 +1,10 @@
+<div class="card" id="memo" *ngIf="isDisplay">
+    <div class="card-header">
+        {{table_info.menu.top_memo_title}}
+        <i *ngIf="userTableSetting.open_memo" class="fa fa-chevron-up pull-right" style="cursor: pointer" (click)="openCloseMemo()"></i>
+        <i *ngIf="!userTableSetting.open_memo" class="fa fa-chevron-down pull-right" style="cursor: pointer" (click)="openCloseMemo()"></i>
+    </div>
+    <div data-memo-card class="card-block" [hidden]="!userTableSetting.open_memo">
+        <div class="card-block" [innerHTML]="table_info.menu.top_memo | safeHtml"></div>
+    </div>
+</div>

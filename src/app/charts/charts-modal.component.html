@@ -1,0 +1,854 @@
+<div class="modal-dialog modal-default" role="document" *ngIf="edittingCustomFilter">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <span *ngIf="edittingCustomFilter.isFilter();else isView;">フィルタ<span *ngIf="table_info.grant.summarize"> / 集計</span></span>
+                <ng-template #isView>
+                    <span *ngIf="edittingCustomFilter.isView();else isChart;">ビュー</span>
+                </ng-template>
+
+                <span *ngIf="!isTableType()">チャート</span>
+
+            </h4>
+            <button type="button" class="close" (click)="onClickCancelButton.emit()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <ng-container *ngIf="mode=='setCustomFilter'">
+
+                <div class="mt-2">
+                    <div class="row">
+                        <div class="col-md-3 font-weight-bold pt-2">
+                            テーブル
+                        </div>
+                        <div class="col-md-9">
+                            <ng-select
+                                class="custom form-control"
+                                [items]="exist_table_a"
+                                appendTo="body"
+                                [searchWhileComposing]="false"
+                                [virtualScroll]="true"
+                                bindLabel="name"
+                                bindValue="table"
+                                [(ngModel)]="edittingCustomFilter.table"
+                                (change)="onSelectTable($event)"
+                            ></ng-select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="mt-2">
+                    <div class="row">
+                        <div class="col-md-3 font-weight-bold pt-2">
+                            フィルタ
+                        </div>
+                        <div class="col-md-9">
+                            <label><input type="radio" name="filter_new" [(ngModel)]="filter_create_type" value="new">&nbsp;新規作成</label><br>
+
+                            <label *ngIf="getFilters().length>0"><input type="radio" name="filter_new" [(ngModel)]="filter_create_type" value="copy">&nbsp;既存のフィルタをコピー</label><br>
+
+                            <ng-container *ngIf="filter_create_type==='copy'">
+                                <ng-select
+                                    class="custom form-control"
+                                    [items]="getFilters()"
+                                    appendTo="body"
+                                    [searchWhileComposing]="false"
+                                    [virtualScroll]="true"
+                                    bindLabel="name"
+                                    (change)="onChangeCopyFilter($event)"
+                                ></ng-select>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="mt-2" *ngIf="filter_create_type==='new'">
+                    <div class="row">
+                        <div class="col-md-3 font-weight-bold pt-2">
+                            表示タイプ
+                        </div>
+                        <div class="col-md-9">
+                            <label>
+                                <input type="radio" name="filter_type" (change)="updateFilterType('table', 'view')" value="table"
+                                       [checked]="edittingCustomFilter.type == 'table' && edittingCustomFilter.filter_type == 'view'">
+                                &nbsp;データ
+                            </label><br>
+                            <label>
+                                <input type="radio" name="filter_type" (change)="updateFilterType('chart')" value="chart"
+                                       [checked]="edittingCustomFilter.type == 'chart'">
+                                &nbsp;チャート
+                            </label><br>
+                            <label>
+                                <input type="radio" name="filter_type" (change)="updateFilterType('sum')" value="sum"
+                                       [checked]="edittingCustomFilter.type == 'table' && edittingCustomFilter.filter_type == 'filter'">
+                                &nbsp;集計
+                            </label><br>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="mt-2">
+                    <div class="row">
+                        <div class="col-md-3 font-weight-bold pt-2">
+                            ダッシュボード 表示サイズ
+                        </div>
+                        <div class="col-md-9">
+                            <select class="form-control width-max-50" [(ngModel)]="dashboardContent.col_size"
+                                    (change)="loadEditingChartData()">
+                                <option *ngFor="let option of chartSizes"
+                                        value="{{option.value}}">{{option.name}}
+                                </option>
+                            </select>
+                        </div>
+                        <ng-container *ngIf="!edittingCustomFilter.isChart()">
+                            <div class="col-md-3 font-weight-bold pt-2">
+                                ダッシュボード 表示件数
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control width-100" [(ngModel)]="edittingCustomFilter.max_record_num">
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+
+            </ng-container>
+            <ng-container *ngIf="mode=='setDetail'">
+                <tabset class="mt-2" #modalTabs>
+                    <!-- Narrow down -->
+                    <tab heading="絞り込み" *ngIf="!edittingCustomFilter.isView() || edittingCustomFilter.filter_type == 'mix'">
+                        <h5>絞り込み&nbsp;&nbsp;<label class="pl-3" style="font-size:16px"><input type="checkbox" [(ngModel)]="openAdvanceMenu">&nbsp;高度な機能 </label></h5>
+                        <!-- 高度な機能　START -->
+                        <ng-container *ngIf="openAdvanceMenu">
+
+                            <ng-container *ngFor="let variable of edittingCustomFilter.variables; let i = index;">
+                                <div class="row">
+                                    <div class="col-md-1">
+                                        <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="this.edittingCustomFilter.deleteVariable(i)"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <ng-select
+                                            appendTo="body"
+                                            [items]="edittingCustomFilter.variable_types"
+                                            [virtualScroll]="true"
+                                            bindLabel="value"
+                                            bindValue="key"
+                                            [(ngModel)]="variable.type"
+                                        >
+                                        </ng-select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="row">
+                                            <i class="fa fa-question-circle pull-left" aria-hidden="true"
+                                               ngbTooltip="変数名を設定します。例えば、「数値1」と設定した場合は絞り込み条件の値として、「{数値1}」と入力します。"></i>
+                                            <input type="text" style="width: 90%" class="pull-left form-control" [(ngModel)]="variable.name" placeholder="変数名">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <i class="fa fa-question-circle pull-left" aria-hidden="true"
+                                           ngbTooltip="デフォルト値を設定します"></i>
+                                        <div style="width:90%" class="pull-left">
+                                            <search-field [table_info]="table_info" [placeholder]="'デフォルトの値'" [value]="variable.default_value" [form]="variable.dummy_form"
+                                                          [is_timing_condition]="false" [condition]="condition"
+                                                          (valueChange)="changeVariableValue($event,variable)"
+                                            ></search-field>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </ng-container>
+                            <br style="clear: both">
+                            <button class="btn btn-success btn-sm" (click)="edittingCustomFilter.addVariable()"><i class="fa fa-plus"></i>変数を追加</button>
+                            <br style="clear: both">
+                        </ng-container>
+                        <!-- 高度な機能　END -->
+
+                        <!-- 絞り込み　START -->
+                        <div class="mt-3">
+                            <ng-container *ngFor="let condition of edittingCustomFilter.conditions.condition_a; let i = index;">
+                                <div style="margin-bottom:10px" class="condition-select-row">
+                                    <div class="condition-wrap">
+                                        <condition-form [use_variable]="openAdvanceMenu" [variables]="edittingCustomFilter.variables" [table]="edittingCustomFilter.table"
+                                                        [default_condition]="condition"
+                                                        (valueChanged)="onConditionChanged($event)" [index]="i"></condition-form>
+                                        <div class="buttons">
+                                            <button class="btn btn-danger pull-left btn-sm btn mt-1 condition-delete" (click)="delCondition(i)"><i class="fa fa-minus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <br style="clear: both">
+                        <button class="btn btn-success btn-sm" (click)="addCondition()"><i class="fa fa-plus mr-1"></i>条件を追加</button>
+                        <!-- 絞り込み　END -->
+                        <br style="clear: both">
+                        <ng-container *ngIf="edittingCustomFilter.isSetSummarizeParam()">
+                            <h5 class="mt-5">集計に対する絞り込み</h5>
+                            <ng-container *ngFor="let condition of edittingCustomFilter.summarize_conditions.condition_a; let i = index;">
+                                <div style="margin-bottom:10px">
+                                    <div class="condition-wrap">
+                                        <condition-form [filter]="edittingCustomFilter" [use_variable]="openAdvanceMenu" [variables]="edittingCustomFilter.variables"
+                                                        [table]="edittingCustomFilter.table"
+                                                        [default_condition]="condition"
+                                                        (valueChanged)="onConditionChanged($event,edittingCustomFilter.summarize_conditions)" [index]="i"></condition-form>
+                                        <div class="buttons">
+                                            <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="edittingCustomFilter.summarize_conditions.deleteCondition(i)"><i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <br style="clear: both">
+                            <button class="btn btn-success btn-sm" (click)="addSummarizeCondition()"><i class="fa fa-plus mr-1"></i>条件を追加</button>
+                        </ng-container>
+                    </tab>
+                    <!-- project -->
+                    <tab heading="項目" *ngIf="isTableType() && edittingCustomFilter.isView()" cdkDropList (cdkDropListDropped)="drop($event)">
+                        <p>表示項目が空の場合はすべての項目が表示され、表示項目が指定してある場合はその項目のみ表示されます。</p>
+                        <h5>ビュー表示画面</h5>
+                        <div class="checkbox">
+                            <label>
+                                <input type='checkbox' [(ngModel)]="edittingCustomFilter.list_use_show_fields"/>&ngsp;一覧画面
+                            </label>
+                            <label>
+                                <input type='checkbox' [(ngModel)]="edittingCustomFilter.view_use_show_fields"/>&ngsp;詳細画面
+                            </label>
+                            <label>
+                                <input type='checkbox' [(ngModel)]="edittingCustomFilter.edit_use_show_fields"/>&ngsp;編集画面 (必須項目は表示されます）
+                            </label>
+                        </div>
+                        <h5 class="mt-2">表示項目</h5>
+
+                        <field-select-dragdrop [table_info]="table_info" [selected_field_name_a]="edittingCustomFilter.show_fields"
+                                               (onChangeValue)="onShowFieldChanged($event)"></field-select-dragdrop>
+
+                    </tab>
+                    <!-- sort order -->
+                    <tab heading="並び順" *ngIf="edittingCustomFilter.isView() || edittingCustomFilter.isSetSummarizeParam()">
+                        <h5>並び順&nbsp;&nbsp;</h5>
+                        <ng-container>
+                            <sort-params-form [sort_params]="edittingCustomFilter.sort_params" [filter]="edittingCustomFilter" [table_info]="table_info"
+                                              (onChangeValue)="onChangeSortParams($event)"></sort-params-form>
+                        </ng-container>
+
+                    </tab>
+                    <!-- totalling -->
+                    <tab *ngIf="table_info.grant.summarize && edittingCustomFilter.isFilter(true)" heading="{{isTableType()?'集計':'チャート設定'}}">
+                        <div class="row chart-setting pl-4 pr-4 col-md-12 mt-1">
+                            <ng-container *ngIf="!isTableType()">
+                                <div class="col-md-2 font-weight-bold">
+                                    テーブル
+                                </div>
+                                <div class="col-md-10">
+                                    <select class="form-control" [(ngModel)]="edittingCustomFilter.table"
+                                            (change)="onSelectTable($event)">
+                                        <option value="">選択して下さい</option>
+                                        <option *ngFor="let option of _share.exist_table_a"
+                                                value="{{option.table}}">{{option.getLabel()}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 font-weight-bold mt-2">
+                                    カラー
+
+                                </div>
+                                <div class="col-md-10 mt-2">
+                                    <select class="form-control" [(ngModel)]="edittingCustomFilter.summarizeFilter.color"
+                                            (change)="loadEditingChartData()">
+                                        <option value="">選択して下さい</option>
+                                        <option *ngFor="let color of _share.chartColorSchemas"
+                                                value="{{color}}">{{color}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="row col-md-12 mt-2">
+                                    <div class="col-md-2 font-weight-bold">
+                                        オプション
+                                    </div>
+                                    <div class="col-md-10 flex">
+                                        <ng-container *ngIf="['line'].indexOf(edittingCustomFilter.summarizeFilter.type)>=0">
+                                            <div class="checkbox mr-2">
+                                                <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.fill" value="true" id="check_fill_color"
+                                                       (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom pr-2" for="check_fill_color">
+                                                    塗りつぶし
+                                                </label>
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf="['line','bar'].indexOf(edittingCustomFilter.summarizeFilter.type)>=0">
+                                            <div class="checkbox mr-2">
+                                                <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.sum" value="true" id="check_sum"
+                                                       (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom pr-2" for="check_sum">
+                                                    累積(時系列の場合)
+                                                </label>
+                                            </div>
+                                            <ng-container *ngIf="edittingCustomFilter.summarizeFilter.options.sum">
+                                                <div class="checkbox ml-2">
+                                                    <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.sum_previous" value="true" id="sum_previous"
+                                                           (change)="loadEditingChartData()">
+                                                    <label class="checkbox-custom pr" for="sum_previous">
+                                                        過去分も全て加算
+                                                    </label>
+                                                </div>
+                                            </ng-container>
+                                            <div class="checkbox ml-2">
+                                                <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.compare_previous" value="true" id="compare_previous"
+                                                       (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom pr-2" for="compare_previous">
+                                                    前期も表示
+                                                </label>
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf="['bar','horizontalBar'].indexOf(edittingCustomFilter.summarizeFilter.type)>=0">
+                                            <div class="checkbox mr-2">
+                                                <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.stacked" value="true" id="stacked"
+                                                       (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom" for="stacked">
+                                                    積み上げ棒グラフ
+                                                </label>
+                                            </div>
+                                            <div class="checkbox mr-2" *ngIf="edittingCustomFilter.summarizeFilter.options['stacked_100per']">
+                                                <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.stacked_100per" value="true" id="stacked_100per"
+                                                       (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom" for="stacked">
+                                                    100％の割合表示
+                                                </label>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <div class="col-md-12" *ngIf="isTableType()">
+                                <label><input type="checkbox" [(ngModel)]="useSummarize" value="true"
+                                              (change)="changeUseSummarize()">&nbsp;集計を使用する</label>
+                                <ng-container *ngIf="useSummarize">
+                                    <br><label><input type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.cross_table" value="true"
+                                >&nbsp;クロス集計</label>
+
+                                </ng-container>
+                            </div>
+                            <ng-container *ngIf="this.edittingCustomFilter.summarizeFilter && edittingCustomFilter.summarizeFilter.fields.length>0 && useSummarize">
+                                <ng-container *ngFor="let chart_field of edittingCustomFilter.summarizeFilter.fields; let i = index">
+                                    <div class="col-md-3 font-weight-bold pt-20">
+                                        <span>データ項目{{i + 1}}</span>
+
+                                    </div>
+                                    <div class="row col-md-8">
+                                        <div [ngClass]="{'col-md-6':chart_field['is_date'] || !isTableType(),'col-md-12':!(chart_field['is_date'] || !isTableType())}">
+                                            <!--
+                                            <ng-container *ngIf="chart_field.use_other_table;else notUseOtherTable">
+                                                <select-field [table_name]="chart_field.table" [field_name]="chart_field.field" [exclude_table_name_a]="[this.table_info.table]" (valueChange)="onSelectOtherTableField($event,i)" [condition_target_form_a]="getConditionTargetFormArray()"></select-field>
+                                            </ng-container>
+                                            <ng-template #notUseOtherTable>
+
+                                            </ng-template>
+                                            -->
+                                            項目：<br>
+                                            <select class="form-control" [(ngModel)]="chart_field['field']"
+                                                    (change)="onSelectField(i)">
+                                                <option value="">選択して下さい</option>
+                                                <option *ngFor="let field of getFields()"
+                                                        value="{{field['value']}}">{{field['label']}}
+                                                </option>
+                                            </select>
+
+                                        </div>
+                                        <ng-container *ngIf="chart_field['is_date'] || !isTableType()">
+                                            <div class="col-md-6" *ngIf="i==0 || edittingCustomFilter.summarizeFilter.cross_table">
+                                                <div>
+                                                    期間単位：
+                                                    <select class="form-control" [(ngModel)]="chart_field['term']"
+                                                            (change)="loadEditingChartData()">
+                                                        <option *ngFor="let term of terms"
+                                                                value="{{term['type']}}">{{term['name']}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="checkbox" *ngIf="isTableType()">
+                                                    <label>
+                                                        <input name="enable_totaling_start_month" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.enable_totaling_start_month" value="edittingCustomFilter.summarizeFilter.options.enable_totaling_start_month" (change)="handleOnChangeEnableTotalingStartMonth(chart_field)">
+                                                        開始月を設定
+                                                    </label>
+                                                </div>
+
+
+                                                <div *ngIf="!isTableType() && chart_field['term']=='month' || edittingCustomFilter.summarizeFilter.options.enable_totaling_start_month" >
+                                                    開始月
+                                                    <select class="form-control" [(ngModel)]="chart_field['term_month_start']" (change)="loadChartData()">
+                                                        <option *ngFor="let start of term_month_starts"
+                                                                value="{{start['value']}}">{{start['name']}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div *ngIf=" chart_field['field']!='' && !chart_field['is_date'] && !isTableType()">
+                                                    期間単位用項目
+                                                    <select class="form-control" [(ngModel)]="chart_field['term_field']" (change)="loadChartData()">
+                                                        <option value="">選択して下さい</option>
+                                                        <option *ngFor="let field of getFields(false,true)"
+                                                                value="{{field['value']}}">{{field['label']}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                    <div class="col-md-1 pt-4">
+                                        &nbsp;<button *ngIf="i>0 && !isScatterChart()" class="btn btn-sm btn-danger" (click)="removeChartField(i)"><i class="fa fa-remove"></i></button>
+                                    </div>
+
+                                </ng-container>
+                                <div class="col-md-12" *ngIf="!edittingCustomFilter.summarizeFilter.options.compare_previous">
+                                    <div class="text-center" style="margin-top:10px;"
+                                         *ngIf="isTableType() || edittingCustomFilter.summarizeFilter.fields.length<edittingCustomFilter.summarizeFilter.max_field_num">
+                                        <button class="btn btn-sm btn-success" (click)="addChartField()">追加+</button>
+                                    </div>
+                                </div>
+
+                                <ng-container *ngIf="isUseYAxes()">
+                                    <div class="col-md-12 row" *ngFor="let summary of edittingCustomFilter.summarizeFilter.summary_a; let i = index">
+                                        <div class="col-md-3 font-weight-bold ">
+                                            <div class="row">
+                                                <div class="col-md-9">
+                                                    <ng-container *ngIf="isTableType()">
+                                                        <ng-container *ngIf="summary.is_edit_mode;else NotEdit">
+                                                            <input type="text" class="form-control" [(ngModel)]="summary.label">
+                                                        </ng-container>
+                                                        <ng-template #NotEdit>
+                                                            <span>{{summary.getLabel(i)}}</span>
+                                                            &nbsp;<i class="fa fa-pencil edit-label" (click)="startEditLabel(summary,i)"></i>
+                                                        </ng-template>
+                                                        <select class="form-control" [(ngModel)]="summary.summary_field_type">
+                                                            <option value="table_field">テーブル項目</option>
+                                                            <option value="other_table_field">&nbsp;他のテーブルの項目</option>
+                                                            <option value="calc">計算式</option>
+
+                                                        </select>
+
+                                                    </ng-container>
+                                                    <span *ngIf="!isTableType()"> y軸</span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row col-md-8">
+                                            <div class="col-md-4" *ngIf="!isTableType()">
+                                                グラフ:
+                                                <select *ngIf="edittingCustomFilter.summarizeFilter" class="form-control" [(ngModel)]="summary['graph_type']"
+                                                        (change)="onChangeGraphType(i)">
+                                                    <ng-container *ngFor="let option of edittingCustomFilter.summarizeFilter.CHART_TYPES">
+                                                        <option *ngIf="i == 0 || ['line','bar'].indexOf(option.value)>=0"
+                                                                value="{{option.value}}">{{option.name}}
+                                                        </option>
+                                                    </ng-container>
+                                                </select>
+                                                <div class="checkbox" *ngIf="i == 0 && percent_label_flg">
+                                                    <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options._percent_label" value="false"
+                                                           id="percent_label"
+                                                           (change)="loadEditingChartData()">
+                                                    <label class="checkbox-custom" for="percent_label">
+                                                        %表示
+                                                    </label>
+                                                </div>
+                                                <!-- 一旦OEM用 -->
+                                                <div class="checkbox" *ngIf="i == 0 && nps_label_flg">
+                                                    <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.nps_flg" value="false" id="nps_label"
+                                                           (change)="loadEditingChartData()">
+                                                    <label class="checkbox-custom" for="nps_label">
+                                                        平均NPS
+                                                    </label>
+                                                    <select [(ngModel)]="edittingCustomFilter.summarizeFilter.options.nps_color" (change)="loadEditingChartData()" class="form-control">
+                                                        <option *ngFor="let color of nps_color_options" [value]="color">
+                                                            {{color}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="summary.summary_field_type!='calc'"
+                                                 [ngClass]="{'col-md-4':!isTableType(),'col-md-6':isTableType() && !summary.use_other_table,'col-md-12':isTableType() && summary.use_other_table}">
+                                                集計方法:
+                                                <select class="form-control" [(ngModel)]="summary['summary_type']"
+                                                        (change)="loadEditingChartData()">
+                                                    <option *ngFor="let option of _share.summary_a"
+                                                            value="{{option.value}}">{{option.name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <ng-container>
+                                                <ng-container [ngSwitch]="summary.summary_field_type">
+                                                    <div *ngSwitchCase="'other_table_field'" class="col-md-12 mt-1">
+                                                        <select-field [table_name]="summary.summary_table" [field_name]="summary.summary_field" [exclude_table_name_a]="[this.table_info.table]"
+                                                                      [conditions]="summary.conditions"
+                                                                      (valueChange)="onSelectSummarizeOtherTableField($event,i)" [condition_target_form_a]="condition_target_form_a"
+                                                                      [is_select_field]="summary['summary_type']!='count'"></select-field>
+                                                    </div>
+                                                    <ng-container *ngSwitchCase="'table_field'">
+                                                        <div *ngIf="!summary.use_other_table && summary['summary_type']!='count'" [ngClass]="{'col-md-4':!isTableType(),'col-md-6':isTableType()}">
+                                                            項目:
+                                                            <select class="form-control" [(ngModel)]="summary['summary_field']"
+                                                                    (change)="loadEditingChartData()">
+                                                                <ng-container *ngFor="let field of getFields(true)">
+                                                                    <option *ngIf="isShowType(edittingCustomFilter.table,field['Field'],summary['summary_type'])"
+                                                                            value="{{field['Field']}}">{{field['Comment']}}
+                                                                    </option>
+                                                                </ng-container>
+                                                            </select>
+                                                        </div>
+                                                    </ng-container>
+                                                    <div *ngSwitchCase="'calc'" class="col-md-12 mt-1">
+                                                        <input type="text" placeholder="{集計項目1} - {集計項目2}" class="form-control" [(ngModel)]="summary.calc_value"/>
+                                                    </div>
+
+                                            </ng-container>
+                                        </ng-container>
+                                        </div>
+                                        <div class="col-md-1 pt-4">
+                                            <button *ngIf="i>0" class="btn btn-sm btn-danger" (click)="removeSummary(i)"><i class="fa fa-remove"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center" style="margin-top:10px;">
+                                        <button (click)="addSummary()" class="btn btn-sm btn-success">追加+</button>
+                                    </div>
+
+                                    <div class="col-md-12 row" *ngIf="!isTableType()">
+                                        <div class="col-md-3"></div>
+                                        <div class="col-md-3">
+                                            <div class="form-group" >
+
+                                            <label class="" for="y-min">Y軸の最小値(任意)</label>
+                                                <input class="form-control" id="y-min" type="number" [(ngModel)]="edittingCustomFilter.summarizeFilter.options.y_min_start" value="0" min="0" max="50" (change)="loadEditingChartData()">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ng-container *ngIf="!isTableType() && ['line','bar'].indexOf(edittingCustomFilter.summarizeFilter.type)>=0 && !edittingCustomFilter.summarizeFilter.options.sum">
+                                        <div class="col-md-12 row">
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-6">
+                                                <div class="checkbox mr-2">
+                                                    <input class="pg-checkbox" type="checkbox"
+                                                        [(ngModel)]="edittingCustomFilter.summarizeFilter.options.hide_zero_data"
+                                                        value="true" id="hide_zero_data" (change)="loadEditingChartData()">
+                                                    <label class="checkbox-custom pr-2" for="hide_zero_data">
+                                                        0件のデータは表示しない
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                    <div class="col-md-12 row">
+                                        <div class="col-md-3"></div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox mr-2">
+                                                <input class="pg-checkbox" type="checkbox"
+                                                    [(ngModel)]="edittingCustomFilter.summarizeFilter.options.do_not_show_legend_if_over_6_more"
+                                                    value="true" id="do_not_show_legend_if_over_6_more" (change)="loadEditingChartData()">
+                                                <label class="checkbox-custom pr-2" for="do_not_show_legend_if_over_6_more">
+                                                    6個以上の場合は凡例を表示しない
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+
+
+                            </ng-container>
+
+
+                        </div>
+
+                    </tab>
+                    <!-- Dashboard settings -->
+                    <tab heading="ダッシュボード設定" *ngIf="dashboard_id">
+                        <ng-container>
+                            <div class="row">
+                                <div class="col-md-2 font-weight-bold pt-2">
+                                    タイトル
+                                </div>
+                                <div class="col-md-4">
+                                    <input [(ngModel)]="edittingCustomFilter.name" class="form-control">
+                                </div>
+                            </div>
+                            <ng-container *ngIf="dashboardContent">
+                                <hr>
+                                <div class="mt-2">
+                                    <div class="row">
+                                        <div class="col-md-3 font-weight-bold pt-2">
+                                            ダッシュボード 表示サイズ
+                                        </div>
+                                        <div class="col-md-9">
+                                            <select class="form-control width-max-50" [(ngModel)]="dashboardContent.col_size"
+                                                    (change)="loadEditingChartData()">
+                                                <option *ngFor="let option of chartSizes"
+                                                        value="{{option.value}}">{{option.name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <ng-container *ngIf="!edittingCustomFilter.isChart()">
+                                            <div class="col-md-3 font-weight-bold pt-2">
+                                                ダッシュボード 表示件数
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control width-100" [(ngModel)]="edittingCustomFilter.max_record_num">
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+
+                            <div class="mt-3">※ダッシュボードへの表示・非表示は. 設定タブの権限を使用して下さい。</div>
+                            <!--                            <div class="checkbox" *ngIf="edittingCustomFilter && edittingCustomFilter.isMyFilter(_share.user.id)">-->
+                            <!--                                <label><input type="radio" [(ngModel)]="edittingCustomFilter.grant" value="public"-->
+                            <!--                                >&nbsp;全員に表示</label>-->
+                            <!--                                <label><input type="radio" [(ngModel)]="edittingCustomFilter.grant" value="private"-->
+                            <!--                                >&nbsp;自分のみ表示</label>-->
+                            <!--                                <label><input type="radio" [(ngModel)]="edittingCustomFilter.grant" value="custom"-->
+                            <!--                                >&nbsp;詳細権限設定</label>-->
+
+                            <!--                                <ng-container *ngIf="edittingCustomFilter.grant === 'custom'">-->
+                            <!--                                    <br>-->
+                            <!--                                    <hr>-->
+                            <!--                                    <grant-group-form [value]="edittingCustomFilter.edit_grant_group_id" [title]="'編集可能ユーザー'"-->
+                            <!--                                                      (onChangeValue)="onEditGrantGroupIdChanged($event)"></grant-group-form>-->
+                            <!--                                    <hr>-->
+                            <!--                                    <grant-group-form [value]="edittingCustomFilter.view_grant_group_id" [title]="'閲覧のみ可能ユーザー'"-->
+                            <!--                                                      (onChangeValue)="onViewGrantGroupIdChanged($event)"></grant-group-form>-->
+
+                            <!--                                </ng-container>-->
+
+                            <!--                            </div>-->
+
+
+                        </ng-container>
+                    </tab>
+                    <!-- color the rows -->
+
+
+                    <tab heading="行に色を付ける" *ngIf="edittingCustomFilter.isView()">
+                        <div class="card" *ngFor="let color_filter of edittingCustomFilter.color_filters;let color_filter_index=index">
+                            <div class="card-block">
+                                <button style="position:absolute; top:10px; right:10px" class="btn btn-danger pull-left btn-sm btn mt-1"
+                                        (click)="edittingCustomFilter.color_filters.splice(color_filter_index,1)"><i class="fa fa-minus"></i></button>
+
+                                <!-- 上下の矢印ボタンを追加 -->
+                                <div style="position:absolute; top:10px; right:60px">
+                                    <button class="btn btn-secondary btn-sm mr-1" [disabled]="color_filter_index === 0"
+                                            (click)="moveColorFilter(color_filter_index, 'up')">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" [disabled]="color_filter_index === edittingCustomFilter.color_filters.length - 1"
+                                            (click)="moveColorFilter(color_filter_index, 'down')">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </button>
+                                </div>
+
+                                <div class="mt-2 row">
+                                    <div class="col-md-4">
+                                        セルの色：
+                                    </div>
+                                    <div class="col-md-8 mb-2">
+                                        <input type="color" [(ngModel)]="color_filter.style['backgroundColor']">
+
+                                        <div class="color_select_block ml-2" style="background-color: #FFE0E2" (click)="setColor(color_filter,'#FFE0E2')"></div>
+                                        <div class="color_select_block" style="background-color: #FFFCE0" (click)="setColor(color_filter,'#FFFCE0')"></div>
+                                        <div class="color_select_block" style="background-color: #E0EFFF" (click)="setColor(color_filter,'#E0EFFF')"></div>
+                                        <div class="color_select_block" style="background-color: #E7FFE0" (click)="setColor(color_filter,'#E7FFE0')"></div>
+                                        <br style="clear: both">
+                                    </div>
+                                    <div class="col-md-4">
+                                        文字サイズ
+                                    </div>
+                                    <div class="col-md-8 mb-2">
+                                        <select class="form-control" [(ngModel)]="color_filter.style['fontSize.px']">
+                                            <ng-container *ngFor="let size of _share.getFontSizeList()">
+                                                <option [value]="size">{{size ?? 'デフォルト'}}</option>
+                                            </ng-container>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        フォント
+                                    </div>
+                                    <div class="col-md-8 mb-2">
+                                        <select class="form-control" [(ngModel)]="color_filter.style['fontWeight']"
+                                                [(ngModel)]="color_filter.style['fontWeight']">
+                                            <ng-container *ngFor="let size of [{key:'normal',value:'通常'},{key:'bold',value:'太字'}]">
+                                                <option [value]="size.key">{{size.value}}</option>
+                                            </ng-container>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        文字色
+                                    </div>
+                                    <div class="col-md-8 mb-2">
+                                        <input type="color" [(ngModel)]="color_filter.style['color']" name="font_color">
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <button class="btn btn-success btn-sm" (click)="color_filter.conditions.addCondition()"><i class="fa fa-plus mr-1"></i>条件を追加</button>
+                                <div class="mb-1" *ngFor="let condition of color_filter.conditions.condition_a;let color_condition_index=index">
+                                    <div class="condition-wrap">
+                                        <condition-form [table]="table_info.table" [default_condition]="condition" [index]="color_condition_index"
+                                                        (valueChanged)="colorFilterChanged($event,color_filter_index)"></condition-form>
+                                        <div class="buttons">
+                                            <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="color_filter.conditions.deleteCondition(color_condition_index)"><i
+                                                class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <!-- color -->
+                                <hr>
+                                <h6 class="mt-2">
+                                    <button class="btn btn-success btn-sm mt-1" (click)="color_filter.field_name_a.push(null)"><i class="fa fa-plus mr-1"></i>項目を指定</button>
+                                </h6>
+                                <ng-container *ngFor="let selected_field_name of color_filter.field_name_a; let field_name_index = index;">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <select style="width:100%" class="form-control mt-1" (change)="onColorfilterShowFieldChanged($event,color_filter,field_name_index)"
+                                                    [(ngModel)]="color_filter.field_name_a[field_name_index]">
+                                                <ng-container *ngFor="let field of table_info.fields">
+                                                    <option value="{{field.Field}}">{{table_info.forms.byFieldName(field.Field).label}}</option>
+                                                </ng-container>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1 pt-1">
+                                            <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="color_filter.field_name_a.splice(field_name_index, 1)"><i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <div class="col-md-7">
+
+
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success btn-sm" (click)="addColorFilter()"><i class="fa fa-plus mr-1"></i>条件・色を追加</button>
+                    </tab>
+
+                    <ng-container *ngFor="let filter_type of ['filter','view']">
+                        <tab heading="デフォルト設定" *ngIf="(filter_type=='filter' && edittingCustomFilter.isFilter(true)) || (filter_type=='view' && edittingCustomFilter.isView(false))">
+                            <ng-container>
+                                <div class="mb-4">
+                                    このフィルタをデフォルトで表示するユーザーを指定します。
+                                </div>
+                                <div class="checkbox mr-2">
+                                    <input class="pg-checkbox" type="checkbox" [(ngModel)]="edittingCustomFilter.all_user_default"
+                                           [value]="true" id="check_default" [disabled]="hasDefaultFilter(filter_type)">
+                                    <label class="checkbox-custom" for="check_default" [ngStyle]="hasDefaultFilter(filter_type) ? {'color': 'gray'} : {}">
+                                        全てのユーザーのデフォルトにする<span *ngIf="hasDefaultFilter(filter_type)">(他にデフォルトのフィルターがある場合はONにできません)</span>
+                                    </label>
+                                </div>
+
+                                <grant-group-form [value]="edittingCustomFilter.default_view_grant_group_id" [title]="'ユーザー・組織選択'"
+                                                  (onChangeValue)="onDefaultGrantGroupIdChanged($event)"></grant-group-form>
+                            </ng-container>
+                        </tab>
+                        <tab heading="設定" *ngIf="(filter_type=='filter' && edittingCustomFilter.isFilter(true)) || (filter_type=='view' && edittingCustomFilter.isView(false))">
+                            <ng-container>
+                                <div class="row">
+                                    <div class="col-md-2 font-weight-bold pt-2">
+                                        タイトル
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input [(ngModel)]="edittingCustomFilter.name" class="form-control">
+                                    </div>
+                                </div>
+
+                                <ng-container *ngIf="edittingCustomFilter && (edittingCustomFilter.isMyFilter(_share.user.id) || table_info.grant.table_author)">
+                                    <h5 class="mt-4">
+                                        フィルタタイプ
+                                    </h5>
+                                    <div class="checkbox">
+                                        <label><input name="filter_type" type="radio" [disabled]="edittingCustomFilter.hasViewParam() || ( useSummarize && isTableType() )" [(ngModel)]="edittingCustomFilter.filter_type" value="filter"
+                                        >&nbsp;フィルタ（絞り込み/集計）</label>
+                                        <label><input name="filter_type" (click)="changeTab(4)" [disabled]="edittingCustomFilter.hasFilterParam()" type="radio"
+                                                      [(ngModel)]="edittingCustomFilter.filter_type"
+                                                      value="view"
+                                        >&nbsp;ビュー</label>
+                                        <label *ngIf="edittingCustomFilter.type != 'chart'"><input name="filter_type" (click)="changeTab(0)" type="radio" [(ngModel)]="edittingCustomFilter.filter_type" value="mix"
+                                        >&nbsp;混合(非推奨)</label>
+
+                                    </div>
+
+
+                                    <h5 class="mt-4">
+                                        権限
+                                    </h5>
+                                    <div class="checkbox">
+                                        <label><input name="grant" type="radio" [(ngModel)]="edittingCustomFilter.grant" value="public"
+                                        >&nbsp;全員に表示</label>
+                                        <label><input name="grant" type="radio" [(ngModel)]="edittingCustomFilter.grant" value="private"
+                                        >&nbsp;自分のみ表示</label>
+                                        <label><input name="grant" type="radio" [(ngModel)]="edittingCustomFilter.grant" value="custom"
+                                        >&nbsp;詳細権限設定</label>
+
+                                        <ng-container *ngIf="edittingCustomFilter.grant === 'custom'">
+                                            <br>
+                                            <hr>
+                                            <grant-group-form [value]="edittingCustomFilter.edit_grant_group_id" [title]="'編集可能ユーザー'"
+                                                              (onChangeValue)="onEditGrantGroupIdChanged($event)" [grant_kind]="'edit'"></grant-group-form>
+                                            <hr>
+                                            <grant-group-form [value]="edittingCustomFilter.view_grant_group_id" [title]="'閲覧のみ可能ユーザー'"
+                                                              (onChangeValue)="onViewGrantGroupIdChanged($event)" [grant_kind]="'view'"></grant-group-form>
+
+                                        </ng-container>
+
+                                    </div>
+
+                                </ng-container>
+
+                            </ng-container>
+                        </tab>
+
+
+                    </ng-container>
+
+                    <!-- AI File Search Tab -->
+                    <tab heading="ファイル内容AI検索" style="background-color: #f0f0f0;" *ngIf="edittingCustomFilter.isFilter() && !edittingCustomFilter.isView() && isTableType()">
+                        <div class="mt-3">
+                            <textarea class="form-control" rows="5" placeholder="社内資料の中で、セキュリティに関する内容の要約を教えて。またその資料を表示して。"></textarea>
+                            <div class="mt-2">
+                                <button class="btn btn-success" disabled>AIに聞く</button>
+                            </div>
+                            <div class="mt-2 text-muted">
+                                ※ファイル検索AIプラン option登録が必要です。<br>
+                                <a href="https://pigeon-fw.com/ai-file-search" target="_blank">詳しくはこちら。</a>
+                            </div>
+                        </div>
+                    </tab>
+                </tabset>
+
+                <ng-container *ngIf="!isTableType()">
+                    <br>
+                    プレビュー<br>
+                    <cloud-charts #sampleChart [customFilter]="edittingCustomFilter"
+                                  [chart_index]="chart_index" [type]="edittingCustomFilter.type"></cloud-charts>
+                </ng-container>
+
+            </ng-container>
+
+        </div>
+        <div class="modal-footer">
+            <ng-container *ngIf="mode=='setCustomFilter'">
+                <button type="button" class="btn btn-success text-bold" (click)="goDetail()">詳細設定</button>
+            </ng-container>
+            <ng-container *ngIf="mode=='setDetail'">
+                <button type="button" class="btn btn-success text-bold " style="margin-right: auto;" (click)="saveChart()">保存して表示する</button>
+                <button type="button" class="btn btn-secondary text-bold" (click)="onClickCancelButton.emit()">キャンセル</button>
+                <button type="button" class="btn btn-warning text-bold" *ngIf="show_preview" (click)="preview()">表示</button>
+            </ng-container>
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

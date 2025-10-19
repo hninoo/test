@@ -1,0 +1,56 @@
+<div>
+    <div class="row">
+        <div [ngClass]="{'col-md-6':is_select_field,'col-md-12':!is_select_field}">
+            テーブル:
+            <ng-select
+                [id]="id_prefix + 'select_table'"
+                [items]="table_info_a"
+                [bindLabel]="'view_label'"
+                [bindValue]="'table'"
+                [(ngModel)]="table_name"
+                (change)="onSelectTable()"
+                class=" custom form-control wide-select"
+                appendTo="body"
+                [disabled]="disabled"
+            >
+            </ng-select>
+        </div>
+
+
+        <ng-container *ngIf="selected_table_info">
+            <div class="col-md-6" *ngIf="is_select_field">
+                項目:
+                <ng-select
+                    [id]="id_prefix + 'select_field'"
+                    [items]="selected_table_info.fields"
+                    [bindLabel]="'Comment'"
+                    [bindValue]="'Field'"
+                    [(ngModel)]="field_name"
+                    appendTo="body"
+                    class="custom form-control"
+                    (change)="change()"
+                >
+                </ng-select>
+            </div>
+
+
+            <!--
+            フィルタ:
+            <select class="form-control" [(ngModel)]="condition.inc_filter_id" (change)="onChange()">
+                <option value="">フィルタ選択(任意)</option>
+                <option *ngFor="let _filter of selected_inc_table.saved_filters"
+                        value="{{_filter['id']}}">{{_filter['name']}}
+                </option>
+            </select>
+            -->
+
+
+            <div *ngIf="use_condition" class="mt-1 col-md-12">
+                <conditions-form [id_prefix]="id_prefix+'cond_'" [table]="selected_table_info.table" [target_form_a]="condition_target_form_a" [output_json]="false"
+                                 (valueChanged)="conditionChanged($event)"
+                                 [default_condition_json]="conditions.getSearchParamJson()"></conditions-form>
+            </div>
+        </ng-container>
+    </div>
+
+</div>

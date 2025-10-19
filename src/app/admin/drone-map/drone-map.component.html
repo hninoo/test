@@ -1,0 +1,128 @@
+<div class="animated fadeIn">
+    <div class="card">
+        <div class="card-header">
+            <i class="fa fa-map-marker"></i> ドローン飛行ルートマップ
+        </div>
+        <div class="card-body">
+            <!-- ドローン選択 -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="droneSelect">ドローンを選択:</label>
+                        <select
+                            id="droneSelect"
+                            class="form-control"
+                            [(ngModel)]="selectedDroneId"
+                            (change)="onDroneSelect()">
+                            <option [value]="null">-- ドローンを選択してください --</option>
+                            <option [value]="-1">すべて (ID: {{ droneIdRange.start }}-{{ droneIdRange.end }})</option>
+                            <option *ngFor="let drone of drones" [value]="drone.raw_data.id">
+                                {{ drone.raw_data.field__12 }} (ID: {{ drone.raw_data.id }})
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mt-4">
+                        <button class="btn btn-secondary" (click)="clearMap()">
+                            <i class="fa fa-trash"></i> マップをクリア
+                        </button>
+                        <button class="btn btn-primary ml-2" (click)="loadFlightRoutes()" [disabled]="!selectedDroneId">
+                            <i class="fa fa-refresh"></i> ルートを再読み込み
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Map -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div #mapElement style="width: 100%; height: 600px; border: 1px solid #ddd;"></div>
+                </div>
+            </div>
+
+            <!-- 飛行コントロール -->
+            <div class="row mt-2" *ngIf="flightRoutes.length > 0 || selectedDroneId == -1">
+                <div class="col-md-12">
+                    <button
+                        class="btn btn-success btn-sm ml-3"
+                        (click)="startAnimation()"
+                        [disabled]="isAnimating || (selectedDroneId != -1 && flightRoutes.length === 0)">
+                        <i class="fa fa-play"></i> 飛行開始
+                    </button>
+                    <button
+                        class="btn btn-danger btn-sm ml-2"
+                        (click)="stopAnimation()"
+                        [disabled]="!isAnimating">
+                        <i class="fa fa-stop"></i> 停止
+                    </button>
+                    <span class="ml-3" *ngIf="isAnimating">
+                        <i class="fa fa-info-circle"></i>
+                        <span *ngIf="selectedDroneId != -1">
+                            飛行中...
+                            ({{ currentAnimationIndex + 1 }} / {{ flightRoutes.length }})
+                        </span>
+                        <span *ngIf="selectedDroneId == -1">
+                            複数ドローン飛行中...
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- 凡例 -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fa fa-info-circle"></i> 凡例</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-2">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-white">
+                                        <img src="/assets/img/icon/drone.svg" width="35" height="35" class="mr-3">
+                                        <div>
+                                            <strong>ドローン</strong><br>
+                                            <small class="text-muted">現在位置・初期位置</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-white">
+                                        <div class="mr-3 ml-1" style="width: 70px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                            <span
+                                                style="display: inline-block; width: 30px; height: 4px; background: linear-gradient(to right, #00FF00 0%, #00FF00 40%, transparent 40%, transparent 60%, #00FF00 60%, #00FF00 100%); border-radius: 2px; margin-right: 5px;"></span>
+                                            <span style="display: inline-block; width: 30px; height: 4px; background-color: #FF0000; border-radius: 2px;"></span>
+                                        </div>
+                                        <div>
+                                            <strong>飛行経路</strong><br>
+                                            <small class="text-muted" *ngIf="selectedDroneId != -1">緑:予定 / 赤:飛行済</small>
+                                            <small class="text-muted" *ngIf="selectedDroneId == -1 && groupType == 'normal'">
+                                                1:青 / 2:橙 / 3:紫
+                                            </small>
+                                            <small class="text-muted" *ngIf="selectedDroneId == -1 && groupType == 'suido'">
+                                                4:青 / 5:橙 / 6:紫
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-white">
+                                        <div class="mr-3 ml-1" style="width: 70px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                            <img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" width="25" height="25" class="mr-1">
+                                            <img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png" width="25" height="25">
+                                        </div>
+                                        <div>
+                                            <strong>{{ detectionLabelText }}</strong><br>
+                                            <small class="text-muted">赤:検知 / 青:NG</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

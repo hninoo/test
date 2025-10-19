@@ -1,0 +1,34 @@
+<div class="modal-dialog modal-default" role="document">
+
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                コメント
+
+            </h4>
+            <button type="button" class="close" (click)="close()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-4 font-weight-bold">
+                    コメント（任意）
+                </div>
+                <div class="col-md-8 mt-3">
+                    <div class="col-md-12 row">
+                        <div class="col-md-10">
+                            <textarea class="form-control" [(ngModel)]="comment" (change)="changed()" appTextareaAutoresize></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="close()">キャンセル</button>
+            <button type="button" class="btn btn-primary" (click)="submit()" [ladda]="sending">保存する</button>
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

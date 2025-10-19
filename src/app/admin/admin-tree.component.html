@@ -1,0 +1,311 @@
+<ng-template #tmplNode let-node="node">
+        <ul class="admin-tree"
+            cdkDropList
+            [cdkDropListDisabled]="!switchGroupEdit"
+            [cdkDropListData]="node.children"
+            [id]="getIds(node)"
+            [ngClass]="{empty_tree:node.children.length==0}"
+            [cdkDropListConnectedTo]="connectedLists"
+            [cdkDropListEnterPredicate]="allowDropPredicate"
+            (cdkDropListDropped)="drop($event,node.data_id,node.parent_group_id)">
+            <li *ngFor="let child of node.children" class="admin-tree__item"
+                cdkDrag [cdkDragData]="child" 
+                (cdkDragMoved)="dragMoved($event)"
+                (cdkDragReleased)="dragReleased($event)"
+                >
+                <div>
+                    <!-- cdkDragPreview -->
+                    <div class="drag-preview" [ngClass]="{'admin-tree__dataset': !child.isDir,'admin-tree__dir':child.isDir}" *cdkDragPreview>
+                        <a class="admin-tree__dir-toggle" *ngIf="child.isDir"> <i class="fa" aria-hidden="true"></i> </a>
+                       <div [ngClass]="{'admin-tree__name':!child.isDir,'admin-tree__dir-name':child.isDir}"> {{ child.name }} </div>
+                    </div>
+                    <!-- cdkDragPlaceholder -->
+                    <div [ngClass]="{'admin-tree__dataset': !child.isDir,'admin-tree__dir':child.isDir}" *cdkDragPlaceholder>
+                        <a class="admin-tree__dir-toggle" *ngIf="child.isDir"> <i class="fa" aria-hidden="true"></i> </a>
+                       <div [ngClass]="{'admin-tree__name':!child.isDir,'admin-tree__dir-name':child.isDir}"> {{ child.name }} </div>
+                    </div>
+
+                    <div *ngIf="!child.isDir && !isArchived(child)" class="admin-tree__dataset">
+                        <div class="admin-tree__check" *ngIf="!switchGroupEdit">
+                            <input type="checkbox" name="data_check"
+                                   (change)="checkboxChange($event)" value="{{child.data_id}}">
+                        </div>
+                        <div class="admin-tree__name">{{child.name}}</div>
+                        <div class="admin-tree__btn" *ngIf="!switchGroupEdit">
+                            <button *ngIf="grant.detail" class="btn btn-default btn-sm" type="button" [routerLink]="'/admin/'+child.id"><i
+                                class="fa fa-list"></i></button>
+                            <button *ngIf="grant.edit" class="btn btn-info btn-sm" type="button" (click)="copy(data_by_id[child.data_id])"><i class="fa fa-clone"></i>
+                            </button>
+                            <button *ngIf="grant.detail" class="btn btn-primary btn-sm" type="button"
+                                    [routerLink]="'/admin/dataset/view/' + child.data_id"><i class="fa fa-search-plus"></i></button>
+                            <button *ngIf="grant.edit" class="btn btn-warning btn-sm" type="button" [routerLink]="'/admin/dataset/edit/' + child.data_id">
+                                <i class="fa fa-pencil"></i></button>
+                            <button *ngIf="!child.delete_lock" class="btn btn-danger btn-sm" type="button" (click)="openDeleteModal(data_by_id[child.data_id])"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div *ngIf="child.isDir && !isArchived(child)" class="admin-tree__dir" dropdown [autoClose]="false">
+                        <a class="admin-tree__dir-toggle" dropdownToggle>
+                            <i class="fa" aria-hidden="true"></i>
+                        </a>
+                        <div class="admin-tree__dir-name">
+                            <span dropdownToggle>{{child.name}}</span>
+                            <button *ngIf="!switchGroupEdit" class="btn btn-sm btn-warning group-edit" (click)="goGroupEditById($event,child.data_id)"><i class="fa fa-pencil"></i></button>
+                            <button *ngIf="!switchGroupEdit && !child.group_delete_lock" class="btn btn-sm btn-danger ml-1 group-edit" (click)="openGroupDeleteModal(child)"><i class="fa fa-trash"></i></button>
+                        </div>
+                        <div class="admin-tree__lower-menus">
+                            <ng-container *ngTemplateOutlet="tmplNode,context:{node:child}"></ng-container>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+</ng-template>
+
+<div>
+    <div *ngIf="tree" style="padding: 1.5rem;padding-top: 5px;">
+        <div class="mb-2 mt-2 clearfix">
+            <div class="pull-left">
+                <button *ngIf="!this.switchGroupEdit" (click)="groupEdit()"
+                        class="btn btn-sm btn-outline-primary">メニュー並び替え
+                </button>
+                <button *ngIf="this.switchGroupEdit" (click)="groupEdit()"
+                        class="btn btn-sm btn-primary">メニュー並び替え終了
+                </button>
+                <button *ngIf="this.switchGroupEdit" (click)="groupEditCancel()"
+                        class="btn btn-sm btn-outline-danger pl-2 ml-2">キャンセル
+                </button>
+                 <label class="ml-4">
+                     アーカイブも表示
+                     <input style="position: relative; top:2px;" type="checkbox" name="show_archive_table" [(ngModel)]="show_archive_table" >
+                 </label>
+            </div>
+            <div class="pull-right">
+                <button (click)="openAllGroup()"
+                        class="btn btn-sm btn-outline-primary">全て展開
+                </button>
+                <button (click)="closeAllGroup()"
+                        class="btn btn-sm btn-outline-danger pl-2 ml-2">全て閉じる
+                </button>
+            </div>
+        </div>
+        <!-- <div class="mb-2">※ 同じ階層内のみ並び替え可能です。階層を変更する場合、テーブル編集画面またはグループ編集画面から行ってください。</div> -->
+        <ng-container *ngTemplateOutlet="tmplNode,context:{node: tree}"></ng-container>
+    </div>
+</div>
+
+
+
+
+
+<div *ngIf="false" class="m-3">
+
+    <div class="mb-2">
+        <button class="btn btn-outline-primary mr-2 mt-1 ml-2" (click)="changeAllGroupOpenClose(true)">全て展開</button>
+        <button class="btn btn-outline-danger  mt-1" (click)="changeAllGroupOpenClose(false)">全て閉じる</button>
+    </div>
+
+    <ul class="mt-2 mb-2 ml-4 pl-0" *ngIf="switchGroupEdit">
+        <ul class="small pl-0">※テーブルをドラッグすることで別のグループに移動することが出来ます。</ul>
+        <ul class="small pl-0">※グループの中にテーブルが存在しない場合は、そのグループは自動的に削除されます。</ul>
+    </ul>
+
+    <div cdkDropList id="first-stage" [cdkDropListData]="group_edit_data"  [cdkDropListConnectedTo]="second_stages"
+        (cdkDropListDropped)="firstDrop($event)" class="mb-4 p-1">
+        <div cdkDrag [cdkDragDisabled]="!switchGroupEdit" *ngFor="let data of group_edit_data; let i = index">
+            <ng-container *ngIf="data.group != undefined">
+                <div *ngIf="!switchGroupEdit"  style="background: white !important; color: black;" (click)='clickGroup(data.group)' (click)="allCheck($event,data.group_id)" class="mt-1 pt-1 pb-1 dataset-group">
+                    <span class="pl-3">
+                        <i *ngIf="!is_group_opening[data.group]" class="fa fa-angle-right big pt-1" style="padding-right: 7px;" aria-hidden="true"></i>
+                        <i *ngIf="is_group_opening[data.group]" class="fa fa-angle-down big pt-1" aria-hidden="true"></i>
+                    </span>
+                        <span style="font-size: 20px;">
+                        {{ data.group }}
+                    </span>
+                    <input type="checkbox" *ngIf="!is_group_opening[data.group]" style="display:none;" class="check_box" (click)="openClose($event)"  (change)="allCheck($event,data.group_id)">
+                    <input type="checkbox" *ngIf="is_group_opening[data.group]" class="check_box" (click)="openClose($event)"  (change)="allCheck($event,data.group_id)">
+                    <button class="btn btn-sm btn-warning group-edit" (click)="goGroupEdit($event,data)"><i class="fa fa-pencil"></i></button>
+                </div>
+                <div *ngIf="switchGroupEdit" class="mt-1 pt-1 pb-1">
+                    <span (click)="clickGroup(data.group)" class="pl-3 pr-2">
+                        <i *ngIf="!is_group_opening[data.group]" class="fa fa-angle-right pr-1 pt-1" style="margin-right: 3px; font-size: 25px;" aria-hidden="true"></i>
+                        <i *ngIf="is_group_opening[data.group]" class="fa fa-angle-down pt-1" style="font-size: 25px;" aria-hidden="true"></i>
+                    </span>
+                    <input type="text" class="pt-1 pb-1" style="width: 90%;" (change)="groupChange()"
+                        [formControl]="data.formControl">
+                </div>
+                <div *ngIf="is_group_opening[data.group]"
+                     style="position: relative;"
+                     cdkDropList id="second-stage-{{ i }}"
+                     [cdkDropListData]="data.data_a"
+                     [cdkDropListConnectedTo]="['remove_container'+i].concat(second_stages_id)"
+                     (cdkDropListDropped)="secondDrop($event)">
+                <div class="dataset-group-container">
+                    <div class="p-4 row" *ngIf="switchGroupEdit">
+                        <div class="add_group_container col-md-6">
+                            <p>ここにドロップでグループに追加
+                            </p>
+                            <i class="fa fa-plus"></i>
+                        </div>
+                        <div class="delete_group_container col-md-4 offset-1" id="remove_container{{ i }}" cdkDropList (cdkDropListDropped)="removeFromGroup($event)">
+                            <p>ここにドロップでグループから出す</p>
+                            <i class="fa fa-sign-out"></i>
+                        </div>
+                    </div>
+                    <div class="p-5" *ngIf="!data['data_a'].length && !switchGroupEdit">
+                        <p>
+                            style="position: absolute; left: 0; right: 0; top: 30%; text-align: center; user-select: none;">
+                            グループにテーブルはありません</p>
+                    </div>
+                    <ng-container *ngFor="let data_one of data.data_a; let g = index">
+                        <table cdkDrag [cdkDragDisabled]="!switchGroupEdit" *ngIf="data_one.group == undefined"
+                               class="table-responsive pc-list-view m-0"
+                               style="width: 98%;">
+                            <tbody>
+                            <tr>
+                                <td *ngIf="grant.edit && !isSummarizeMode && !is_relation_table" style="width: 35px;" class="table-admin-list__checkbox text-center">
+                                    <input type="checkbox" name="data_check"
+                                           (change)="checkboxChange($event)" value="{{data_one['raw_data']['id']}}">
+                                </td>
+                                <td class="pl-2">
+                                    {{data_one.view_data.label}}
+                                </td>
+                                <td *ngIf="((!data['__disabled'] || (!table_info.grant.detail && !table_info.grant.edit && !table_info.grant.delete)) && isShowManageCol) && !isSummarizeMode && !isEditMode && !switchGroupEdit"
+                                    class="text-center" style="width: 120px;">
+                                    <button *ngIf="grant.detail && data_one['raw_data']['id'] > 0" class="btn btn-default btn-sm" type="button" [routerLink]="getLink(data_one)"><i
+                                        class="fa fa-list"></i></button>
+                                    <button *ngIf="grant.edit && !data_one['raw_data'].system_table" class="btn btn-info btn-sm" type="button" (click)="copy(data_one)"><i class="fa fa-clone"></i>
+                                    </button>
+                                    <button *ngIf="grant.detail && data_one['raw_data']['id'] > 0" class="btn btn-primary btn-sm" type="button"
+                                            [routerLink]="'/admin/dataset/view/' + data_one['raw_data']['id']"><i class="fa fa-search-plus"></i></button>
+                                    <button *ngIf="grant.edit && data_one.isEditable()" class="btn btn-warning btn-sm" type="button" [routerLink]="'/admin/dataset/edit/' + data_one['raw_data']['id']">
+                                        <i class="fa fa-pencil"></i></button>
+                                    <button class="btn btn-danger btn-sm" type="button" (click)="openDeleteModal(data_one)"><i class="fa fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div cdkDrag [cdkDragDisabled]="1" *ngIf="data_one.group != undefined">
+                            <div *ngIf="!switchGroupEdit" (click)='clickGroup(data.group + "////" + data_one.group)'
+                                 class="mt-1 pt-1 pb-1">
+                                <span class="pl-3">
+                                    <i *ngIf="!is_group_opening[data.group + '////' + data_one.group]" class="fa fa-angle-right pt-1" style="font-size: 25px; padding-right: 7px;"
+                                       aria-hidden="true"></i>
+                                    <i *ngIf="is_group_opening[data.group + '////' + data_one.group]" class="fa fa-angle-down pt-1" style="font-size: 25px;" aria-hidden="true"></i>
+                                </span>
+                                    <span style="font-size: 20px;">
+                                    {{ data_one.group }}
+                                </span>
+                                    <button class="btn btn-sm btn-warning"><i class="fa fa-pencil"></i></button>
+                                </div>
+                                <div *ngIf="switchGroupEdit"
+                                     class="mt-1 pt-1 pb-1">
+                                <span (click)="clickGroup(data.group + '////' + data_one.group)" class="pl-3 pr-2">
+                                    <i *ngIf="!is_group_opening[data.group + '////' + data_one.group]" class="fa fa-angle-right pr-1 pt-1" style="margin-right: 3px; font-size: 25px;"
+                                       aria-hidden="true"></i>
+                                    <i *ngIf="is_group_opening[data.group + '////' + data_one.group]" class="fa fa-angle-down pt-1" style="font-size: 25px;" aria-hidden="true"></i>
+                                </span>
+                                    <input type="text" class="pt-1 pb-1" style="width: 90%;" (change)="groupChange()"
+                                           [formControl]="data_one.formControl">
+                                </div>
+                                <div class="pl-3" *ngIf="is_group_opening[data.group + '////' + data_one.group]">
+                                    <div class="p-5" *ngIf="!data_one['data_a'].length && switchGroupEdit">
+                                        <p
+                                            style="position: absolute; left: 0; right: 0; top: 30%; text-align: center; user-select: none;">
+                                            こちらにテーブルをドロップするとグループに移動できます</p>
+                                    </div>
+                                    <div class="p-5" *ngIf="!data_one['data_a'].length && !switchGroupEdit">
+                                        <p
+                                            style="position: absolute; left: 0; right: 0; top: 30%; text-align: center; user-select: none;">
+                                            グループにテーブルはありません</p>
+                                    </div>
+                                    <ng-container *ngFor="let data_table of data_one.data_a; let g = index">
+                                        <table *ngIf="data_table.group == undefined" class="table table-bordered table-responsive pc-list-view m-0"
+                                               style="width: 98%; ">
+                                            <tbody>
+                                            <tr>
+                                                <td *ngIf="grant.edit && !isSummarizeMode && !is_relation_table" style="width: 35px;" class="table-admin-list__checkbox text-center">
+                                                    <input type="checkbox" name="data_check"
+                                                           (change)="checkboxChange(data_table['raw_data'],$event)" value="{{data_table['raw_data']['id']}}">
+                                                </td>
+                                                <td class="pl-2">
+                                                    {{data_table.view_data.label}}
+                                                </td>
+                                                <td *ngIf="((!data['__disabled'] || (!table_info.grant.detail && !table_info.grant.edit && !table_info.grant.delete)) && isShowManageCol) && !isSummarizeMode && !isEditMode && !switchGroupEdit"
+                                                    class="text-center" style="width: 120px;">
+                                                    <button *ngIf="grant.detail && data_table['raw_data']['id'] > 0" class="btn btn-default btn-sm" type="button" [routerLink]="getLink(data_table)"><i
+                                                        class="fa fa-list"></i></button>
+                                                    <button *ngIf="grant.edit && !data_table['raw_data'].system_table" class="btn btn-info btn-sm" type="button" (click)="copy(data_table)"><i
+                                                        class="fa fa-clone"></i></button>
+                                                    <button *ngIf="grant.detail && data_table['raw_data']['id'] > 0" class="btn btn-primary btn-sm" type="button"
+                                                            [routerLink]="'/admin/dataset/view/' + data_table['raw_data']['id']"><i class="fa fa-search-plus"></i></button>
+                                                    <button *ngIf="grant.edit && data_table.isEditable()" class="btn btn-warning btn-sm" type="button"
+                                                            [routerLink]="'/admin/dataset/edit/' + data_table['raw_data']['id']"><i class="fa fa-pencil"></i></button>
+                                                    <button class="btn btn-danger btn-sm" type="button" (click)="openDeleteModal(data_one)"><i class="fa fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="data.group == undefined">
+
+                <table class="table table-bordered table-responsive pc-list-view m-0 ml-2"
+                       style="width: 98%;">
+                    <tbody>
+                    <tr>
+                        <td *ngIf="grant.edit && !isSummarizeMode && !is_relation_table" style="width: 35px;" class="table-admin-list__checkbox text-center">
+                            <input type="checkbox" name="data_check"
+                                   (change)="checkboxChange(data['raw_data'],$event)" value="{{data['raw_data']['id']}}">
+                        </td>
+                        <td class="pl-2">
+                            {{data.view_data.label}}
+                        </td>
+                        <td *ngIf="((!data['__disabled'] || (!table_info.grant.detail && !table_info.grant.edit && !table_info.grant.delete)) && isShowManageCol) && !isSummarizeMode && !isEditMode && !switchGroupEdit"
+                            class="text-center" style="width: 120px;">
+                            <button *ngIf="grant.detail && data['raw_data']['id'] > 0" class="btn btn-default btn-sm" type="button" [routerLink]="getLink(data)"><i class="fa fa-list"></i></button>
+                            <button *ngIf="grant.edit && !data['raw_data'].system_table" class="btn btn-info btn-sm" type="button" (click)="copy(data)"><i class="fa fa-clone"></i></button>
+                            <button *ngIf="grant.detail && data['raw_data']['id'] > 0" class="btn btn-primary btn-sm" type="button" [routerLink]="'/admin/dataset/view/' + data['raw_data']['id']"><i
+                                class="fa fa-search-plus"></i></button>
+                            <button *ngIf="grant.edit && data.isEditable()" class="btn btn-warning btn-sm" type="button" [routerLink]="'/admin/dataset/edit/' + data['raw_data']['id']"><i
+                                class="fa fa-pencil"></i></button>
+                            <button class="btn btn-danger btn-sm" type="button" (click)="openDeleteModal(data)"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <!-- <div bsModal #relationConfirmModal="bs-modal" class="modal fade" role="dialog"
+                        aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-primary" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title"><i class="fa fa-upload"></i>リレーションテーブルもエクスポートしますか？</h4>
+
+                                    <button type="button" class="close" (click)="hideRelationConfirmModal()"
+                                        aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        (click)="hideRelationConfirmModal()">キャンセル</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                </table>
+
+            </ng-container>
+        </div>
+        <button (click)="clickGroupAdd()" *ngIf="switchGroupEdit" class="ml-1 mt-1 btn btn-sm btn-success"><i class="fa fa-plus mr-1"></i>グループ追加</button>
+
+    </div>
+</div>

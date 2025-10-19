@@ -1,0 +1,28 @@
+<button class="btn btn-success btn-sm btn-md " (click)="addSortParam('id','asc')"><i class="fa fa-plus mr-1"></i>並び順を追加</button>
+<ng-container *ngFor="let sortParam of sort_params; let e = index;">
+    <div class="row" *ngIf="table_info">
+        <div class="col-md-4">
+            <select style="" class="form-control mt-1" [(ngModel)]="sortParam.field" (change)="onChange()">
+                <ng-container *ngFor="let field of table_info.fields">
+                    <ng-container *ngIf="canOrder(field.Field)">
+                        <option value="{{field.Field}}">{{table_info.forms.byFieldName(field.Field).label}}</option>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="filter && filter.isSetSummarizeParam()">
+                    <ng-container *ngFor="let summary of filter.summarizeFilter.summary_a; let i = index">
+                        <option value="y{{i + 1}}">集計項目{{i + 1 }}</option>
+                    </ng-container>
+                </ng-container>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select style="" class="form-control mt-1" [(ngModel)]="sortParam.asc_desc" (change)="onChange()">
+                <option value="asc">昇順</option>
+                <option value="desc">降順</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-danger pull-left btn-sm mt-2" (click)="deleteSortParam(e)"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+</ng-container>

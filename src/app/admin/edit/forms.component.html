@@ -1,0 +1,442 @@
+<div
+cdkDropList
+[cdkDropListData]="group_fields"
+id="dragRow_{{uniqueID}}"
+(cdkDropListDropped)="dropControll($event,'row',group_fields??[],0)"
+[cdkDropListEnterPredicate]="allowDropPredicate"
+[cdkDropListConnectedTo]="connectedLists"
+(cdkDropListDisabled)="parent.drag_placeholder_visible"
+class="drag-row-list"
+[ngClass]="{empty_row_fields: group_fields.length == 0, 'is_public_form': IS_PUBLIC_FORM}"
+>
+    <div
+        *ngFor="let row_fields of group_fields; let row_index = index"
+        cdkDropList
+        [cdkDropListData]="row_fields"
+        id="dragRowField_{{uniqueID}}_{{row_index}}"
+        cdkDropListOrientation="horizontal"
+        class="row-list-{{row_fields.length}}"
+        [ngClass]="{order_list:row_fields.length!=0,richtext:row_fields.length!=0 && row_fields[0].Type =='mediumtext' ,empty_list:row_fields.length==0 && parent.drag_placeholder_visible,condition_json:row_fields.length!=0 && row_fields[0].Field == 'condition_json'}"
+        (cdkDropListDropped)="dropControll($event,'row_field',row_fields,row_index)"
+        [cdkDropListEnterPredicate]="allowDropPredicate"
+        [cdkDropListConnectedTo]="connectedLists"
+
+    >
+    <div *ngIf="row_fields.length==0 && parent.drag_placeholder_visible" style="text-align: center; "></div>
+        <ng-container
+            *ngFor="let field of row_fields; let field_index = index"
+
+        >
+            <div
+                *ngIf="(isShowField(field)) && isShowFieldDefinitionForm(field);"
+                [ngStyle]="{'cursor':is_custom_table_definition && dataset_edit_mode== 'dataset_field' && 'move' }"
+                class='order_box pc-field-block wrap-field-{{field.Field}}'
+                [ngClass]="this.forms.byFieldName(field.Field).getCustomJaClassName()"
+                cdkDrag
+                (cdkDragMoved)="dragMoved($event)"
+                (cdkDragReleased)="dragReleased($event)"
+                [cdkDragData]='field'
+                [cdkDragDisabled]="table_info.table != 'dataset' || isChildForm() || is_custom_table_definition==false || group_fields.length==1 && row_fields.length==1"
+                (cdkDragStarted)="parent.drag_placeholder_visible=true"
+            >
+
+                <ng-container *ngIf="(isShowField(field)) && isShowFieldDefinitionForm(field);then showForm else notShowForm"></ng-container>
+                <ng-template *ngIf="true" #notShowForm>
+                    <div>=======Field:{{field.Field}}=======</div>
+                    <div>isShowField<span *ngIf="isShowField(field)">:true</span></div>
+                    <div>isShowFieldDefinitionForm<span *ngIf="isShowFieldDefinitionForm(field)">:true</span></div>
+                </ng-template>
+                <ng-template #showForm>
+                    <div [ngClass]="{'card ':isQuestionnaireStyle()}" style="width:100%">
+
+                        <div [ngClass]="{'card-body p-3':isQuestionnaireStyle() && !IS_PUBLIC_FORM}">
+                            <div class="form-group row admin-forms"
+                                [ngClass]="{'p-344': isQuestionnaireStyle()}"
+                                 *ngIf="shouldShowForm(this.forms.byFieldName(field.Field))">
+
+                                <ng-container *ngIf="this.forms.byFieldName(field.Field).type=='fixed_html';else NotFixedHtml">
+                                    <div class="fixed_html_wrapper">
+                                        <div [innerHTML]="this.forms.byFieldName(field.Field).fixed_html | safeHtml"></div>
+                                    </div>
+                                </ng-container>
+                                <ng-template #NotFixedHtml>
+                                    <!-- 項目名  -->
+                                    <div *ngIf="!isChildField(field)" class=" form-control-label col-md-12 pc-field-label">
+
+                                        <ng-container
+                                            *ngIf="!isAutoFillField(field) && this.forms.byFieldName(field.Field).is_multi_value_mode;else NOT_MULTI">
+                                            <label *ngIf="show_field_label">
+                                                {{this.forms.byFieldName(field.Field).label}}
+                                                <i *ngIf="!!field.help_tooltip_text" class="fa fa-question-circle" aria-hidden="true"
+                                                ngbTooltip="{{field.help_tooltip_text}}" container="body"></i>
+                                                <span
+                                                *ngIf="this.forms.byFieldName(field.Field).isRequired()"
+                                                class="text-danger"><i style="    height: auto;" class="fa fa-asterisk"></i></span>
+                                            </label>
+                                            <ng-container *ngIf="_share.debug_mode">
+                                                ( {{ field.Field }} / {{ this.forms.byFieldName(field.Field).multiple_table_name }} )
+                                            </ng-container>
+                                            <div *ngIf="this.forms.byFieldName(field.Field).sublabel && show_field_label" style="width:70%">
+                                                <small style="font-size:11px"
+                                                       class="text-gray-dark">{{this.forms.byFieldName(field.Field).sublabel}}</small>
+                                            </div>
+                                            <!-- 20240531 Kanazawa 検索虫メガネが出ない場合別のUIを用意したので、検索虫メガネが出る場合のみ＋ボタンを有効とする -->
+                                            <button *ngIf="!this.forms.byFieldName(field.Field).isUseMultiplePulldown()" [disabled]="!canAddChildData(field.Field)"
+                                                    class="btn-success btn  btn-sm ml-2"
+                                                    (click)="addChildData(getChildByField(field.Field),true,-1,$event)"><i class="fa fa-plus"></i></button>
+                                            <br>
+                                            <button *ngIf="getChildByField(field.Field) && table_info.forms.byFieldName(field['Field']).show_add_all_option"
+                                                    class="btn-success pull-right btn btn-sm"
+                                                    (click)="addAllFormData(getChildByField(field.Field),field.Field)">全データ追加
+                                            </button>
+                                            <ng-container *ngIf="this.forms.byFieldName(field.Field) && this.forms.byFieldName(field.Field).button_label">
+                                                <button class="btn btn-sm btn-success pull-left mt-1" (click)="call_func(this.forms.byFieldName(field.Field).button_function)"
+                                                        [ladda]="sending_custom_button">{{ this.forms.byFieldName(field.Field).button_label }}
+                                                </button>
+                                            </ng-container>
+                                        </ng-container>
+                                        <ng-template #NOT_MULTI>
+                                            <label *ngIf="show_field_label && this.forms.byFieldName(field.Field).getOriginalType() != 'relation_table'">
+                                                {{this.forms.byFieldName(field.Field).label}}
+                                                <ng-container *ngIf="_share.debug_mode">
+                                                    ( {{field.Field}} )
+                                                </ng-container>
+                                                <ng-template appDebugMode="true" [add_new_mode]="mode=='add'">
+                                                    <span>( {{field.Field}} )</span>
+                                                </ng-template>
+                                                <i *ngIf="!!field.help_tooltip_text" class="fa fa-question-circle"
+                                                   aria-hidden="true" ngbTooltip="{{field.help_tooltip_text}}" container="body"></i>
+                                                <span
+                                                    *ngIf="this.forms.byFieldName(field.Field).isRequired()"
+                                                    class="text-danger"><i style="    height: auto;" class="fa fa-asterisk"></i></span>
+                                                <div
+                                                    *ngIf="this.forms.byFieldName(field.Field).type=='image' && this.forms.byFieldName(field.Field).option != null && this.forms.byFieldName(field.Field).option.width!=null">
+                                                    <small class="text-gray-dark">推奨サイズ:
+                                                        {{this.forms.byFieldName(field.Field).option.width}}px
+                                                        × {{this.forms.byFieldName(field.Field).option.height}}px
+                                                    </small>
+                                                </div>
+                                                <div
+                                                    *ngIf="this.forms.byFieldName(field.Field).type=='file' && this.forms.byFieldName(field.Field).accept">
+                                                    <small class="text-gray-dark">対応ファイル:
+                                                        {{this.forms.byFieldName(field.Field).accept}}</small>
+                                                </div>
+                                                <div *ngIf="this.forms.byFieldName(field.Field).sublabel">
+                                                    <small
+                                                        class="text-gray-dark">{{this.forms.byFieldName(field.Field).sublabel}}</small>
+                                                </div>
+                                                <span *ngIf="this.forms.byFieldName(field.Field).original_type=='radio' && !this.forms.byFieldName(field.Field).required">
+                                                    <i class="fa fa-trash " style=" color:#888;   font-size: 19px; padding: 5px;cursor: pointer" (click)="changeValue(field.Field,null)"></i>
+                                                </span>
+                                            </label>
+                                        </ng-template>
+
+
+                                    </div>
+                                    <hr style="    width: 93%;" *ngIf="isQuestionnaireStyle()">
+
+                                    <!-- フォーム -->
+
+                                    <div class="col-md-12" [ngClass]="{'p-0': isQuestionnaireStyle()}">
+                                        <ng-container *ngIf="!isEditableField(field);else isEditable;">
+                                            <span *ngIf="mode ==='add' && field.fixed_value && hasFixedOtherTableLabels(field.fixed_value)">
+                                                {{fixedOtherTableLabels[field.fixed_value]}}
+                                            </span>
+                                            <span *ngIf="mode ==='add' && field.fixed_value && !hasFixedOtherTableLabels(field.fixed_value)">
+                                                {{field.fixed_value}}
+                                            </span>
+                                            <span *ngIf="mode ==='add'  && !field.fixed_value">
+                                                (編集不可)
+                                            </span>
+                                            <span *ngIf="mode ==='edit'">
+                                                <dynamic-data-view [table_info]="table_info" [data]="data" [field_name]="field['Field']" [is_view_mode]="true"
+                                                                   [dataType]="forms.byFieldName(field['Field']).type"></dynamic-data-view>
+                                            </span>
+                                        </ng-container>
+                                        <ng-template #isEditable>
+                                            <!-- NOT MULTIPLE -->
+                                            <ng-container *ngIf="isAutoFillField(field); else NotAuto;">
+                                                <ng-container *ngIf="isLoadingField(field.Field);else NotLoading">
+                                                    <div class="loader_small">Loading...</div>
+                                                </ng-container>
+                                                <ng-template #NotLoading>
+                                                    <ng-container *ngIf="!forms.byFieldName(field['Field']).is_multi_value_mode">
+                                                    <span class="pc-field-label" *ngIf="!['image','file'].includes(forms.byFieldName(field['Field']).type) && this.forms.byFieldName(field.Field).original_type != 'richtext'">
+                                                        {{data.view_data[field.Field]}}
+                                                    </span>
+                                                        <span class="pc-field-label"
+                                                              *ngIf="!['image','file'].includes(forms.byFieldName(field['Field']).type) && this.forms.byFieldName(field.Field).original_type == 'richtext'"
+                                                              [innerHTML]="data.view_data[field.Field]">
+                                                    </span>
+                                                        <div *ngIf="forms.byFieldName(field['Field']).type === 'image' && data.view_data[field.Field]">
+                                                            <img [src]="data.view_data[field.Field].url" class="preview_thumbnail"/>
+                                                        </div>
+                                                        <div *ngIf="forms.byFieldName(field['Field']).type === 'file' && data.view_data[field.Field]">
+                                                            <div *ngIf="!is_string(data.view_data[field.Field])">
+                                                                <a class="d-none d-lg-inline" *ngIf="data.view_data[field.Field]!=null && !is_string(data.view_data[field.Field])"
+                                                                   href="javascript:void(0)"
+                                                                   (click)="download_file(data.view_data[field.Field]['url'])">{{ data.view_data[field.Field]['name'] }}</a>
+                                                                <div *ngIf="data.view_data[field.Field] && isDownloading(data.view_data[field.Field].url)">
+                                                                    <div class="loader_small">Loading...</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div *ngIf="is_string(data.view_data[field.Field])">{{ data.view_data[field.Field] }}</div>
+                                                    </ng-container>
+
+
+                                                    <ng-container *ngIf="forms.byFieldName(field['Field']).is_multi_value_mode">
+                                                    <span class="pc-field-label" *ngIf="!['image','file'].includes(forms.byFieldName(field['Field']).type)">
+                                                        {{ formatArrayValue( data.view_data[field.Field]) }}
+                                                    </span>
+                                                        <div *ngIf="forms.byFieldName(field['Field']).type === 'image' && data.view_data[field.Field]">
+                                                            <ng-container *ngFor="let image of data.view_data[field.Field]">
+                                                                <img [src]="image.url" class="preview_thumbnail"/>
+                                                            </ng-container>
+                                                        </div>
+                                                        <div *ngIf="forms.byFieldName(field['Field']).type === 'file' && data.view_data[field.Field]">
+                                                            <ng-container *ngFor="let file of data.view_data[field.Field]">
+                                                                <div *ngIf="!is_string(file)">
+                                                                    <a class="d-none d-lg-inline" *ngIf="file!=null && !is_string(file)"
+                                                                       href="javascript:void(0)"
+                                                                       (click)="download_file(file['url'])">{{ file['name'] }}</a>
+                                                                    <div *ngIf="file && isDownloading(file.url)">
+                                                                        <div class="loader_small">Loading...</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div *ngIf="is_string(file)">{{ file }}</div>
+                                                            </ng-container>
+                                                        </div>
+                                                    </ng-container>
+                                                </ng-template>
+
+                                            </ng-container>
+                                            <ng-template #NotAuto>
+                                                <div class="row" [ngClass]="{'m-0': isQuestionnaireStyle()}">
+                                                    <div class="col-md-12 fieldname_{{field.Field}} pc-field-value {{this.forms.byFieldName(field.Field).getCustomClassName()}}"
+                                                         [ngClass]="{'form-field-container': !isChildField(field)}"
+                                                         style="margin-bottom:5px;"
+                                                         *ngIf="!this.forms.byFieldName(field.Field).is_multi_value_mode">
+
+                                                        <ng-container *ngIf="isChildField(field); else NotChildField">
+                                                            <admin-child-forms 
+                                                                [form]="forms.byFieldName(field.Field)" 
+                                                                [child_table]="getChildTable(field)" 
+                                                                [editComponent]="getEditComponent()">
+                                                            </admin-child-forms>
+                                                        </ng-container>
+
+                                                        <ng-template #NotChildField>
+                                                            <admin-forms-field [data_changed]="data.last_dirty_changed" [table_info]="table_info" [data]="data"
+                                                                           [is_add]="mode=='add'"
+                                                                           [forms]="forms"
+                                                                           [id_prefix]="id_prefix"
+                                                                           [default_form]="this.forms.byFieldName(field.Field)"
+                                                                           [default_field]="field"
+                                                                           [thumbnail_file_info]="(forms.byFieldName(field.Field).type=='image' && view_data && view_data[field.Field]) ?view_data[field.Field]:null"
+                                                                           [editComponent]="getEditComponent()" [field_name]="field.Field"
+                                                                           [grant_menu_a]="grant_menu_a"
+                                                                           [auto_complete_values]="auto_complete_values"
+                                                                           (valueChanged)="onValueChanged($event)" [last_updated]="last_updated"
+                                                                           [is_add_new_button_select_other_table]="is_add_new_button_select_other_table"
+                                                                           [selectOptionitemsFilter]="selectOptionItemsFilter"
+                                                                           [IS_PUBLIC_FORM]="IS_PUBLIC_FORM"
+                                                                           [IS_EMBED_MODE]="IS_EMBED_MODE"
+                                                                           (openLookupSearchModal)="openLookupModal($event)"
+                                                                           [last_option_changed_date]="last_option_changed_date"
+                                                                           [grant_kind]="grant_kind"
+                                                                           [parent_data]="parent?.data"
+                                                                           [child_index]="child_index"
+                                                                           [showDetailSettings]="showDetailSettings"
+                                                                            [source]="source"
+                                                                            (showDetailSettingsChange)="showDetailSettingsChange.emit($event)"
+                                                        ></admin-forms-field>
+                                                        </ng-template>
+                                                        
+                                                        <!-- エラー表示 -->
+                                                        <div *ngIf="error_a && error_a[field.Field] != undefined" class="text-danger " style="clear: both">
+                                                            {{error_a[field.Field]}}
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+
+                                                <!-- MULTIPLE -->
+                                                <ng-container *ngIf="this.forms.byFieldName(field.Field).is_multi_value_mode">
+                                                    <div cdkDropList [cdkDropListData]="child_data_a_by_fieldname[field.Field]" (cdkDropListDropped)="innerDrop($event)">
+                                                        <!--  複数選択可能、且つ検索虫眼鏡非表示の場合テーブル検索のUIに合わせたセレクトボックスを用意 -->
+                                                        <!-- is_add_new_button_select_other_tableは他テーブル参照の複数選択の場合動かないロジックになっているので、最初から無効に設定 -->
+                                                        <ng-container *ngIf="this.forms.byFieldName(field.Field).isUseMultiplePulldown();else notMultiOtherSelect">
+                                                            <admin-forms-field [data_changed]="data.last_dirty_changed" [table_info]="table_info" [data]="data"
+                                                                [is_add]="mode=='add'"
+                                                                [forms]="forms"
+                                                                [id_prefix]="id_prefix"
+                                                                [default_form]="this.forms.byFieldName(field.Field)"
+                                                                [default_field]="field"
+                                                                [thumbnail_file_info]="(forms.byFieldName(field.Field).type=='image' && view_data && view_data[field.Field]) ?view_data[field.Field]:null"
+                                                                [editComponent]="getEditComponent()" [field_name]="field.Field"
+                                                                [grant_menu_a]="grant_menu_a"
+                                                                [auto_complete_values]="auto_complete_values"
+                                                                (valueChanged)="onValueChanged($event)" [last_updated]="last_updated"
+                                                                [is_add_new_button_select_other_table]="false"
+                                                                [selectOptionitemsFilter]="selectOptionItemsFilter"
+                                                                [IS_PUBLIC_FORM]="IS_PUBLIC_FORM"
+                                                                [IS_EMBED_MODE]="IS_EMBED_MODE"
+                                                                (openLookupSearchModal)="openLookupModal($event)"
+                                                                [last_option_changed_date]="last_option_changed_date"
+                                                                [grant_kind]="grant_kind"
+                                                                [parent_data]="parent?.data"
+                                                                [child_table]="getChildTablenameByFieldname(field.Field)"
+                                                                [child_table_data]="getChildByField(field.Field)"
+                                                                (deleteAllChildData)="deleteAllChildDataFromChild($event)"
+
+                                                                [child_index]="child_index"
+                                                            ></admin-forms-field>
+                                                        </ng-container>
+                                                        <ng-template  #notMultiOtherSelect>
+                                                            <div class="row multiple-form-field-container"
+                                                                *ngFor="let child_data of child_data_a_by_fieldname[field.Field]; index as i" cdkDrag>
+                                                                <div class="col-lg-11 row " style="margin-bottom:5px;"
+                                                                    [ngClass]="{'multiple-box':['image','file'].indexOf(this.forms.byFieldName(field.Field).type)>=0}">
+                                                                    <div class="col-md-11  pc-field-value" [ngClass]="this.forms.byFieldName(field.Field).getCustomClassName()">
+                                                                        <admin-forms-field [data_changed]="data.last_dirty_changed" [table_info]="table_info" [data]="child_data"
+                                                                                        [is_add]="mode=='add'"
+                                                                                        [forms]="forms"
+                                                                                        [default_form]="this.forms.byFieldName(field.Field)"
+                                                                                        [default_field]="field"
+                                                                                        [thumbnail_file_info]="(view_data && view_data[field.Field]) ?view_data[field.Field][i]:null"
+                                                                                        [editComponent]="getEditComponent()" [field_name]="field.Field"
+                                                                                        [grant_menu_a]="grant_menu_a"
+                                                                                        [auto_complete_values]="auto_complete_values"
+                                                                                        (valueChanged)="onValueChanged($event)"
+                                                                                        [child_table]="getChildTablenameByFieldname(field.Field)"
+                                                                                        [id_prefix]="id_prefix+'multi_index_'+i+'_'"
+                                                                                        [data_index]="i"
+                                                                                        [parent_data]="data" [last_updated]="last_updated"
+                                                                                        [parent_data_ifmulti]="parent?.data"
+                                                                                        [is_add_new_button_select_other_table]="is_add_new_button_select_other_table"
+                                                                                        [disable_edit]="['image','file'].indexOf(this.forms.byFieldName(field.Field).type)>=0 && !!child_data.raw_data['id']"
+                                                                                        (addchildvalue)="addChildDatafromformsfield($event)"
+                                                                                        (openLookupSearchModal)="openLookupModal($event,i)"
+                                                                                        [IS_PUBLIC_FORM]="IS_PUBLIC_FORM"
+                                                                                        [IS_EMBED_MODE]="IS_EMBED_MODE"
+                                                                                        [last_option_changed_date]="last_option_changed_date"
+                                                                                        [selectOptionitemsFilter]="selectOptionItemsFilter"
+                                                                                        [child_index]="child_index"
+                                                                        >
+                                                                        </admin-forms-field>
+                                                                        <!-- エラー表示 -->
+                                                                        <div
+                                                                            *ngIf="error_a['_child_a'] != undefined && error_a['_child_a'][getChildTablenameByFieldname(field.Field)] && error_a['_child_a'][getChildTablenameByFieldname(field.Field)][i] &&  error_a['_child_a'][getChildTablenameByFieldname(field.Field)][i]['value'] != undefined"
+                                                                            class="text-danger">
+                                                                            {{error_a['_child_a'][getChildTablenameByFieldname(field.Field)][i]['value']}}
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <div class="col-md-1 buttons" style="color: #777;">
+                                                                        <button
+                                                                            *ngIf="this.forms.byFieldName(field.Field).is_multi_value_mode"
+                                                                            class="btn-danger pull-right btn btn-sm"
+                                                                            (click)="deleteChildData(getChildByField(field.Field),i,field.Field)"><i
+                                                                            class="fa fa-minus"></i></button>
+                                                                        <div class="dragger ml-1" cdkDragHandle>
+                                                                            <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                                                                                <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                                                                                <path d="M0 0h24v24H0z" fill="none"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ng-template>
+                                                    </div>
+
+
+                                                </ng-container>
+                                            </ng-template>
+                                        </ng-template>
+
+                                    </div>
+
+                                </ng-template>
+
+                                <!-- テーブル定義用マウスオーバーブロック -->
+                                <div *ngIf="is_custom_table_definition && !is_custom_table_definition_popup && !isChildForm() && dataset_edit_mode== 'dataset_field'"
+                                     class="overSetting" (click)="clickOverArea($event,field)">
+                                    <div class="back"></div>
+                                    <div class="border"></div>
+                                    <div class="icon-container">
+                                        <a target="_blank"><i class="fa fa-trash red" aria-hidden="true" (click)="openTableDetectionDeleteModal(field)"></i></a>
+                                        <a target="_blank"><i class="fa fa-gear" aria-hidden="true" (click)="openSettingModal(field)"></i></a>
+                                        <a target="_blank"><i class="fa fa-clone" aria-hidden="true" (click)="addFieldData(field)"></i></a>
+                                        <div class="dragger ml-1" cdkDragHandle>
+                                            <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                                                <path d="M0 0h24v24H0z" fill="none"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </div>
+        </ng-container>
+
+    </div>
+
+</div>
+
+<confirm-modal #cloneFieldConfirm [submit_button_text]="'はい'" [text]="cloneConfirmText" (onOk)="cloneFieldData()"
+             [type]="'warning'"></confirm-modal>
+
+<div bsModal #deleteFieldModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-danger" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></h4>
+                <button type="button" class="close" (click)="deleteFieldModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div *ngIf="field_delete_warning != ''">{{field_delete_warning}}の表示条件設定に使われています</div>
+                <p>本当に削除してもよろしいですか？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="deleteFieldModal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-danger" (click)="deleteField()">削除する</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div bsModal #selectOtherEditModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div *ngIf="selectOtherEditModal.isShown" class="modal-dialog modal-default" role="document">
+        <div class="modal-content modal-primary">
+            <div class="modal-header">
+                <h4 class="modal-title">データ追加</h4>
+                <button type="button" class="close" (click)="selectOtherEditModal.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" *ngIf="table_info">
+                <edit-component [_id]="-1" [_table]="select_other_edit_modal_form.item_table" [IS_EMBED_MODE]="true" [submit_text]="'追加'"
+                                (onSubmit)="onSubmitSelectOtherNewData($event)" (onCancel)="onCancelSelectOtherNewData()"></edit-component>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<ng-container *ngIf="!IS_PUBLIC_FORM && !IS_EMBED_MODE  ">
+    <div bsModal #lookupModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+        <lookup-modal *ngIf="lookupForm" [table]="lookupForm.item_table" [searchValue]="lookupSearchValue" [searchValueLastChanged]="searchValueLastChanged" (onClose)="this.lookupModal.hide()"
+                      (onSelectData)="onLookupDataSelected($event)" [lookupForm]="lookupForm" [lookupOptionItems]="lookupOptionItems"></lookup-modal>
+
+    </div><!-- /.modal -->
+</ng-container>

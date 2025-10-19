@@ -1,0 +1,9 @@
+.group-index-bread{
+    text-decoration: none;
+    &:not(:last-child)::after{
+        font-family: FontAwesome;
+        content: "\f105";
+        padding: 0 0.5rem;
+        color: #374767;
+    }
+}

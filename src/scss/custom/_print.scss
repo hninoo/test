@@ -1,0 +1,126 @@
+@media print {
+    body,html,app-dashboard{
+        width: 100%!important;
+    }
+    .header-fixed .app-header{
+        position: relative!important;
+    }
+    .app-body{
+        overflow-x: unset;
+    }
+    .app-body .main{
+        flex: 0;
+        width: 100%;
+        min-width: 100%;
+    }
+    .header-fixed .app-body{
+        margin-top: 0px;
+    }
+    .sidebar {
+        display: none!important;
+    }
+    .sidebar-fixed .main, .sidebar-fixed .app-footer {
+        margin-left: 0px!important;
+    }
+    
+    /** 
+    calendar print css
+    */
+    .full-calendar{
+        width: 100%!important;
+    }
+    .full-calendar,
+    .fc-daygrid table,
+    .fc-daygrid tr,
+    .fc-daygrid tr>td tr{
+        background-color: #fff;
+    }
+
+    .full-calendar{
+        max-height: max-content;
+        position: absolute;
+        top: 40px;
+        bottom: 0;
+    }
+    .fc .fc-scroller-liquid-absolute table,
+    .fc .fc-scrollgrid-section,
+    .fc-view-harness-active{
+        height: 100%!important;
+    }
+    .fc .fc-view-harness-active>.fc-view
+    .fc .fc-scroller-liquid-absolute{
+        position: unset!important;
+        top: 0px !important;
+        bottom: 0px !important;
+        left: 0px!important;
+        right: 0px !important;
+        height: max-content;
+    }
+    .fc-toolbar-chunk{display: none;}
+    .fc-toolbar-chunk:first-child{display: block;}
+
+    .fc-daygrid>table>thead table,
+    .fc-daygrid>table td .fc-daygrid-body,
+    .fc-daygrid>table td .fc-daygrid-body>table{
+        width: 100%!important;
+    }
+    // hide scroll on window
+    .fc-daygrid .fc-scroller-liquid-absolute{
+        position: relative!important;
+    }
+    .fc-daygrid .fc-scroller{
+        overflow-y: hidden!important;
+    }
+    // daygrid border
+    .fc .fc-daygrid  .fc-scrollgrid-section>*{
+        border-left-width:1px;
+        border-color: var(--fc-border-color,#ddd);
+        // border-width: 1px;
+    }
+    .fc .fc-daygrid .fc-scrollgrid{
+        border-right-width: 0;
+        border-bottom-width: 0;
+    }
+    .fc-theme-standard .fc-daygrid .fc-scrollgrid{
+        border-width: 0px;
+    }
+    .fc .fc-daygrid  .fc-scrollgrid table.fc-col-header{
+        border-top-style: solid;
+        border-top-width: 1px;
+    }
+    .fc-daygrid tr>td tr{
+        // border:1px solid red!important;
+    }
+    .fc .fc-timegrid .fc-view-harness-active>.fc-view, 
+    .fc .fc-timegrid .fc-scroller-liquid-absolute {
+        position: unset !important;
+        top: 0px !important;
+        bottom: 0px !important;
+        left: 0px !important;
+        right: 0px !important;
+        height: max-content;
+    }
+
+    .fc-view>table>thead table,
+    .fc-view>table td .fc-daygrid-body,
+    .fc-view>table td .fc-daygrid-body>table,
+    .fc .fc-timegrid .fc-scrollgrid-section-body table,
+    .fc .fc-timegrid .fc-scrollgrid-section-footer table,
+    .fc .fc-timegrid .fc-timegrid-body,
+    .fc .fc-timegrid .fc-timegrid-body>table {
+        width: 100% !important;
+    }
+
+    .fc-timegrid tr.break-next-page{
+        page-break-inside: avoid;
+    }
+    .fc-timegrid.fc-view tr {
+        page-break-inside: inherit;
+    }
+    .fc .fc-event,
+    .fc .fc-timegrid .fc-scrollgrid table tr {
+        -moz-column-break-inside: inherit;
+        break-inside: inherit;
+    }
+
+}

@@ -1,0 +1,106 @@
+.t1-image-2 {
+    height: 200px;
+    width: 350px;
+}
+
+a.disabled {
+    pointer-events: none;
+}
+
+.disabled-wrapper {
+    cursor: not-allowed;
+}
+
+.nav-item.button_center {
+    text-align: center;
+}
+
+.bg-transparent{
+    background-color: transparent!important;
+}
+
+.h-auto{
+    height: auto!important;
+}
+
+.popup-search-icon{
+    cursor: pointer;
+}
+
+button.popup-search-icon{
+    left: 40px;
+    cursor: pointer;
+}
+
+.sidebar .sidebar-nav{
+    display: flex;
+    flex-direction: column;
+}
+/* .sidebar .sidebar-nav .nav.list-unstyled{
+    flex: 1 auto;
+    justify-content: end;
+} */
+
+@media (max-width:991px){
+    .app-header .navbar-toggler.menu-toggle{
+        /* font-size: 30px; */
+        /* margin-top: -2px; */
+        margin-left: 5px;
+    }
+    .app-header .navbar-toggler{
+        width: auto;
+        margin-left: 20px;
+        color: #fff;
+    }
+}
+@media (max-width: 550px) {
+    .shortcut_modal_form{
+        width: 100%;
+    }
+}
+@media (max-width: 480px){
+    .app-body .sidebar-fixed .sidebar .sidebar-nav {
+        margin-top: 45px;
+    }
+}
+@media (max-width:425px){
+    .app-header .navbar-toggler.menu-toggle {
+        margin-left: 0px;
+    }
+    .app-header .navbar-toggler.popup-search-icon {
+        margin-left: 5px;
+    }
+}
+
+/* 通知ドロップダウンのスタイル */
+#header_notification .dropdown-header {
+    color: #212529 !important;
+}
+
+#header_notification .notification-item {
+    border-bottom: 1px solid #dee2e6 !important;
+    height: 63px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* スマホでの通知ポップアップの幅を調整 */
+@media (max-width: 767px) {
+    #header_notification {
+        min-width: 320px !important;
+        max-width: calc(100vw - 20px) !important;
+        right: 10px !important;
+    }
+}
+
+/* ユーザーメニューのドロップダウンアイテムの高さを調整 */
+.nav-item.dropdown .dropdown-menu .dropdown-item {
+    padding: 0.6rem 1.5rem !important;
+    line-height: 1.4 !important;
+}

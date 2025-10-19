@@ -1,0 +1,1370 @@
+<div class="card card-accent-primary dataset-add-modal">
+    <div class="card-block">
+        <div class="form-group row admin-forms">
+            <label class="col-md-3 form-control-label">
+                グループ <br>
+            </label>
+            <div class="col-md-9 row">
+                <div class="col-md-8">
+                    <admin-forms-field (valueChanged)="chnaged($event,'dataset_group_id')" [is_add_new_button_select_other_table]="true" [is_add]="isInsert" [table_info]="dataset_table_info"
+                                       [field_name]="'dataset_group_id'" [data]="data" [default_value]="data.raw_data['dataset_group_id']"
+                                       [last_option_changed_date]="last_option_changed_date"></admin-forms-field>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-success" (click)="selectOtherEditModal.show()">追加</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-3 form-control-label">
+                テーブル名
+                <span class="text-danger">※</span>
+            </label>
+            <div class="col-md-9 col-lg-7">
+                <input id="table_name" [(ngModel)]="data.raw_data['label']" type="text" class="form-control" [disabled]="is_system_table">
+            </div>
+        </div>
+        <hr>
+        <ng-container *ngIf="isUnionMode()">
+            <label class="col-md-3 col-lg-3 form-control-label">
+                UNION / UNION ALL MODE
+            </label>
+            <div class="col-md-9 col-lg-7">
+                <div class="checkbox">
+                    <label>
+                        <input [(ngModel)]="data.raw_data['union_mode']" type="hidden" name="delete_lock">
+                        <input type="checkbox" [checked]="data.raw_data['union_mode']=='true'"
+                               (change)="data.raw_data['union_mode']=(data.raw_data['union_mode']=='true')?'false':'true';" [disabled]="!isAdd()">
+                        有効
+                    </label>
+                </div>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="!isUnionMode()">
+
+            <div class="row" *ngIf="!is_system_table">
+            <label class="col-md-3 col-lg-3 form-control-label">
+                テーブル削除ロック
+            </label>
+                <div class="col-md-9 col-lg-7">
+                <div class="checkbox">
+                    <label>
+                        <input [(ngModel)]="data.raw_data['delete_lock']" type="hidden" name="delete_lock">
+                        <input type="checkbox" [checked]="data.raw_data['delete_lock']!='false'"
+                            (change)="data.raw_data['delete_lock']=(data.raw_data['delete_lock']=='true')?'false':'true';">
+                        有効
+                    </label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="button" class="btn btn-sm btn-outline-info" (click)="isDatasetSettingOptionCollapsed = !isDatasetSettingOptionCollapsed"
+                        [attr.aria-expanded]="!isDatasetSettingOptionCollapsed" aria-controls="collapseDataset">
+                    <i class="fa" [class.fa-bars]="isDatasetSettingOptionCollapsed" [class.fa-times]="!isDatasetSettingOptionCollapsed"></i>
+                    追加オプション設定
+                </button>
+            </div>
+            <div id="collapseDataset" class="col-12 mt-3 animated fadeIn" [ngbCollapse]="isDatasetSettingOptionCollapsed">
+
+                <div class="form-group row admin-forms" *ngIf="isAdd()">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        UNION / UNION ALL MODE
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['union_mode']" type="hidden" name="delete_lock">
+                                <input type="checkbox" [checked]="data.raw_data['union_mode']=='true'"
+                                       (change)="data.raw_data['union_mode']=(data.raw_data['union_mode']=='true')?'false':'true';" [disabled]="!isAdd()">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h4>メニュー</h4>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        メニューに表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['show_menu']" type="hidden" name="show_id" class="input_show_menu">
+                                <input type="checkbox" [checked]="data.raw_data['show_menu']!='false'" (change)="data.raw_data['show_menu']=(data.raw_data['show_menu']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        アイコンタイプ
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <admin-forms-field (valueChanged)="chnaged($event,'icon_type')" [is_add]="isInsert" [table_info]="dataset_table_info"
+                                           [field_name]="'icon_type'" [data]="data" [default_value]="data.raw_data['icon_type']"></admin-forms-field>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        アイコン
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <ng-container *ngIf="data.raw_data['icon_type']=='class';else iconImage">
+                            <input [(ngModel)]="data.raw_data['icon_class']" type="text" class="form-control" placeholder="address-book">
+                            <br>
+                            <label>
+                                <a href="https://fontawesome.com/v4.7/icons/" target="_blank">こちら</a>よりclassの名称を取得し、入力して下さい。（例：address-book
+                            </label>
+                        </ng-container>
+                        <ng-template #iconImage>
+                            <admin-forms-field (valueChanged)="chnaged($event,'icon_image_url')" [is_add]="isInsert" [table_info]="dataset_table_info"
+                                               [field_name]="'icon_image_url'" [data]="data" [default_value]="data.raw_data['icon_image_url']"></admin-forms-field>
+                        </ng-template>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        フィルタを表示しない (テーブル管理者以外)
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['not_display_filter']!='false'"
+                                       (change)="data.raw_data['not_display_filter']=(data.raw_data['not_display_filter']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        ビューを表示しない (テーブル管理者以外)
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['not_display_filter_view']!='false'"
+                                       (change)="data.raw_data['not_display_filter_view']=(data.raw_data['not_display_filter_view']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>一覧画面</h4>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        1ページあたりの表示データ数 (最大100）<br>
+                        <!-- <small>項目数が多い場合、データ数が多いと重くなる場合があります</small>-->
+                    </label>
+                    <div class="col-md-5 col-lg-4">
+                        <input [(ngModel)]="data.raw_data['per_page']" OnlyNumber [object]="data.raw_data" [key]="'per_page'" [min]="1" [max]="100" class="form-control input_per_page">
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        デフォルトの並び順
+                    </label>
+                    <div class="col-md-5 col-lg-4">
+                        <select name="sort_field" class="input_sort_field" [(ngModel)]="data.raw_data['sort_field']" class="form-control">
+                            <option value="id">ID</option>
+                            <option *ngFor="let _child_data of data.child_data_by_table['dataset_field']" value="field__{{_child_data.raw_data.id}}">{{_child_data.raw_data.name}}
+                            </option>
+                            <option value="admin_id">作成者</option>
+                            <option value="updated">更新日時</option>
+                            <option value="created">作成日時</option>
+                        </select>
+
+                        <br>
+                        <label>
+                            <input type="radio" name="sort_order" class="input_sort_order" [(ngModel)]="data.raw_data['sort_order']" value="asc"> 昇順
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="sort_order" class="input_sort_order" [(ngModel)]="data.raw_data['sort_order']" value="desc"> 降順
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        IDを表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['show_id']" type="hidden" name="show_id" class="input_show_id">
+                                <input type="checkbox" [checked]="data.raw_data['show_id']!='false'" (change)="data.raw_data['show_id']=(data.raw_data['show_id']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        ヘッダー（１行目）を固定する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['show_table_header_sticky']" type="hidden" name="show_table_header_sticky" class="input_show_table_header_sticky">
+                                <input type="checkbox" [checked]="data.raw_data['show_table_header_sticky']!='false'" (change)="data.raw_data['show_table_header_sticky']=(data.raw_data['show_table_header_sticky']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        更新日時を表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['show_updated']" type="hidden" name="show_updated" class="input_show_updated">
+                                <input type="checkbox" [checked]="data.raw_data['show_updated']=='true'"
+                                       (change)="data.raw_data['show_updated']=(data.raw_data['show_updated']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        作成日時を表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <!-- ngModelはhiddenに紐付け、checkboxでhiddenのvalueを変える -->
+                                <input [(ngModel)]="data.raw_data['show_created']" type="hidden" name="show_created" class="input_show_created">
+                                <input type="checkbox" [checked]="data.raw_data['show_created']=='true'"
+                                       (change)="data.raw_data['show_created']=(data.raw_data['show_created']=='true')?'false':'true';">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        作成者を表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <!-- ngModelはhiddenに紐付け、checkboxでhiddenのvalueを変える -->
+                                <input [(ngModel)]="data.raw_data['show_admin']" type="hidden" name="show_created" class="input_show_created">
+                                <input type="checkbox" [checked]="data.raw_data['show_admin']=='true'" (change)="flgChange('show_admin',$event)">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        一覧編集／登録モード
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['editable_on_list']" type="hidden" name="editable_on_list" class="input_editable_on_list">
+                                <input type="checkbox" [checked]="data.raw_data['editable_on_list']=='true'" value="true"
+                                       (change)="flgChange('editable_on_list',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        カレンダー表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['is_calendar_view_enabled']" type="hidden">
+                                <input type="checkbox" [checked]="data.raw_data['is_calendar_view_enabled']=='true'" (change)="flgChange('is_calendar_view_enabled',$event); calendarViewActive()">
+                                有効
+                            </label>
+                        </div>
+                        <ng-container *ngIf="data.raw_data['is_calendar_view_enabled']=='true'">
+
+                            <div class="checkbox">
+                                <label>
+                                    <input [(ngModel)]="data.raw_data['show_calendar_view_only']" type="hidden">
+                                    <input type="checkbox" [checked]="data.raw_data['show_calendar_view_only']=='true'"
+                                           (change)="data.raw_data['show_calendar_view_only']=(data.raw_data['show_calendar_view_only']=='true')?'false':'true';">
+                                    カレンダー表示をデフォルトにする
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input [(ngModel)]="data.raw_data['from_to_calendar_view_datetime']" type="hidden">
+                                    <input type="checkbox" [checked]="data.raw_data['from_to_calendar_view_datetime']=='true'"
+                                           (change)="data.raw_data['from_to_calendar_view_datetime']=(data.raw_data['from_to_calendar_view_datetime']=='true')?'false':'true';">
+                                    参照する日時フィールドをfrom,toの形式にする。
+                                </label>
+                            </div>
+
+                            <ng-container *ngIf="data.raw_data['from_to_calendar_view_datetime']=='false'">
+                                <label>参照したい日時フィールドを選択してください。</label>
+                                <ng-select
+                                    class="custom form-control"
+                                    [items]="calendar_view_datetime_list"
+                                    [(ngModel)]="data.raw_data['calendar_view_datetime']"
+                                    appendTo="body"
+                                    [searchWhileComposing]="false"
+                                    [virtualScroll]="true"
+                                    bindLabel="name"
+                                    bindValue="value"
+                                >
+                                </ng-select>
+                            </ng-container>
+                            <ng-container *ngIf="data.raw_data['from_to_calendar_view_datetime']=='true'">
+                                <label>開始日時で参照したい日時フィールドを選択してください。</label>
+                                <br>
+                                <ng-select
+                                    class="custom form-control"
+                                    [items]="calendar_view_datetime_list"
+                                    [(ngModel)]="data.raw_data['calendar_view_datetime_from']"
+                                    appendTo="body"
+                                    [searchWhileComposing]="false"
+                                    [virtualScroll]="true"
+                                    bindLabel="name"
+                                    bindValue="value"
+                                >
+                                </ng-select>
+                                <label>終了日時で参照したい日時フィールドを選択してください。</label>
+                                <br>
+                                <ng-select
+                                    class="custom form-control"
+                                    [items]="calendar_view_datetime_list"
+                                    [(ngModel)]="data.raw_data['calendar_view_datetime_to']"
+                                    appendTo="body"
+                                    [searchWhileComposing]="false"
+                                    [virtualScroll]="true"
+                                    bindLabel="name"
+                                    bindValue="value"
+                                >
+                                </ng-select>
+                            </ng-container>
+
+                            <br>
+                            <label>カレンダーで表示したいフィールドを入力してください。</label>
+                            <br>
+                            <input [(ngModel)]="data.raw_data['field_displaying_in_calendar_view']" [mention]="calendar_view_display_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}"  type="text" placeholder="ex. {ID}: {表示したいフィールド名}" class="form-control">
+
+                            <label>カレンダーで表示したい画像フィールドがあれば選択してください。</label>
+                            <ng-select
+                                class="custom form-control"
+                                [items]="calendar_view_image_list"
+                                [(ngModel)]="data.raw_data['image_field_displaying_in_calendar_view']"
+                                appendTo="body"
+                                [searchWhileComposing]="false"
+                                [virtualScroll]="true"
+                                bindLabel="name"
+                                bindValue="value"
+                            >
+                            </ng-select>
+
+                            <button class="btn btn-success btn-sm btn-md mt-2" (click)="setCalenderBgColor.show()"><i class="fa fa-plus mr-1"></i>カレンダーの背景色を追加</button>
+                        </ng-container>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        メニューに「全てのデータを削除」を表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <!-- ngModelはhiddenに紐付け、checkboxでhiddenのvalueを変える -->
+                                <input [(ngModel)]="data.raw_data['show_delete_all']" type="hidden" name="show_created" class="input_show_created">
+                                <input type="checkbox" [checked]="data.raw_data['show_delete_all']=='true'"
+                                       (change)="flgChange('show_delete_all',$event)">
+                                有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        上部にメモを表示する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['show_top_memo']=='true'"
+                                       (change)="showTopMemoChange('show_top_memo',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 地図表示設定（有償オプションが有効の場合） -->
+                <div *ngIf="this._share.google_map_max_call_count_plan > 0" class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        地図を表示する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['use_google_map']=='true'" (change)="flgChange('use_google_map',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地図表示設定（有償オプションが無効の場合：グレーアウト表示） -->
+                <div *ngIf="this._share.google_map_max_call_count_plan <= 0" class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        google map地図を表示する
+                        <span style="color: #999; font-size: 0.9em;">（有償オプション）</span>
+                    </label>
+                    <div class="col-md-9 col-lg-7" style="opacity: 0.5; pointer-events: none;">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" disabled> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地図設定がOFFの場合：グレーアウトで表示 -->
+                <div *ngIf="data.raw_data['use_google_map'] !== 'true' || this._share.google_map_max_call_count_plan <= 0" style="opacity: 0.4; pointer-events: none;">
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">住所フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" disabled>
+                                <option value="">選択してください</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">緯度フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" disabled>
+                                <option value="">選択してください</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">経度フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" disabled>
+                                <option value="">選択してください</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">編集画面に地図を表示する</label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" disabled> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">詳細画面に地図を表示する</label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" disabled> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地図設定がONの場合：通常表示 -->
+                <div *ngIf="data.raw_data['use_google_map'] === 'true' && this._share.google_map_max_call_count_plan > 0">
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">住所フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" [(ngModel)]="data.raw_data['google_map_address_field']">
+                                <option value="">選択してください</option>
+                                <option *ngFor="let field of getStringFields()" [value]="'field__' + field.raw_data.id">{{ field.raw_data.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">緯度フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" [(ngModel)]="data.raw_data['google_map_lat_field']">
+                                <option value="">選択してください</option>
+                                <option *ngFor="let field of getNumberFields()" [value]="'field__' + field.raw_data.id">{{ field.raw_data.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">経度フィールド</label>
+                        <div class="col-md-9 col-lg-7">
+                            <select class="form-control" [(ngModel)]="data.raw_data['google_map_lng_field']">
+                                <option value="">選択してください</option>
+                                <option *ngFor="let field of getNumberFields()" [value]="'field__' + field.raw_data.id">{{ field.raw_data.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">編集画面に地図を表示する</label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['use_google_map_edit']=='true'" (change)="flgChange('use_google_map_edit',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">詳細画面に地図を表示する</label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['use_google_map_detail']=='true'" (change)="flgChange('use_google_map_detail',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="child-container" *ngIf="data.raw_data['show_top_memo']=='true'">
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            メモの表示箇所
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="memo_view" [checked]="data.hasValueInJsonField('top_memo_display_view','list')"
+                                           (change)="flgChangeJson('top_memo_display_view','list',$event)"> 一覧画面
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="memo_view" [checked]="data.hasValueInJsonField('top_memo_display_view','edit')"
+                                           (change)="flgChangeJson('top_memo_display_view','edit',$event)"> 編集画面
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="memo_view" [checked]="data.hasValueInJsonField('top_memo_display_view','view')"
+                                           (change)="flgChangeJson('top_memo_display_view','view',$event)"> 詳細画面
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 col-lg-3 form-control-label">
+                            メモタイトル
+                        </label>
+
+                        <div class="col-md-9 col-lg-7">
+                            <input [(ngModel)]="data.raw_data['top_memo_title']" type="text" class="form-control">
+                        </div>
+
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 col-lg-3 form-control-label">
+                            メモ本文
+                        </label>
+
+                        <div class="col-md-9 col-lg-7">
+                            <div [froalaEditor]="_share.getFroalaOption()" [(froalaModel)]="data.raw_data['top_memo']"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <h4>詳細画面</h4>
+
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        ログとコメントをまとめて表示する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['merge_comment_and_history']=='true'"
+                                       (change)="flgChange('merge_comment_and_history',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        複製ボタンを非表示
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['hide_duplicate_button']=='true'"
+                                       (change)="flgChange('hide_duplicate_button',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        レイアウトを詳細画面にも適用
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['layout_apply_view']=='true'"
+                                       (change)="flgChange('layout_apply_view',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>編集画面</h4>
+
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        保存時にコメントを残すポップアップを出す
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['popup_comment_after_save']=='true'"
+                                       (change)="flgChange('popup_comment_after_save',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 col-lg-3 form-control-label">
+                        フォームのスタイル
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <label>
+                            <input type="radio" name="style" class="input_style" [(ngModel)]="data.raw_data['style']" value="form"> フォーム
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="style" class="input_style" [(ngModel)]="data.raw_data['style']" value="questionnaire"> アンケート
+                        </label>
+                    </div>
+
+                </div>
+
+                <h4>CSV</h4>
+
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVアップロード時に、必須項目が空の場合でもアップロードを許可する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['csv_upload_allow_required_field_empty']=='true'"
+                                       (change)="flgChange('csv_upload_allow_required_field_empty',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVにファイル・画像リンクを含める
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['include_files_to_csv']=='true'"
+                                       (change)="flgChange('include_files_to_csv',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVにファイル・画像名を含める
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['include_file_name_to_csv']=='true'"
+                                       (change)="flgChange('include_file_name_to_csv',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVにワークフローの申請状態を含める
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['include_workflow_to_csv']=='true'"
+                                       (change)="flgChange('include_workflow_to_csv',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVにテーブル名を含める
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['include_table_to_csv']=='true'"
+                                       (change)="flgChange('include_table_to_csv',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVアップロード時に、【選択肢】または【選択肢(複数選択)】項目で、項目がない場合自動的に追加する
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['csv_upload_allow_not_exist_select_value']=='true'"
+                                       (change)="flgChange('csv_upload_allow_not_exist_select_value',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVダウンロード/アップロードに子テーブルも含める
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['use_child_on_csv']=='true'"
+                                       (change)="flgChange('use_child_on_csv',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        CSVアップロードの主キー設定
+                        <br>
+                        (計算項目は設定できません)
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div *ngFor="let field of data.raw_data['csv_main_key_field']; let i = index" class="d-flex mb-2">
+                            <select [(ngModel)]="data.raw_data['csv_main_key_field'][i]" class="form-control mr-2">
+                                <option value="id">ID</option>
+                                <option *ngFor="let _child_data of getUniqeField()" [value]="'field__' + _child_data.raw_data.id">
+                                    {{_child_data.raw_data.name}}
+                                </option>
+                            </select>
+                            <button type="button" class="btn btn-danger btn-sm" (click)="removeMainKeyField(i)">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-success btn-sm" (click)="addMainKeyField()">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <h4>ワークフロー</h4>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        ワークフロー
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['workflow']=='true'"
+                                       (change)="flgChange('workflow',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="data.raw_data['workflow']=='true'" class="child-container">
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            ワークフロー承認者はデータ編集可能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_editable']=='true'"
+                                           (change)="flgChange('workflow_editable',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            一度承認されたデータも再申請可能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_reapply']=='true'"
+                                           (change)="flgChange('workflow_reapply',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms" *ngIf="data.raw_data['workflow_reapply']=='true'">
+                        <label class="col-md-3 form-control-label">
+                            申請者以外でも再申請可能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_reapply_other_user']=='true'"
+                                           (change)="flgChange('workflow_reapply_other_user',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            同一承認者の承認スキップ機能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_same_user_skip']=='true'"
+                                           (change)="flgChange('workflow_same_user_skip',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms" *ngIf="data.raw_data['workflow_same_user_skip']=='true'">
+                        <label class="col-md-3 form-control-label">
+                            同一承認者の承認スキップ機能を承認者が連続する場合のみ可能にする
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_same_user_skip_only_continuity']=='true'"
+                                           (change)="flgChange('workflow_same_user_skip_only_continuity',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            引き上げ承認機能
+                            <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="ユーザーに対しての申請の場合にのみ適用可能です。例えばAさん→Bさん→Cさんという承認の順番で、Aさんを飛ばしてBさんが承認可能です。"></i>
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_salvage']=='true'"
+                                           (change)="flgChange('workflow_salvage',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            フローを一つ戻す機能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_back']=='true'"
+                                           (change)="flgChange('workflow_back',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            組織の全員が承認時のみに通知
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_change_notify_for_division']=='true'"
+                                           (change)="flgChange('workflow_change_notify_for_division',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            申請時の件名と本文を変更
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_change_mail_for_submit']=='true'"
+                                           (change)="flgChange('workflow_change_mail_for_submit',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-lg-7" style="margin-bottom: 12px;"  *ngIf="data.raw_data['workflow_change_mail_for_submit']=='true'">
+                        <label>メールの件名を入力してください</label>
+                        <div class="" >
+                            <input [(ngModel)]="data.raw_data['workflow_change_mail_title_for_submit']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}"  type="text" placeholder="【申請】承認依頼、申請者：{作成者}、ID={レコードID}" class="form-control">
+                        </div>
+                        <label>メールの本文を入力してください</label>
+                        <div class="">
+                            <textarea style="height: 200px;" [(ngModel)]="data.raw_data['workflow_change_mail_content_for_submit']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}" class="form-control" placeholder="XXXに関するアンケートを実施します。全ての項目に正確に記入して下さい。">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            否認時の件名と本文を変更
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_change_mail_for_denied']=='true'"
+                                           (change)="flgChange('workflow_change_mail_for_denied',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-lg-7" style="margin-bottom: 12px;"  *ngIf="data.raw_data['workflow_change_mail_for_denied']=='true'">
+                        <label>メールの件名を入力してください</label>
+                        <div class="" >
+                            <input [(ngModel)]="data.raw_data['workflow_change_mail_title_for_denied']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}"  type="text" placeholder="【申請】承認依頼、申請者：{作成者}、ID={レコードID}" class="form-control">
+                        </div>
+                        <label>メールの本文を入力してください</label>
+                        <div class="">
+                            <textarea style="height: 200px;" [(ngModel)]="data.raw_data['workflow_change_mail_content_for_denied']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}" class="form-control" placeholder="XXXに関するアンケートを実施します。全ての項目に正確に記入して下さい。">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            完了時の件名と本文を変更
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_change_mail_for_completed']=='true'"
+                                           (change)="flgChange('workflow_change_mail_for_completed',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-lg-7" style="margin-bottom: 12px;"  *ngIf="data.raw_data['workflow_change_mail_for_completed']=='true'">
+                        <label>メールの件名を入力してください</label>
+                        <div class="" >
+                            <input [(ngModel)]="data.raw_data['workflow_change_mail_title_for_completed']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}"  type="text" placeholder="【申請】承認依頼、申請者：{作成者}、ID={レコードID}" class="form-control">
+                        </div>
+                        <label>メールの本文を入力してください</label>
+                        <div class="">
+                            <textarea style="height: 200px;" [(ngModel)]="data.raw_data['workflow_change_mail_content_for_completed']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}" class="form-control" placeholder="XXXに関するアンケートを実施します。全ての項目に正確に記入して下さい。">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            取り下げ時の件名と本文を変更
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_change_mail_for_withdrawn']=='true'"
+                                           (change)="flgChange('workflow_change_mail_for_withdrawn',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9 col-lg-7" style="margin-bottom: 12px;"  *ngIf="data.raw_data['workflow_change_mail_for_withdrawn']=='true'">
+                        <label>メールの件名を入力してください</label>
+                        <div class="" >
+                            <input [(ngModel)]="data.raw_data['workflow_change_mail_title_for_withdrawn']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}"  type="text" placeholder="【申請】承認依頼、申請者：{作成者}、ID={レコードID}" class="form-control">
+                        </div>
+                        <label>メールの本文を入力してください</label>
+                        <div class="">
+                            <textarea style="height: 200px;" [(ngModel)]="data.raw_data['workflow_change_mail_content_for_withdrawn']" [mention]="workflow_mention_list" [mentionConfig]="{triggerChar:'{',mentionSelect:mentionSelect,labelKey:'name'}" class="form-control" placeholder="XXXに関するアンケートを実施します。全ての項目に正確に記入して下さい。">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            ワークフローのフローを固定する
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_flow_fixed']=='true'"
+                                           (change)="flgChange('workflow_flow_fixed',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <ng-container *ngFor="let workflow_template of workflow_template_a; let i = index;">
+                                <div class="workflow_template">
+                                    <h4>申請フロー名</h4>
+                                    <div class="workflow-name" style="margin-bottom: 60px;">
+                                        <input [(ngModel)]="workflow_template.name" type="text" class="form-control">
+                                    </div>
+                                    <button class="btn btn-danger  btn-md pull-right" (click)="workflow_template_a.splice(i,1)"><i class="fa fa-minus"></i></button>
+                                    <h5 style="font-weight: bold">条件
+                                        <button class="btn btn-success btn-sm ml-3" (click)="workflow_template.conditions.addCondition()"><i class="fa fa-plus"></i></button>
+                                    </h5>
+                                    <ng-container *ngFor="let condition of workflow_template.conditions.condition_a; let i = index;">
+                                        <div style="margin-bottom:10px">
+                                            <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="workflow_template.conditions.deleteCondition(i)"><i class="fa fa-minus"></i>
+                                            </button>
+                                            <condition-form [show_admin_division_and_fields]="true" [table]="getTableName()" [default_condition]="condition"
+                                                            (valueChanged)="onValueChanged(workflow_template,i,$event)" [index]="i"></condition-form>
+                                        </div>
+                                    </ng-container>
+                                    <br style="clear: both">
+                                    <h4>申請フロー
+                                        <button class="ml-4 btn-success btn-sm btn" (click)="workflow_template.workflow.addWorkflowPath()"><i class="fa fa-plus"></i></button>
+                                    </h4>
+                                    <workflow-setting [is_setting_template]="true" [table]="getTableName()" [workflow]="workflow_template.workflow"
+                                                      (valueChanged)="onWorkflowChanged(workflow_template,$event)" [fieldOptions]="workflow_field_options"></workflow-setting>
+                                    <br style="clear: both">
+                                </div>
+                            </ng-container>
+
+                            <br style="clear: both">
+                            テンプレートの追加&nbsp;<button class="ml-3 btn-success  btn-md" (click)="addWorkflowTempate()"><i class="fa fa-plus"></i></button>
+                            &nbsp;<button class="ml-3 btn-primary  btn-md" (click)="uploadCsv()">CSVインポート</button>
+                            <input type="file" (change)="changeCsv($event)" style="display: none;" #csvInput>
+                            <div *ngIf="workflow_template_csv_name">
+                                <span>インポートされたCSVファイル名: {{ workflow_template_csv_name }}</span>
+                            </div>
+                            <button class="ml-3 btn-primary  btn-md" (click)="downloadCsv()">CSVダウンロード</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms" *ngIf="data.raw_data['workflow_flow_fixed']=='true'">
+                        <label class="col-md-3 form-control-label">
+                            ワークフローのフローの固定時に承認者を追加できる
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_flow_fixed_can_add']=='true'"
+                                           (change)="flgChange('workflow_flow_fixed_can_add',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            承認後も編集可能
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_done_can_edit']=='true'"
+                                           (change)="flgChange('workflow_done_can_edit',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-9 col-lg-7" *ngIf="data.raw_data['workflow_done_can_edit']=='true'">
+                            <dynamic-data-view [is_view_mode]="true" [dataType]="'grant_group'" [grantGroupData]="grantGroupData" [loadGrantGroupAuto]="false"></dynamic-data-view>
+                            <button class="btn btn-success btn-sm" (click)="grantGroupModal.show()" type="button">権限ユーザー/組織 選択</button>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            ワークフローを変更可能にする
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" [checked]="data.raw_data['workflow_can_flow_edit']=='true'"
+                                           (change)="flgChange('workflow_can_flow_edit',$event)"> 有効
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        グループ
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <input [(ngModel)]="data.raw_data['group']" type="text" class="form-control">
+                    </div>
+                </div>
+                -->
+
+                <h4>その他</h4>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        テーブルの固有ID(API用機能)
+                        <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="APIのrequest, responseにてtable_idの箇所が、ここで設定した固有IDが使用されます" container="body"></i>
+                    </label>
+                    <div class="col-md-5 col-lg-4">
+                        <input id="unique_id" [(ngModel)]="data.raw_data['unique_id']" type="text" placeholder="デフォルト(dataset__XX)" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        画像を公開にする(API用機能)
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input [(ngModel)]="data.raw_data['public_image']" type="hidden" name="public_image" class="input_public_image">
+                                <input type="checkbox" [checked]="data.raw_data['public_image']=='true'" value="true"
+                                       (change)="flgChange('public_image',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        埋め込みフォームをONにする<br>（scriptを設置したwebサイトからデータ登録が可能になります。）
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['is_iframe_enabled']=='true'"
+                                       (change)="flgChange('is_iframe_enabled',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        公開フォームをONにする<br>（ログインせずに、指定されたURLからデータ登録が可能になります。アンケート等用）
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['is_public_form_enabled']=='true'"
+                                       (change)="flgChange('is_public_form_enabled',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="child-container" *ngIf="data.raw_data['is_public_form_enabled'] == 'true'">
+
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            公開フォームのタイトル
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <input [(ngModel)]="data.raw_data['public_form_title']" type="text" class="form-control" placeholder="XXXに関するアンケート">
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            公開フォームの詳細
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <textarea [(ngModel)]="data.raw_data['public_form_description']" class="form-control" placeholder="XXXに関するアンケートを実施します。全ての項目に正確に記入して下さい。">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row admin-forms">
+                        <label class="col-md-3 form-control-label">
+                            公開フォームの送信時テキスト
+                            <small>空の場合は「送信が完了しました」が表示されます。</small>
+                        </label>
+                        <div class="col-md-9 col-lg-7">
+                            <input [(ngModel)]="data.raw_data['public_form_sent_text']" type="text" class="form-control" placeholder="送信が完了しました">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms" *ngIf="show_bulk_copy">
+                    <label class="col-md-3 form-control-label">
+                        一括コピー機能
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['is_set_bulk_copy']=='true'"
+                                       (change)="flgChange('is_set_bulk_copy',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        一括削除機能
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['enable_all_delete']=='true'"
+                                       (change)="flgChange('enable_all_delete',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        一括否認機能
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['enable_all_reject']=='true'"
+                                       (change)="flgChange('enable_all_reject',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-3 form-control-label">
+                        レコード複製する項目を指定
+                    </label>
+                    <div class="col-md-9 col-lg-7">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [checked]="data.raw_data['is_set_duplicate_field']=='true'"
+                                       (change)="flgChange('is_set_duplicate_field',$event)"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="child-container" *ngIf="data.raw_data['is_set_duplicate_field'] == 'true'">
+                    <field-select-dragdrop type="'duplicate'" [dataset_fields]="data.child_data_by_table['dataset_field']" [selected_field_name_a]="data.raw_data['duplicate_fields']"
+                                           (onChangeValue)="onDuplicateFieldChanged($event)"></field-select-dragdrop>
+                </div>
+
+                <!--                <div class="form-group row admin-forms">-->
+                <!--                    <label class="col-md-3 form-control-label">-->
+                <!--                        テーブル高速化モード（データが多い場合に推奨。ワークフロー機能がONの場合は適用されません）-->
+                <!--                    </label>-->
+                <!--                    <div class="col-md-9 col-lg-7">-->
+                <!--                        <div class="checkbox">-->
+                <!--                            <label>-->
+                <!--                                <input type="checkbox" [checked]="data.raw_data['use_view_for_list']=='true'"-->
+                <!--                                       (change)="flgChange('use_view_for_list',$event)"> 有効-->
+                <!--                            </label>-->
+                <!--                        </div>-->
+                <!--                    </div>-->
+                <!--                </div>-->
+
+            </div>
+
+        </div>
+        </ng-container>
+    </div>
+</div>
+<div bsModal #grantGroupModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">権限グループ選択</h4>
+                <button type="button" class="close" (click)="grantGroupModal.hide()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body m-2">
+                <edit-component [_mode]="!data.raw_data['workflow_done_can_edit_grant_group_id']?'add':'edit'"
+                    [IS_EMBED_MODE]="true" [_table]="'grant_group'" [grant_kind]="'workflow_edit'"
+                    (onSubmit)="onInputGrantGroup($event, 'workflow_done_can_edit_grant_group_id')"
+                    (onCancel)="grantGroupModal.hide()" [is_add_new_button_select_other_table]="false"
+                    [grantGroupData]="grantGroupData"></edit-component>
+            </div>
+        </div>
+    </div>
+</div>
+<div bsModal #selectOtherEditModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div *ngIf="selectOtherEditModal.isShown" class="modal-dialog modal-default" role="document">
+        <div class="modal-content modal-primary">
+            <div class="modal-header">
+                <h4 class="modal-title">グループ追加</h4>
+                <button type="button" class="close" (click)="selectOtherEditModal.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <edit-component [_id]="-1" [_table]="'dataset_group'" [IS_EMBED_MODE]="true" [submit_text]="'追加'"
+                                (onSubmit)="onSubmitSelectOtherNewData($event)" (onCancel)="onCancelSelectOtherNewData()"></edit-component>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<div bsModal #setCalenderBgColor="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" [config]="{backdrop: 'static',  keyboard: false}" aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content modal-primary">
+            <div class="modal-header">
+                <h4 class="modal-title">カレンダーの背景色を追加します:</h4>
+                <button type="button" class="close" (click)="setCalenderBgColor.hide()"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label class="db w-100 mt-2"> カレンダー日の背景色 </label>
+                <div class="row calendar_date_color py-2"
+                    *ngFor="let date_color of calendar_date_color_data;let calendar_date_color_index=index">
+                    <div class="col-md-7">
+
+                    <input (change)="calendarDateColorChange()" [(ngModel)]="date_color.value" type="text" class="form-control"
+                            placeholder="sunday,10th,2024-10-02">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="color" (change)="calendarDateColorChange()" [(ngModel)]="date_color.color"
+                            value="{{date_color.color}}">
+                        <!-- <div *ngIf="calendar_date_colors.size <= 2"> -->
+                            <div class="color_select_block ml-0" style="background-color: #FFE0E2"
+                                (click)="calendarSetColor(calendar_date_color_index,'#FFE0E2')"></div>
+                            <div class="color_select_block ml-0" style="background-color: #FFFCE0"
+                                (click)="calendarSetColor(calendar_date_color_index,'#FFFCE0')"></div>
+                            <div class="color_select_block ml-0" style="background-color: #E0EFFF"
+                                (click)="calendarSetColor(calendar_date_color_index,'#E0EFFF')"></div>
+                            <div class="color_select_block ml-0" style="background-color: #E7FFE0"
+                                (click)="calendarSetColor(calendar_date_color_index,'#E7FFE0')"></div>
+                        <!-- </div> -->
+                        <!-- <div *ngIf="calendar_date_colors.size > 2">
+                            <ng-container *ngFor="let _date_color of calendar_date_colors;">
+                                <div *ngIf="_date_color!=date_color.color" class="color_select_block ml-0"
+                                    [style.background-color]="_date_color"
+                                    (click)="calendarSetColor(calendar_date_color_index,_date_color)"></div>
+                            </ng-container>
+                        </div> -->
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-danger pull-left btn-sm" (click)="calendarDeleteDate(calendar_date_color_index)"><i
+                                class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-sm btn-md mb-2" (click)="calendarDuplicateDate()"><i
+                        class="fa fa-plus mr-1"></i>さらに追加</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

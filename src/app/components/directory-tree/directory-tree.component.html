@@ -1,0 +1,30 @@
+<ul class="directory-tree">
+    <ng-container *ngFor="let child of this.menu_node.children">
+        <li class="directory-tree__item" *ngIf="!child.isDir && child.menu.show_menu">
+            <a routerLinkActive="active" [routerLink]="child.menu.link">
+                <ng-container *ngIf="child.menu.icon_type=='class'; else soretdMenuImg">
+                    <i class="fa fa-{{child.menu.icon_class}} mr-2" aria-hidden="true"></i>
+                </ng-container>
+                <ng-template #soretdMenuImg>
+                    <img class="icon mr-2" src="{{child.menu.icon_image_url}}">
+                </ng-template>
+                <span>{{child.name}}</span>
+                <span class="badge badge-danger ml-2" *ngIf="!!child.menu.badge_text">{{child.menu.badge_text}}</span>
+            </a>
+        </li>
+        <li class="directory-tree__item" *ngIf="child.isDir" dropdown [autoClose]="false">
+            <div class="directory-tree__dir-wrap">
+                <a class="directory-tree__dir-toggle" dropdownToggle>
+                    <i class="fa" aria-hidden="true"></i>
+                </a>
+                <a class="directory-tree__dir-link -nowrap" routerLinkActive="active" [routerLink]="'/admin/group/' + child.id">
+                    <span>{{ child.name }}</span>
+                    <span class="badge badge-danger ml-2" *ngIf="child.badge_total != 0">{{child.badge_total}}</span>
+                </a>
+            </div>
+            <div class="directory-tree__lower-menus">
+                <directory-tree [menu_node]="child"></directory-tree>
+            </div>
+        </li>
+    </ng-container>
+</ul>

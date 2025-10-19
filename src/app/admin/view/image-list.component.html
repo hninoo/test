@@ -1,0 +1,20 @@
+<div class="row">
+    <div *ngFor="let data of data_a" class="col-md-2 col-sm-3 col-xs-3">
+        <div class="card card-accent-primary">
+            <div class="card-body">
+                <div class="text-center p-2 bg-light-gray">
+                    <span class="image-contain" [style.background-image]="'url('+data.image_url+')'"
+                          style="height:120px;"></span>
+                </div>
+                <div class="p-2">
+                    <ng-container *ngFor="let field of fields">
+                        <div *ngIf="['id','created','updated','image_url'].indexOf(field.Field) == -1 && field.editable">
+                            <small class="text-muted">{{forms.byFieldName(field.Field).label}}</small>
+                            <div>{{data[field.Field]}}&nbsp;</div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

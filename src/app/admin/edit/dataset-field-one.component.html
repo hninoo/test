@@ -1,0 +1,1795 @@
+<div *ngIf="type=='fixed_html';else NotFixedHtml">
+    <div class="form-group row admin-forms">
+        <!--
+        <label class="col-md-4 form-control-label">
+            表示ページ
+        </label>-->
+        <div class="col-md-8">
+            <div class="checkbox">
+                <!--<label>
+                    <input type="checkbox" [checked]="this.data.raw_data['option']['show_edit_page']"
+                           [value]="true"> 編集画面
+                </label>
+                <br>-->
+                <label>
+                    <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_view_page']" [value]="true"> 詳細ページでも表示
+                </label>
+            </div>
+        </div>
+
+        <div class="col-md-12 mt-4">
+            <div [froalaEditor]="_share.getFroalaOption('full',null,'.modal')"
+                 [(froalaModel)]="this.data.raw_data['option']['fixed_html']"></div>
+            <input [(ngModel)]="this.data.raw_data['unique_key_name']" type="hidden" [value]="true">
+        </div>
+    </div>
+
+
+</div>
+<ng-template #NotFixedHtml>
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            項目名 <span class="text-danger">※</span>
+        </label>
+        <div class="col-md-8">
+            <input [(ngModel)]="this.data.raw_data['name']" type="text" name="label" class="form-control">
+            <input [(ngModel)]="this.data.raw_data['unique_key_name']" type="hidden" [value]="true">
+        </div>
+    </div>
+</ng-template>
+
+<div *ngIf="type=='auto-id'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        フォーマット
+        <div><small class="text-gray-dark">※空白の場合はID-&#123;YYYY&#125;-&#123;MM&#125;-&#123;ID:4:0000&#125;での採番となります</small></div>
+    </label>
+    <div class="col-md-8">
+        <input [(ngModel)]="this.data.raw_data['option']['auto-id-format']" type="text" name="label" class="form-control"
+               (change)="setDummyFieldAndForm()" placeholder="ID-{YYYY}-{MM}-{ID:4:0000}">
+    </div>
+    <div class="col-md-12 mt-3">
+        <button type="button" class="btn btn-warning btn-sm" (click)="resetAutoId()">
+            カウンターをリセット
+        </button>
+        <small class="text-muted ml-2">※リセット後は1から採番が開始されます</small>
+    </div>
+    <label class="col-md-4 form-control-label mt-4">
+        ソート設定
+        <div><small class="text-gray-dark">※一覧画面での並び替え時に数値としてソートします</small></div>
+    </label>
+    <div class="col-md-8 mt-4">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['sort_as_number']" [value]="true">
+                数値として並び替え
+            </label>
+            <small class="text-muted ml-2"></small>
+        </div>
+    </div>
+</div>
+<div *ngIf="type=='text'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        種類 <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" (change)="changeTextType()" type="radio" name="_form_data" value="text"> テキスト
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" (change)="changeTextType()" type="radio" name="_form_data" value="email"> メールアドレス
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" (change)="changeTextType()" type="radio" name="_form_data" value="url"> URL
+            </label>
+        </div>
+    </div>
+
+
+</div>
+<ng-container *ngIf="(type=='text' && data.raw_data['type'] !== 'url') || type == 'select_other_table' || type=='auto-id'">
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            値の重複
+        </label>
+        <div class="col-md-8">
+            <div class="checkbox">
+                <label>
+                    <input type="hidden" [(ngModel)]="this.data.raw_data['is_unique']">
+                    <input type="checkbox" [checked]="this.data.raw_data['is_unique']=='true'"
+                           value="true" (change)="onUniqueCheckChange($event)"> 値の重複を禁止する
+                </label>
+            </div>
+        </div>
+    </div>
+</ng-container>
+<div *ngIf="type=='textarea'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        種類 <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" name="_form_data" value="textarea"> 通常テキスト
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" name="_form_data" value="richtext"> リッチテキスト
+            </label>
+        </div>
+    </div>
+</div>
+<div *ngIf="type=='boolean'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        ラベル <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <input [(ngModel)]="this.data.raw_data['option']['boolean-text']" type="text" name="label" class="form-control"
+               (change)="setDummyFieldAndForm()">
+    </div>
+</div>
+<div *ngIf="type=='radio'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        種類 <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="radio"> ラジオボタン
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="select"> プルダウン
+            </label>
+        </div>
+    </div>
+</div>
+<div *ngIf="type=='checkbox'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        種類 <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['option']['checkbox_input_type']" type="radio" value="checkbox"> チェックボックス
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['option']['checkbox_input_type']" type="radio" value="select"> プルダウン
+            </label>
+        </div>
+    </div>
+</div>
+<div *ngIf="['checkbox','radio'].indexOf(type)>=0 && this.data.raw_data['option']['checkbox_input_type'] == 'checkbox' || this.data.raw_data['type'] == 'radio'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        Layout <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio layout" ng-bind="{{this.data.raw_data['option']['layout']}}">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['option']['layout']" type="radio" name="layout" value="horizontal"> 横並び
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['option']['layout']" type="radio" name="layout" value="vertical"> 縦並び
+            </label>
+        </div>
+    </div>
+</div>
+<div *ngIf="['checkbox','radio','select'].indexOf(type)>=0" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        選択肢 <span class="text-danger">※</span>
+        <div><small class="text-gray-dark">カンマ区切りで入力してください。</small></div>
+    </label>
+    <div class="col-md-8">
+        <input *ngIf="this.data.raw_data['option']!==undefined" [(ngModel)]="this.data.raw_data['option']['items']"
+               (change)="setDummyFieldAndForm()" type="text" class="form-control">
+    </div>
+</div>
+<div *ngIf="['checkbox'].indexOf(type)>=0" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        選択肢の制限<br>
+        <small>空の場合は制限無し</small>
+    </label>
+    <div class="col-md-8">
+        <table>
+            <tr>
+                <td class="text-nowrap">最小</td>
+                <td><input [min]="0" OnlyNumber class="form-control width-max-100 ml-1" [(ngModel)]="this.data.raw_data['option']['num_min']" [object]="data.raw_data" [key]="'num_min'"></td>
+                <td class="text-nowrap pl-2">最大</td>
+                <td><input [min]="1" OnlyNumber class="form-control width-max-100 ml-1" [(ngModel)]="this.data.raw_data['option']['num_max']" [object]="data.raw_data" [key]="'num_max'"></td>
+            </tr>
+        </table>
+    </div>
+
+
+</div>
+<ng-container *ngIf="type=='calc'">
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            計算式 <span class="text-danger">※</span>
+        </label>
+        <div class="col-md-8 contenteditable-wrap" style="position: relative;">
+            <!-- <input [(ngModel)]="data.raw_data['option']['expression']" id="Comment" [mention]="relation_fields"
+                   [mentionConfig]="{triggerChar:'{',items:relation_fields,mentionSelect:mentionSelect,labelKey:'Comment'}" class="form-control" rows="16"> -->
+            <div
+                [mention]="relation_fields"
+                class="form-control contenteditable"
+                contenteditable="true"
+                inputmode="text"
+                id="CommentExpression"
+                (input)="this.data.raw_data['option']['expression'] = handleContentEditableChange($event)"
+                (paste)="handleContentEditableOnPaste($event)"
+                (focus)="handleContentEditableFocus($event)"
+                (closed)="this.data.raw_data['option']['expression'] = handelMentionSelectClose()"
+                (itemSelected)="handelMentionItemSelected($event)"
+                [mentionConfig]="{triggerChar:'{',items:relation_fields,mentionSelect:mentionSelect,labelKey:'Comment',dropUp:false,returnTrigger:false}"
+            >
+            </div>
+        </div>
+
+
+    </div>
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            計算値の自動更新
+            <div><small class="text-gray-dark">※OFFの場合、一度入力された値は、入力欄を空にすると再計算されます</small></div>
+            <div><small class="text-gray-dark">※計算式で他のテーブルからのルックアップを参照、または子テーブル・関連テーブルを使用している場合にはONが推奨です</small></div>
+        </label>
+        <div class="col-md-8">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['option']['calc_auto_reload_off']" type="checkbox" value="true"> OFF
+            </label>
+        </div>
+    </div>
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            計算値の種類
+        </label>
+        <div class="col-md-8 row">
+            <!-- 20240510 Kanazawa セレクトボックスに修正  -->
+            <select [(ngModel)]="this.data.raw_data['option']['calc_result_type']" (change)="onChangeCalcResultType()" class="form-control">
+                <option value="number">数値</option>
+                <option value="date">日付</option>
+                <option value="datetime">日時</option>
+                <option value="text">テキスト</option>
+                <option value="email">メールアドレス</option>
+                <option value="url">URL</option>
+            </select>
+            <!--
+            <div class="col-md-12">
+                <label class="text-nowrap">
+                    <input [(ngModel)]="this.data.raw_data['option']['calc_result_type']" type="radio" value="time"> 時間
+                </label>
+            </div>
+            -->
+        </div>
+    </div>
+</ng-container>
+<ng-container *ngIf="(type=='number' || (type=='calc' && data.raw_data['option']['calc_result_type']=='number'))">
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            数値の形式
+        </label>
+        <div class="col-md-8">
+            <select [(ngModel)]="data.raw_data['option']['switch_num']" (change)="changeSwitchNum()" class="form-control">
+                <option value="integer">整数</option>
+                <option value="decimal">小数</option>
+            </select>
+        </div>
+    </div>
+
+    <div *ngIf="data.raw_data['option']['switch_num'] === 'decimal'" class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            桁数
+        </label>
+        <div class="col-md-8">
+            <select [(ngModel)]="this.data.raw_data['option']['decimal_places']" class="form-control">
+                <option value="1">1.0</option>
+                <option value="2">1.00</option>
+                <option value="3">1.000</option>
+                <option value="4">1.0000</option>
+                <option value="5">1.00000</option>
+                <option value="6">1.000000</option>
+                <option value="7">1.0000000</option>
+                <option value="8">1.00000000</option>
+            </select>
+        </div>
+    </div>
+</ng-container>
+
+<!-- 20240510 Kanazawa 計算フィールドかつ数値の場合表示する条件追加  -->
+<div *ngIf="type=='calc' && data.raw_data['option']['calc_result_type']=='number' || type=='number'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        桁区切り
+    </label>
+    <div class="col-md-8">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['num_separator']" value="true"> 桁区切りを表示しない
+            </label>
+        </div>
+    </div>
+</div>
+<!-- 20240510 Kanazawa 計算フィールドかつurlの場合表示する条件追加  -->
+<div *ngIf="type=='calc' && this.data.raw_data['option']['calc_auto_reload_off'] && data.raw_data['option']['calc_result_type']!='url'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        値の重複
+    </label>
+    <div class="col-md-8">
+        <div class="checkbox">
+            <label>
+                <input type="hidden" [(ngModel)]="this.data.raw_data['is_unique']">
+                <input type="checkbox" [checked]="this.data.raw_data['is_unique']=='true'"
+                       value="true" (change)="onUniqueCheckChange($event)"> 値の重複を禁止する
+            </label>
+        </div>
+    </div>
+</div>
+
+
+<div *ngIf="type=='number'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        値の最小最大
+        <div><small class="text-gray-dark">整数で指定</small></div>
+    </label>
+    <div class="col-md-8">
+        <table>
+            <tr>
+                <td class="text-nowrap">最小</td>
+                <td><input OnlyNumber class="form-control width-max-100 ml-1" [(ngModel)]="this.data.raw_data['option']['num_min']" [object]="data.raw_data" [key]="'num_min'"></td>
+                <td class="text-nowrap pl-3">最大</td>
+                <td><input OnlyNumber class="form-control width-max-100 ml-1" [(ngModel)]="this.data.raw_data['option']['num_max']" [object]="data.raw_data" [key]="'num_max'"></td>
+            </tr>
+        </table>
+    </div>
+
+
+    <label class="col-md-4 form-control-label">
+        値の重複
+    </label>
+    <div class="col-md-8">
+        <div class="checkbox">
+            <label>
+                <input type="hidden" [(ngModel)]="this.data.raw_data['is_unique']">
+                <input type="checkbox" [checked]="this.data.raw_data['is_unique']=='true'"
+                       value="true" (change)="onUniqueCheckChange($event)"> 値の重複を禁止する
+            </label>
+        </div>
+    </div>
+</div>
+<!-- 20240510 Kanazawa 計算フィールドかつ数値の場合表示する条件追加  -->
+<div *ngIf="type=='calc' && data.raw_data['option']['calc_result_type']=='number' || type=='number'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        単位記号表示
+    </label>
+    <div class="col-md-8">
+        <table>
+            <tr>
+                <td class="col-md-12 pl-0"><input type="text" class="form-control" [(ngModel)]="this.data.raw_data['option']['num_unit']"></td>
+                <td class="col-md-2">
+                    <label class="text-nowrap">
+                        <input [(ngModel)]="this.data.raw_data['option']['num_unit_order']" type="radio" value="first" name="num_unit_order"> 先頭につける
+                        <div><small class="text-gray-dark">例：¥100</small></div>
+                    </label>
+                </td>
+                <td class="col-md-2">
+                    <label class="text-nowrap">
+                        <input [(ngModel)]="this.data.raw_data['option']['num_unit_order']" type="radio" value="end" name="num_unit_order"> 末尾につける
+                        <div><small class="text-gray-dark">例：30%</small></div>
+                    </label>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div *ngIf="type=='calc' || type=='number'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        数値表示形式
+    </label>
+    <div class="col-md-8">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['minus_format_triangle']" value="true"> マイナス符号を「▲」で表示
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_minus_red']" value="true"> マイナス値を赤字で表示
+            </label>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="type=='datetime' || type=='date' || type=='time' || type=='year_month'" class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        種類 <span class="text-danger">※</span>
+    </label>
+    <div class="col-md-8">
+        <div class="radio">
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="datetime" (change)="setType(this.data.raw_data['type'])"> 日時
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="year_month" (change)="setType(this.data.raw_data['type'])"> 年月
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="date" (change)="setType(this.data.raw_data['type'])"> 日付のみ
+            </label>
+            <label>
+                <input [(ngModel)]="this.data.raw_data['type']" type="radio" value="time" (change)="setType(this.data.raw_data['type'])"> 時刻のみ
+            </label>
+        </div>
+    </div>
+    <label class="col-md-4 form-control-label">
+        デフォルトで現在日時(時刻)をセット
+    </label>
+    <label class="col-md-8 form-control-label">
+        <input type="checkbox" [checked]="this.data.raw_data['option']['use_current_as_default']" [(ngModel)]="this.data.raw_data['option']['use_current_as_default']" [value]="true">
+        ON
+    </label>
+
+
+    <label class="col-md-4 form-control-label">
+        値の重複
+    </label>
+    <div class="col-md-8">
+        <div class="checkbox">
+            <label>
+                <input type="hidden" [(ngModel)]="this.data.raw_data['is_unique']">
+                <input type="checkbox" [checked]="this.data.raw_data['is_unique']=='true'"
+                       value="true" (change)="onUniqueCheckChange($event)"> 値の重複を禁止する
+            </label>
+        </div>
+    </div>
+</div>
+<!-- 20240510 Kanazawa 計算フィールドかつ(日付or日時)の場合表示する条件追加  -->
+<div
+    *ngIf="type=='datetime' || type=='date' || type=='time' || type=='year_month' || (type=='calc' && (this.data.raw_data['option']['calc_result_type']=='date' || this.data.raw_data['option']['calc_result_type']=='datetime'))"
+    class="form-group row admin-forms">
+    <label class="col-md-4 form-control-label">
+        フォーマット
+        <div><small class="text-gray-dark">CSVアップロード時には、以下の規定フォーマットのみご利用いただけます。<br>
+            Y-m, Y年m月 , Y年n月 , Y/m, Y/n , m/d , n/d , Y/n/d <br>
+            Y/n/d H:i:s , Y/n/d H:i , m/d H:i:s , n/d H:i:s , m/d H:i , n/d H:i <br>
+            H:i:s , H:i<br>
+            ※Yは小文字も可</small></div>
+
+    </label>
+
+    <div class="col-md-8">
+        <label>
+            <input type="checkbox" [checked]="this.data.raw_data['option']['is_use_date_format']" [(ngModel)]="this.data.raw_data['option']['is_use_date_format']" [value]="true">
+            表示フォーマットを指定する
+        </label>
+        <ng-container *ngIf="this.data.raw_data['option']['is_use_date_format']">
+            <small class="mb-2">
+                <br>
+                <ng-container *ngIf="data.getType() != 'time'">
+                    Y：年（西暦の4桁）・・・例）2017<br>
+                    y：年（西暦の2桁）・・・例）17<br>
+                    M：月英語3文字・・・例）Jan, Feb<br>
+                    m：月（2桁の月）・・・例）08<br>
+                    n：月（1桁で先頭に0を付けない）・・・例）8<br>
+                    d：日（2桁の日付）・・・例）21<br>
+                </ng-container>
+                H：時間（2桁の24時間単位）・・・例）16<br>
+                h：時間（2桁の12時間単位）・・・例）08<br>
+                i：分（2桁の分）・・・例）20<br>
+                s：秒（2桁の秒）・・・例）30<br>
+                t：指定した月の日数（28~31）・・・例）31<br>
+                <ng-container *ngIf="data.getType() != 'time'">
+                    w：曜日（0：日 ～ 6：土）・・・例）2(火)<br>
+                    l：曜日（Sunday〜Saturday）<br>
+                </ng-container>
+            </small>
+            <input *ngIf="data.getType() == 'time'" class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['date-format']"
+                   placeholder="H時i分">
+            <input *ngIf="data.getType() == 'year_month'" class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['date-format']"
+                   placeholder="Y-m">
+            <input *ngIf="data.getType() == 'date'" class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['date-format']"
+                   placeholder="Y-m-d (w)">
+            <input *ngIf="data.getType() == 'datetime' || data.getType() == 'calc'" class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['date-format']"
+                   placeholder="Y-m-d (w) H:i:s">
+        </ng-container>
+    </div>
+</div>
+<!-- 202405123 Kanazawa 時間フィールドの場合表示する条件追加  -->
+<div *ngIf="this.data.raw_data['type']=='time'">
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            時間の間隔
+        </label>
+        <div class="col-md-8 row">
+            <select [(ngModel)]="this.data.raw_data['option']['minutes_interval']" class="form-control" (change)="setMinutesInterval(this.data.raw_data['option']['minutes_interval'])">
+                <option value="1">1分おき</option>
+                <option value="15">15分おき</option>
+                <option value="30">30分おき</option>
+                <option value="60">１時間おき</option>
+                <option value="180">３時間おき</option>
+            </select>
+        </div>
+    </div>
+    <ng-container *ngIf="this.data.raw_data['option'] && this.data.raw_data['option']['minutes_interval'] > 1">
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                開始時間
+            </label>
+            <div class="col-md-8 row">
+                <select [(ngModel)]="this.data.raw_data['option']['start_hour']" class="form-control">
+                    <option *ngFor="let hour of this.selectStartHours"
+                        value="{{hour}}">{{hour}}時
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            終了時間
+        </label>
+        <div class="col-md-8 row">
+            <select [(ngModel)]="this.data.raw_data['option']['end_hour']" class="form-control">
+                <option value="" ></option>
+                <ng-container *ngFor="let hour of this.selectEndHours">
+                    <option value="{{hour}}" *ngIf="this.data.raw_data['option']['start_hour'] && this.data.raw_data['option']['start_hour'] < hour">{{hour}}時</option>
+                </ng-container>
+            </select>
+        </div></div>
+    </ng-container>
+</div>
+<ng-container *ngIf="type=='select_other_table'">
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            対象テーブル <span class="text-danger">※</span>
+        </label>
+        <div class="col-md-8">
+            <div *ngIf="mode=='edit';else addMode">
+                <!-- 対象テーブルは編集不可 -->
+                {{getTablenameFromTable(data.raw_data['option']['item-table'])}} (変更不可)
+            </div>
+            <ng-template #addMode>
+                <ng-select
+                    appendTo="body"
+                    ng-required="true"
+                    [items]="select_other_table_select_tables"
+                    [searchWhileComposing]="false"
+                    bindLabel="view_label"
+                    bindValue="table"
+                    [(ngModel)]="this.data.raw_data['option']['item-table']" class="form-control"
+                    (change)="onSelectOtherTable(data,$event)"
+                >
+                </ng-select>
+
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="form-group row admin-forms" *ngIf="this.data.raw_data['option']['item-table'] && !isDivisionOrAdminTable();">
+        <label class="col-md-4 form-control-label">
+            入力フォームにする（子テーブル機能）
+        </label>
+        <div class="col-md-8">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['is_child_form']"
+                           (change)="onChangeChildForm()"
+                           value="true"> 有効
+                    <br>
+                    ※有効にした場合、子要素に対する権限設定は無視されます。
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row admin-forms" *ngIf="this.data.raw_data['option']['is_child_form'] && this.data.raw_data['option']['item-table'] && !isDivisionOrAdminTable();">
+        <label class="col-md-4 form-control-label">
+            子テーブルを表形式表示
+            <div>
+                <small class="text-gray-dark">
+                    子テーブルを表形式で表示します。
+                </small>
+            </div>
+        </label>
+        <div class="col-md-8">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_child_table_as_table']" value="true"> 有効
+                </label>
+            </div>
+        </div>
+
+    </div>
+    <ng-container *ngIf="this.data.raw_data['option']['item-table']!=null && !this.data.raw_data['option']['is_child_form'];">
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                表示項目
+            </label>
+            <div class="col-md-8">
+
+                <div>
+                    <select [(ngModel)]="this.data.raw_data['option']['label-fields'][0]" class="form-control" (change)="setDummyFieldAndForm()">
+                        <option *ngFor="let field of isLabelFields()"
+                                value="{{field.Field}}">{{field.Comment}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                選択用表示項目<br>（空の場合は表示項目が表示されます）
+            </label>
+            <div class="col-md-8">
+
+                <div>
+                    <input class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['label-format-manual']"
+                           placeholder="{ID}: {名前}"
+                           [mention]="getItemTableFields()"
+                           [mentionConfig]="{triggerChar:'{',items:getItemTableFields(),mentionSelect:mentionSelect,labelKey:'Comment'}">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                一覧テーブルからの検索ボタンを表示
+            </label>
+            <div class="col-md-8">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_lookup_modal']" [value]="true"> 有効
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms" *ngIf="this.data.raw_data['option']['show_lookup_modal']">
+            <label class="col-md-4 form-control-label">
+                プルダウンを出さず、検索フィールドのみ表示
+            </label>
+            <div class="col-md-8">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['not_display_pulldown']" [value]="true"> 有効
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                選択肢で新規追加を表示
+                <br>
+                <small>
+                    ※有効にした場合、編集画面で選択肢を新たに追加が可能です。
+                </small>
+            </label>
+            <div class="col-md-8">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_add_on_list']" [value]="true"> 有効
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                項目のコピー（ルックアップ）
+            </label>
+
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success pull-left btn-md btn-sm" (click)="addCopyField()" [disabled]="this.data.raw_data['option']['is_multi_value_mode']"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <hr style="width:90%">
+
+                    <ng-container *ngFor="let copy_field of this.data.raw_data['option']['copy-fields'];let i=index">
+                        <div class="col-md-4">
+                            <select [(ngModel)]="copy_field['from']" class="form-control" (change)="copyFromSelected(copy_field)">
+                                <option *ngFor="let field of copy_from_field_a"
+                                        value="{{field.Field}}">{{field.Comment}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-1"><i style="font-size: 23px; margin-top: 3px;" class="fa fa-arrow-right"></i></div>
+                        <div class="col-md-4">
+                            <select [(ngModel)]="copy_field['to']" class="form-control" [disabled]="!copy_field['from_form']">
+                                <ng-container *ngFor="let hash of getFilteredToOptions(copy_field)">
+                                    <option [ngValue]="hash['value']"
+                                    >{{hash['label']}}
+                                    </option>
+                                </ng-container>
+                            </select>
+
+
+                        </div>
+
+                        <div class="col-md-1">
+                            <button class="btn btn-danger btn-sm" (click)="delCopyField(i)"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <div class="col-md-12 pt-2">
+                            <label>
+                                <input type="checkbox" [(ngModel)]="copy_field['is_auto_reflect']" [value]="true" (click)="onAutoReflectChange($event,i)"> 自動反映する
+                            </label><br>
+                            <label *ngIf="!copy_field['is_auto_reflect']">
+                                <input type="checkbox" [(ngModel)]="copy_field['is_force_overwrite']" [value]="true"> コピー先に値が入っていても強制的に上書き
+                            </label>
+                        </div>
+
+                        <hr style="width:90%">
+                    </ng-container>
+                </div>
+                ※&nbsp;同じ項目タイプの項目にのみコピー可能です。<br>
+                <span *ngIf="this.data.raw_data['option']['is_multi_value_mode']">
+                    ※&nbsp;複数の値の登録が有効の場合、ルックアップは設定できません
+                </span>
+            </div>
+        </div>
+
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                他の項目で値の絞り込みを行う
+            </label>
+
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success pull-left btn-md btn-sm" (click)="addDisplayConditionField()"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <hr style="width:90%">
+
+                    <ng-container *ngFor="let display_condition_field of this.data.raw_data['option']['display-condition-fields'];let i=index">
+                        <div class="col-md-4">
+                            <!--
+                            <ng-select
+                                [items]="display_condition_from_field_a"
+                                [bindLabel]="'Comment'"
+                                [bindValue]="'Field'"
+                                [(ngModel)]="display_condition_field['select_other_table_field']"
+                                (change)="displayFieldSelectOtherTableFieldSelected(display_condition_field)"
+
+                            >
+
+                            </ng-select>
+                            -->
+                            <select [(ngModel)]="display_condition_field['select_other_table_field']" class="form-control"
+                                    (change)="displayFieldSelectOtherTableFieldSelected(display_condition_field)">
+                                <option *ngFor="let field of display_condition_from_field_a"
+                                        value="{{field.Field}}">{{field.Comment}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-1"><i style="font-size: 23px; margin-top: 3px;" class="fa fa-arrow-right"></i></div>
+                        <div class="col-md-4">
+                            <select [(ngModel)]="display_condition_field['compare_field']" class="form-control" [disabled]="!display_condition_field['select_other_table_field']">
+                                <ng-container *ngFor="let hash of can_compare_form_a_by_field_name[display_condition_field['select_other_table_field']]">
+                                    <option [ngValue]="hash['value']"
+                                    >{{hash['label']}}
+                                    </option>
+                                </ng-container>
+                            </select>
+
+
+                        </div>
+
+                        <div class="col-md-1">
+                            <button class="btn btn-danger btn-sm" (click)="delDisplayConditionField(i)"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <hr style="width:90%">
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                表示条件
+            </label>
+            <div class="col-md-8">
+                <div class="mt-3">
+                    <ng-container *ngFor="let condition of data.conditions.condition_a; let cond_i = index;">
+                        <div style="margin-bottom:10px">
+                            <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="data.conditions.deleteCondition(cond_i);onConditionChanged()"><i class="fa fa-minus"></i></button>
+                            <condition-form [table]="this.data.raw_data['option']['item-table']" [default_condition]="condition"
+                                            (valueChanged)="onConditionChanged(cond_i,$event)" [index]="cond_i" [ignore_field_name_a]="['current_at','google_calendar']"></condition-form>
+                        </div>
+                    </ng-container>
+                </div>
+                <button class=" btn btn-success btn-sm" (click)="data.conditions.addCondition()"><i class="fa fa-plus"></i>条件を追加</button>
+            </div>
+        </div>
+        <div class="form-group row admin-forms" *ngIf="type==='select_other_table'">
+            <label class="col-md-4 form-control-label">
+                並び順
+            </label>
+            <div class="col-md-8">
+                <sort-params-form [sort_params]="data.sort_params" [table]="this.data.raw_data['option']['item-table']" (onChangeValue)="onChangeSortParams($event)"></sort-params-form>
+            </div>
+        </div>
+    </ng-container>
+
+</ng-container>
+<hr>
+<ng-container *ngIf="type==='relation_table'">
+
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            対象テーブル <span class="text-danger">※</span>
+        </label>
+        <div class="col-md-8">
+            <div *ngIf="mode=='edit';else addMode">
+                <!-- 対象テーブルは編集不可 -->
+                {{getTablenameFromTable(data.raw_data['option']['item-table'])}} (変更不可)
+            </div>
+            <ng-template #addMode>
+                <select [(ngModel)]="this.data.raw_data['option']['item-table']" class="form-control"
+                        (change)="
+                        onSelectRelationTable(data,$event)">
+                    <ng-container *ngFor="let tableinfo of select_other_table_select_tables">
+                        <option
+                            value="{{tableinfo.table}}">{{tableinfo.getLabel()}}
+                        </option>
+                    </ng-container>
+                </select>
+            </ng-template>
+        </div>
+
+
+        <label class="col-md-4 form-control-label">
+            オプション
+        </label>
+        <div class="col-md-8">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['view_mode']" [value]="true"> 縦に表示する
+                </label>
+            </div>
+        </div>
+    </div>
+
+
+    <div *ngIf="!!this.data.raw_data['option']['item-table']">
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label" for="">
+                表示する条件
+                <i class="fa fa-question-circle ml-1" aria-hidden="true"
+                   ngbTooltip="特定の項目の値によって表示するレコードの条件を設定可能です。(項目を選択するには、一度保存する必要があります)"></i>
+                <button class="btn-success pull-right btn-md" (click)="addRelationField()"><i class="fa fa-plus"></i></button>
+            </label>
+
+            <div class="col-md-8">
+                <div class="row">
+
+                    <ng-container *ngFor="let relation_field of this.data.raw_data['option']['relation-fields'];let i=index">
+
+                        <div class="col-md-2">
+                            <select class="form-control" [(ngModel)]="relation_field['and_or']" *ngIf="i>0">
+                                <option value="and">AND</option>
+                                <option value="or">OR</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <select [(ngModel)]="relation_field['to']" (change)="relationToSelected(relation_field)" class="form-control">
+                                <option value="">このテーブルの項目</option>
+                                <ng-container *ngFor="let field of relation_fields">
+                                    <option [ngValue]="field.Field" *ngIf="!isTmpField(field)">{{field.Comment}}
+                                    </option>
+                                </ng-container>
+                            </select>
+
+
+
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <select [disabled]="disabled" class="form-control" [(ngModel)]="relation_field['condition']"
+                                (change)="relationToSelected(relation_field)">
+                                <option value="">条件選択</option>
+                                <option value="null">空</option>
+                                <option value="not_null">空でない</option>
+                                <option value="eq">が次と一致</option>
+                                <option value="noteq">が次と一致しない</option>
+
+                                <option value="gt">が次の値以上</option>
+                                <option value="lt">が次の値以下</option>
+                                <option value="gt_ne">が次の値より大きい</option>
+                                <option value="lt_ne">が次の値より小さい</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <select [(ngModel)]="relation_field['from']" class="form-control" [disabled]="relation_field['to']==''" (change)="relationFromSelected(relation_field)">
+                                <option value="">対象テーブルの項目</option>
+                                <ng-container *ngFor="let form of getSelectedRelationTableForms()">
+                                    <option *ngIf="isSameTypeForRelationTable(form,relation_field) " value="{{form.field['Field']}}">{{form.label}}
+                                    </option>
+                                </ng-container>
+                            </select>
+
+
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-danger btn-sm" (click)="delRelationField(i)"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <!-- To -->
+                        <div class="col-md-5">
+                            <ng-container
+                                *ngIf="relation_field['from'] && ['date', 'datetime', 'year_month', 'time'].indexOf(relation_field['to_type']) >= 0">
+                                <div class="checkbox">
+                                    <label>
+                                        <input [(ngModel)]="relation_field['use_custom_value_for_to']" [disabled]="disabled" type="checkbox"
+                                            [checked]="value=='true'" (change)="relationToSelected(relation_field)">
+                                        カスタム値を設定する
+                                    </label>
+                                </div>
+                                <ng-container *ngIf="relation_field['use_custom_value_for_to'] && relation_field['to_form']">
+
+                                    <select [disabled]="disabled" class="form-control" [(ngModel)]="relation_field['to_condition']">
+                                        <option value="">条件選択</option>
+                                        <option value="null">空</option>
+                                        <option value="not_null">空でない</option>
+                                        <option value="eq">が次と一致</option>
+                                        <option value="noteq">が次と一致しない</option>
+
+                                        <option value="gt">が次の値以上</option>
+                                        <option value="lt">が次の値以下</option>
+                                        <option value="gt_ne">が次の値より大きい</option>
+                                        <option value="lt_ne">が次の値より小さい</option>
+                                    </select>
+
+                                    <admin-forms-field [default_form]="relation_field['to_form']" [default_field]="getField('to_value')"
+                                        [table_info]="selected_relationtable" [default_value]="relation_field['to_value']"
+                                        (valueChanged)="onRelativeCustomChange($event,relation_field)"></admin-forms-field>
+
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                        <!-- From -->
+                        <div class="col-md-5">
+                            <ng-container
+                                *ngIf="relation_field['from'] && ['date', 'datetime', 'year_month', 'time'].indexOf(relation_field['to_type']) >= 0">
+                                <div class="checkbox">
+                                    <label>
+                                        <input [(ngModel)]="relation_field['use_custom_value_for_from']" [disabled]="disabled" type="checkbox"
+                                            [checked]="value=='true'" (change)="relationFromSelected(relation_field)">
+                                        カスタム値を設定する
+                                    </label>
+                                </div>
+                                <ng-container *ngIf="relation_field['use_custom_value_for_from'] && relation_field['from_form']">
+
+                                    <select [disabled]="disabled" class="form-control" [(ngModel)]="relation_field['from_condition']">
+                                        <option value="">条件選択</option>
+                                        <option value="null">空</option>
+                                        <option value="not_null">空でない</option>
+                                        <option value="eq">が次と一致</option>
+                                        <option value="noteq">が次と一致しない</option>
+
+                                        <option value="gt">が次の値以上</option>
+                                        <option value="lt">が次の値以下</option>
+                                        <option value="gt_ne">が次の値より大きい</option>
+                                        <option value="lt_ne">が次の値より小さい</option>
+                                    </select>
+
+                                    <admin-forms-field [default_form]="relation_field['from_form']" [default_field]="getField('from_value')"
+                                        [table_info]="selected_relationtable" [default_value]="relation_field['from_value']"
+                                        (valueChanged)="onRelativeCustomChange($event,relation_field)"></admin-forms-field>
+
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="relation_field['from_form'] && relation_field['from_form']['_is_child_form']">
+                                <button class="btn btn-primary btn-sm" (click)="showChildField(relation_field)">子テーブルの項目を指定</button>
+                            </ng-container>
+
+                            <ng-container *ngIf="relation_field['from_form'] && relation_field['from_form']['_is_child_form'] && relation_field['use_child_field']">
+                                <select [(ngModel)]="relation_field['child_field']" class="form-control">
+                                    <ng-container *ngFor="let field of child_table_fields[relation_field['from']]">
+                                        <option [ngValue]="'field__' + field['id']">{{field['name']}}
+                                        </option>
+                                    </ng-container>
+                                </select>
+                            </ng-container>
+
+                        </div>
+
+                        <hr style="width:90%">
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label" for="">
+                データ絞り込み条件
+                <button class="btn-success pull-right btn-md" (click)="addRelationTableCondition()"><i class="fa fa-plus"></i></button>
+            </label>
+
+            <div class="col-md-8" *ngIf="data.conditions">
+                <div cdkDropList (cdkDropListDropped)="dropRelationTableCondition($event)">
+                    <ng-container *ngFor="let condition of data.conditions.condition_a; let cond_i = index;">
+                        <div cdkDrag style="margin-bottom:10px" class="row">
+                            <div class="col-md-11">
+                                <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="delRelationTableCondition(cond_i)"><i class="fa fa-minus"></i></button>
+                                <condition-form [table]="data.raw_data['option']['item-table']" [default_condition]="condition" (valueChanged)="onRelationTableConditionChanged(cond_i,$event)"
+                                                [index]="cond_i"></condition-form>
+                            </div>
+                            <div class="dragger col-md-1" cdkDragHandle>
+                                <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                                    <path d="M0 0h24v24H0z" fill="none"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                表示する項目
+                <button class="btn-success btn-md pull-right" (click)="addRelationTableViewField()">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </label>
+
+            <div class="col-md-8">
+                <div cdkDropListGroup>
+                    <div cdkDropList #showFieldList="cdkDropList" [cdkDropListData]="data.raw_data['option']['relation_table_show_fields']"
+                         [cdkDropListConnectedTo]="[conditionList]"
+                         (cdkDropListDropped)="dropRelationTableShowField($event)">
+                        <ng-container *ngFor="let show_field of data.raw_data['option']['relation_table_show_fields']; let i = index;">
+                            <div class="d-flex align-items-center mb-2" cdkDrag>
+                                <select [(ngModel)]="show_field['field']" class="form-control w-100">
+                                    <ng-container *ngFor="let form of getSelectedRelationTableForms()">
+                                        <option [ngValue]="form.field['Field']">{{ form.field['Comment'] }}</option>
+                                    </ng-container>
+                                </select>
+
+                                <button class="btn btn-danger btn-sm mx-2" (click)="delRelationTableViewField(i)">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+
+                                <div class="dragger" cdkDragHandle>
+                                    <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+                                        <path d="M0 0h24v24H0z" fill="none"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label" for="">
+                ソート
+                <button class="btn-success  btn-md pull-right" (click)="addOptionValue('sort_params')"><i class="fa fa-plus"></i></button>
+            </label>
+
+            <div class="col-md-8">
+                <div class="row">
+
+                    <ng-container *ngFor="let sort_param of this.data.raw_data['option']['sort_params'];let i=index">
+                        <div class="col-md-6">
+                            <select [(ngModel)]="sort_param['field']" class="form-control">
+                                <ng-container *ngFor="let form of getSelectedRelationTableForms()">
+                                    <option [ngValue]="form.field['Field']">{{form.field['Comment']}}
+                                    </option>
+                                </ng-container>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <select [(ngModel)]="sort_param['asc_desc']" class="form-control">
+                                <option value="asc">昇順</option>
+                                <option value="desc">降順</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-danger btn-sm" (click)="delOptionValue('sort_params',i)"><i class="fa fa-minus"></i></button>
+                        </div>
+
+                        <hr style="width:90%">
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    <div class="form-group row admin-forms">
+        <label class="col-md-4 form-control-label">
+            １ページあたり表示データ数(1~100)
+        </label>
+
+        <div class="col-md-8">
+            <input OnlyNumber class="form-control" max="100" min="1" [(ngModel)]="data.raw_data['option']['relation_table_show_data_num']">
+        </div>
+    </div>
+    -->
+
+</ng-container>
+
+<ng-container>
+    <ng-container *ngIf="type!='fixed_html'">
+        <div class="my-3">
+            <button type="button" class="btn btn-sm btn-outline-info"
+                    (click)="isTableSettingOptionCollapsed = !isTableSettingOptionCollapsed"
+                    [attr.aria-expanded]="!isTableSettingOptionCollapsed" aria-controls="collapseExample">
+                <i class="fa" [class.fa-bars]="isTableSettingOptionCollapsed"
+                   [class.fa-times]="!isTableSettingOptionCollapsed"></i> 追加オプション設定
+            </button>
+        </div>
+        <div id="collapseExample" class="animated fadeIn" [ngbCollapse]="isTableSettingOptionCollapsed">
+            <div class="form-group row admin-forms" *ngIf="['calc','relation_table'].indexOf(type)===-1 && !this.data.raw_data['option']['is_child_form'] && type != 'auto-id'">
+                <label class="col-md-4 form-control-label">
+                    必須設定
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['required']"
+                                   value="true"> 必須項目にする
+                        </label>
+                    </div>
+                </div>
+                <label class="col-md-4 form-control-label">
+                </label>
+                <div *ngIf="this.data.raw_data['option']['required'] && this.is_workflow" class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['no_workflow_required']"
+                                   value="true"> ワークフロー下書き保存の場合は必須にしない
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- 関連レコード一覧の場合のみ表示する項目 -->
+            <div class="form-group row admin-forms" *ngIf="type=='relation_table'">
+                <label class="col-md-4 form-control-label">
+                    対象テーブルに値をコピーする項目
+                    <button class="btn-success pull-right btn-md" (click)="addCopyToRelationField()"><i class="fa fa-plus"></i></button>
+                </label>
+                <div class="col-md-8">
+                    <div class="row">
+                        <ng-container *ngFor="let copy_field of this.data.raw_data['option']['copy_to_relation_fields'];let i=index">
+                            <div class="col-md-5">
+                                <select [(ngModel)]="copy_field['to']" class="form-control" (change)="relationToSelected(copy_field)">
+                                    <option value="">このテーブルの項目</option>
+                                    <ng-container *ngFor="let field of relation_all_fields">
+                                        <option [ngValue]="field.Field" *ngIf="!isTmpField(field)">{{field.Comment}}
+                                        </option>
+                                    </ng-container>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <select [(ngModel)]="copy_field['from']" class="form-control" [disabled]="!copy_field['to']">
+                                    <option value="">対象テーブルの項目</option>
+                                    <ng-container *ngFor="let form of getSelectedRelationTableForms()">
+                                        <option *ngIf="isSameTypeForRelationTable(form, copy_field)" value="{{form.field['Field']}}">{{form.label}}
+                                        </option>
+                                    </ng-container>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-danger btn-sm" (click)="delCopyToRelationField(i)"><i class="fa fa-minus"></i></button>
+                            </div>
+                            <hr style="width:90%">
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row admin-forms" *ngIf="type == 'image'">
+                <label class="col-md-4 form-control-label">
+                    画像の縦横サイズを表示（詳細画面のみ）
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_pixel']"
+                                   value="true"> 表示する
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+            <div class="form-group row admin-forms" *ngIf="type == 'image'">
+                <label class="col-md-4 form-control-label">
+                    画像サイズを制限する（MB）
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['is_limit_image_size']"
+                                   value="true"> 有効
+                        </label>
+
+                        <ng-container *ngIf="this.data.raw_data['option']['is_limit_image_size']">
+                            <input type="number" class="form-control" [(ngModel)]="this.data.raw_data['option']['limit_image_size']" placeholder="MBまで" value="1">
+                        </ng-container>
+                    </div>
+
+                </div>
+            </div>
+
+            <ng-container *ngIf="isAdd();else isUpdate;">
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-8">
+                    <span *ngIf="type != 'auto-id'">必須条件・</span>表示条件は一度保存後に設定可能です。
+                </div>
+            </ng-container>
+            <ng-template #isUpdate>
+                <div class="form-group row admin-forms" *ngIf="this.data.raw_data['option']['required']">
+                    <label class="col-md-4 form-control-label">
+                        必須条件設定
+                    </label>
+                    <div class="col-md-8">
+                        <conditions-form [table]="getTableName()" [default_condition_json]="this.data.raw_data['required_condition_json']"
+                                         (valueChanged)="onChangeConditionJson($event,'required_condition_json')" [ignore_type_a]="['image','file']" [ignore_field_name_a]="['id']"></conditions-form>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms" *ngIf="['relation_table'].indexOf(type)===-1">
+                    <label class="col-md-4 form-control-label">
+                        表示条件設定
+                    </label>
+                    <div class="col-md-8">
+                        <conditions-form [table]="getTableName()" [default_condition_json]="this.data.raw_data['show_condition_json']"
+                                         (valueChanged)="onChangeConditionJson($event,'show_condition_json')" [ignore_type_a]="['image','file']" [ignore_field_name_a]="['id']"></conditions-form>
+                    </div>
+                </div>
+
+            </ng-template>
+
+
+            <!--
+            <div class="form-group row admin-forms">
+                <label class="col-md-4 form-control-label">
+                    検索必須設定
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['search_required']"
+                                   (click)="this.data.raw_data['option']['search_hide']=''"
+                                   value="true"> 検索必須項目にする
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row admin-forms">
+                <label class="col-md-4 form-control-label">
+                    検索非表示設定
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['search_hide']"
+                                   (click)="this.data.raw_data['option']['search_required']=''"
+                                   value="true"> 検索非表示項目にする
+                        </label>
+                    </div>
+                </div>
+            </div>
+            -->
+
+            <div class="form-group row admin-forms">
+                <label class="col-md-4 form-control-label">
+                    表示設定
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label class="mr-2">
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show-list']"
+                                   value="true"> 一覧に表示 <span class="text-danger" *ngIf="type==='relation_table'">（※関連テーブルを一覧に表示する場合、重くなる場合があります。）</span>
+                        </label>
+                        <label class="mr-2">
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show-in-detail']"
+                                   value="true"> 詳細に表示
+                        </label>
+                        <label *ngIf="is_show_old_editable">
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['editable']"
+                                   value="true"> 編集可(非推奨)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <ng-container *ngIf="this.data.raw_data['option']['is_child_form'] || type=='relation_table'">
+                <div *ngIf="this.data.raw_data['option']['show-list']" class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        一覧用表示項目
+                    </label>
+                    <div class="col-md-8">
+                        <div>
+                            <input class="form-control" type="text" [(ngModel)]="this.data.raw_data['option']['label-format-manual']"
+                                   placeholder="{ID}: {名前}">
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="form-group row admin-forms" *ngIf="this.data.raw_data['option']['show-list'] && ['text','richtext','textarea','select_other_table', 'relation_table'].indexOf(type)>=0">
+                <label class="col-md-4 form-control-label">
+                    一覧表示文字数
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['is_show_all_text']"
+                                   value="true"> 全て表示<br>
+                        </label>
+                        <div class="row" *ngIf="!this.data.raw_data['option']['is_show_all_text']">
+                            <div class="col-md-4">
+                                表示文字数（空の場合は自動設定）
+                            </div>
+                            <div class="col-md-8">
+                                <input OnlyNumber min="1" class="form-control" [(ngModel)]="this.data.raw_data['option']['list_text_length']" [object]="data.raw_data" [key]="'list_text_length'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row admin-forms">
+                <label class="col-md-4 form-control-label">
+                    一覧の表示幅(px)
+                    <div><small class="text-gray-dark">指定しない場合は自動で設定されます(最低10px)</small></div>
+                </label>
+                <div class="col-md-8">
+                    <input OnlyNumber [min]="10" [max]="1000" class="form-control" [(ngModel)]="this.data.raw_data['option']['list_th_width']" [object]="data.raw_data['option']"
+                           [key]="'list_th_width'">
+                </div>
+            </div>
+            <ng-container *ngFor="let list_detail of ['list','detail']">
+                <div class="form-group row admin-forms"
+                    *ngIf="(!this.data.raw_data['option']['is_child_form'] || list_detail=='list') && !['image', 'file'].includes(type) && !(['relation_table'].includes(type) && list_detail=='detail')">
+                    <label class="col-md-4 form-control-label">
+                        <span *ngIf="list_detail==='list';else isDetail;">
+                            一覧画面スタイル指定
+                        </span>
+                        <ng-template #isDetail>
+                            詳細画面スタイル指定
+                        </ng-template>
+                    </label>
+                    <div class="col-md-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['set_'+list_detail+'_style']"
+                                       [value]="true" (change)="changeSetStyle(list_detail)"> スタイルを指定<br>
+                            </label>
+                            <div class="row mt-3" *ngIf="this.data.raw_data['option']['set_'+list_detail+'_style']">
+                                <div class="col-md-4">
+                                    文字サイズ
+                                </div>
+                                <div class="col-md-8 mb-2">
+                                    <select class="form-control" [(ngModel)]="this.data.raw_data['option'][list_detail+'_style']['fontSize.px']">
+                                        <ng-container *ngFor="let size of _share.getFontSizeList()">
+                                            <option [value]="size">{{size != 14 ? size : "デフォルト"}}</option>
+                                        </ng-container>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    フォント
+                                </div>
+                                <div class="col-md-8 mb-2">
+                                    <select class="form-control" [(ngModel)]="this.data.raw_data['option'][list_detail+'_style']['fontWeight']">
+                                        <ng-container *ngFor="let size of ['normal','bold']">
+                                            <option [value]="size">{{size == 'normal' ? '通常' : '太字'}}</option>
+                                        </ng-container>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    文字色
+                                </div>
+                                <div class="col-md-8 mb-2">
+                                    <input type="color" [(ngModel)]="this.data.raw_data['option'][list_detail+'_style']['color']" name="font_color">
+                                </div>
+                                <div class="col-md-4">
+                                    位置
+                                </div>
+                                <div class="col-md-8">
+                                    <select class="form-control" [(ngModel)]="this.data.raw_data['option'][list_detail+'_style']['text-align']">
+                                        <option value="left">左寄せ</option>
+                                        <option value="center">中央</option>
+                                        <option value="right">右寄せ</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+
+            <div class="form-group row admin-forms" *ngIf="['relation_table'].indexOf(type)===-1">
+                <label class="col-md-4 form-control-label">
+                    説明用テキスト
+                    <div><small class="text-gray-dark">項目名の下に表示されるテキスト</small></div>
+                </label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control" [(ngModel)]="this.data.raw_data['option']['sub-label']">
+                </div>
+            </div>
+            <div class="form-group row admin-forms" *ngIf="['relation_table'].indexOf(type)===-1">
+                <label class="col-md-4 form-control-label">
+                    ヘルプテキスト
+                    <div><small class="text-gray-dark">ツールチップに表示されるテキスト</small></div>
+                </label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control" [(ngModel)]="this.data.raw_data['option']['help']">
+                </div>
+            </div>
+            <div class="form-group row admin-forms" *ngIf="['relation_table', 'calc', 'auto-id', 'fixed_html'].indexOf(type)===-1">
+                <label class="col-md-4 form-control-label">
+                    プレースホルダー
+                    <div><small class="text-gray-dark">入力欄に表示されるヒントテキスト（例：090-1234-5678）</small></div>
+                </label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control" [(ngModel)]="this.data.raw_data['option']['placeholder']" placeholder="例：090-1234-5678">
+                </div>
+            </div>
+            <ng-container *ngIf="['image','file','calc','auto-id', 'relation_table'].indexOf(type)==-1">
+                <div class="form-group row admin-forms" *ngIf="!this.data.raw_data['option']['is_multi_value_mode'] && type != 'checkbox' && data.raw_data['is_unique']!='true' && type!='boolean'">
+                    <label class="col-md-4 form-control-label">
+                        固定値&nbsp;
+                        <button class="btn btn-xs btn-default mr-2" *ngIf="type=='radio'"
+                                style="padding-left:7px;padding-right:7px;border-radius:30px;"
+                                (click)="clearValue()"><i class="fa fa-trash"></i></button>
+                        <div><small class="text-gray-dark">決まった値を設定可能です(編集不可)</small></div>
+                    </label>
+                    <div class="col-md-8">
+                        <admin-forms-field [default_form]="getForm('__fixed_value')" [default_field]="getField('__fixed_value')" [table_info]="data.table_info"
+                                           [default_value]="data.raw_data['option']['value']" (valueChanged)="onChange($event)"></admin-forms-field>
+                    </div>
+                </div>
+                <div class="form-group row admin-forms"
+                    *ngIf="!this.data.raw_data['option']['is_multi_value_mode'] && !this.data.raw_data['option']['use_current_as_default']">
+                    <label class="col-md-4 form-control-label">
+                        デフォルト値
+                        <button class="btn btn-xs btn-default mr-2" *ngIf="type=='radio'"
+                            style="padding-left:7px;padding-right:7px;border-radius:30px;" (click)="clearValue('default')"><i
+                                class="fa fa-trash"></i></button>
+                        <div *ngIf="type!='boolean'"><small class="text-gray-dark">固定値がある場合、無効</small></div>
+
+                    </label>
+                    <div class="col-md-8">
+                        <admin-forms-field [default_form]="getForm('__default_value')" [default_field]="getField('__default_value')"
+                            [table_info]="data.table_info" [default_value]="data.raw_data['option']['default']"
+                            (valueChanged)="onChange($event)"></admin-forms-field>
+                    </div>
+
+                    <ng-container *ngIf="is_child_table">
+                        <label class="col-md-4 form-control-label">
+                            子テーブルのデフォルト値
+                            <button class="btn btn-xs btn-default mr-2" *ngIf="type=='radio'"
+                                style="padding-left:7px;padding-right:7px;border-radius:30px;" (click)="clearValue('default')"><i
+                                    class="fa fa-trash"></i></button>
+                            <div><small class="text-gray-dark">固定値がある場合、無効</small></div>
+
+                        </label>
+                        <div class="col-md-8">
+                            <button class="btn btn-sm btn-success mb-2" (click)="addDefaultCondition()"><i
+                                    class="fa fa-plus mr-1"></i>条件追加</button>
+                            <ng-container *ngIf="this.data.raw_data['option']['child_default_condition']">
+                                <div class="row"
+                                    *ngFor="let condition of this.data.raw_data['option']['child_default_condition']; let i = index">
+                                    <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="deleteDefaultCondition(i)"><i
+                                            class="fa fa-minus"></i></button>
+                                    <div class="col-md-5">
+                                        <select [disabled]="disabled" class="form-control" [(ngModel)]="condition.condition"
+                                            (change)="onChange($event)" [id]="id_prefix + 'condition'">
+                                            <option value="">条件選択</option>
+                                            <option value="eq">indexが次と一致</option>
+                                            <option value="gt">indexが次の値以上</option>
+                                            <option value="lt">indexが次の値以下</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control" [(ngModel)]="condition.index"
+                                            (change)="onChange($event)" [id]="id_prefix + 'index'">
+                                    </div>
+                                    <div class="row col-md-12">
+                                        <div class="col-md-2"></div>
+                                        <label class="col-md-3 form-control-label" style="line-height:2rem;">
+                                            デフォルト値
+                                        </label>
+                                        <div class="col-md-7">
+                                            <admin-forms-field [default_form]="getForm('__child_default_value')"
+                                                [default_field]="getField('__child_default_value')" [table_info]="data.table_info"
+                                                [default_value]="this.data.raw_data['option']['child_default_condition'][i].value"
+                                                [data_index]="i" (valueChanged)="onChange($event)"></admin-forms-field>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="this.data.raw_data['option']['is_multi_value_mode']" class="">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        個数制限
+                    </label>
+                    <div class="col-md-8 row">
+                        <div class=" row col-md-6">
+                            <label class="col-md-6 form-control-label">
+                                最小個数
+                                <div><small class="text-gray-dark">空の場合無し</small></div>
+                            </label>
+                            <div class="col-md-6">
+                                <input OnlyNumber [min]="0" class="form-control" [(ngModel)]="this.data.raw_data['option']['min_child_number']" [object]="data.raw_data" [key]="'min_child_number'">
+                            </div>
+                        </div>
+                        <div class=" row col-md-6">
+                            <label class="col-md-6 form-control-label">
+                                最大個数
+                                <div><small class="text-gray-dark">空の場合無制限</small></div>
+                            </label>
+                            <div class="col-md-6">
+                                <input OnlyNumber [min]="1" [max]="1000" class="form-control" [(ngModel)]="this.data.raw_data['option']['max_child_number']" [object]="data.raw_data"
+                                       [key]="'max_child_number'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms" *ngIf="type === 'image' || type === 'file'">
+                    <label class="col-md-4 form-control-label">
+                        一覧に表示する数
+                    </label>
+                    <div class="col-md-8 row">
+                        <div class=" row col-md-6">
+                            <label class="col-md-6 form-control-label">
+                                <div><small class="text-gray-dark">空の場合無制限</small></div>
+                            </label>
+                            <div class="col-md-6">
+                                <input OnlyNumber [min]="1" [max]="1000" class="form-control" [(ngModel)]="this.data.raw_data['option']['display_num_on_list']" [object]="data.raw_data"
+                                       [key]="'max_child_number'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </ng-container>
+            <div class="form-group row admin-forms" *ngIf="type === 'image'">
+                <label class="col-md-4 form-control-label">
+                    ファイル名を表示する
+                </label>
+                <div class="col-md-8 row">
+                    <div class=" row col-md-6">
+                        <div class="col-md-6">
+                            <label>
+                                <input [(ngModel)]="this.data.raw_data['option']['display_image_filename']" type="checkbox" value="true"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ng-container *ngIf="['text'].indexOf(type)>=0">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        最小文字数
+                        <div><small class="text-gray-dark">空の場合無し</small></div>
+                    </label>
+                    <div class="col-md-8">
+                        <input OnlyNumber [min]="0" class="form-control" [(ngModel)]="this.data.raw_data['option']['min-length']" [object]="data.raw_data" [key]="'min-length'">
+                    </div>
+                </div>
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        最大文字数
+                        <div><small class="text-gray-dark">空の場合180</small></div>
+                    </label>
+                    <div class="col-md-8">
+                        <input OnlyNumber [min]="1" [max]="10000" class="form-control" [(ngModel)]="this.data.raw_data['option']['max-length']" [object]="data.raw_data" [key]="'max-length'">
+                    </div>
+                </div>
+
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        フォーマットを正規表現で指定する
+                        <div><small class="text-gray-dark"></small></div>
+                    </label>
+                    <div class="col-md-8">
+                        <input class="form-control" [(ngModel)]="this.data.raw_data['option']['format-regex']" placeholder="\d{4}-\d{2}">
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="type=='select_other_table' && data.raw_data['option']['item-table']!=null &&  !this.data.raw_data['option']['is_child_form']">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        CSVアップロード用項目
+                        <div>
+                            <small class="text-gray-dark">
+                                ※他テーブル参照のみ<br>
+                                CSVアップロード時、対象テーブルのどの項目の値を用いて更新するか指定できます。
+                            </small>
+                        </div>
+                    </label>
+                    <div class="col-md-8">
+                        <select [(ngModel)]="this.data.raw_data['option']['csv-fields']" class="form-control">
+                            <option *ngFor="let field of _share.exist_table_field_by_table[data.raw_data['option']['item-table']]"
+                                    value="{{field.Field}}">{{field.Comment}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="['calc', 'checkbox', 'radio', 'select', 'boolean', 'auto-id', 'relation_table'].indexOf(type) === -1 && !this.data.raw_data['option']['is_child_form']">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        複数の値の登録を許可する
+                    </label>
+                    <div class="col-md-8 row">
+                        <div class="col-md-12">
+                            <ng-container *ngIf="this.previousData.raw_data['option']['is_multi_value_mode'];else notIsmultiModeDefined">
+                                有効 ※変更不可
+                            </ng-container>
+                            <ng-template #notIsmultiModeDefined>
+                                <ng-container *ngIf="this.data.raw_data['option']['is_child_form'] || (this.data.raw_data['option']['is_multi_value_mode'] && data['id']); else NotForceMultiple;">
+                                    有効 ※変更不可
+                                    <input [(ngModel)]="this.data.raw_data['option']['is_multi_value_mode']" type="hidden" value="true"> 有効
+                                </ng-container>
+                                <ng-template #NotForceMultiple>
+                                    <label>
+                                        <input [(ngModel)]="this.data.raw_data['option']['is_multi_value_mode']" type="checkbox" value="true" [disabled]="data.raw_data['option']['copy-fields']?.length > 0"> 有効
+                                    </label>
+                                    <br>
+                                    <span style="color:red">
+                                        ※この機能は後から変更不可となります。
+                                    </span>
+                                    <br>
+                                    <span style="color:red" *ngIf="data.raw_data['option']['copy-fields']?.length > 0">
+                                        ※ルックアップを設定すると複数の値の登録は有効にできません
+                                    </span>
+                                </ng-template>
+                            </ng-template>
+                        </div>
+                        <div class="col-md-12 checkbox" *ngIf="this.data.raw_data['option']['is_multi_value_mode'] && type == 'select_other_table'">
+                            <label>
+                                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_add_all_option']"
+                                       value="true"> 全データ追加ボタンを表示する
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="['image','file','textarea', 'relation_table'].indexOf(type)==-1 && ['url'].indexOf(data.raw_data['type'])==-1 ">
+                <div class="form-group row admin-forms" *ngIf=" (data.raw_data['type']!='text' ||  !this.data.raw_data['option']['max-length'] || this.data.raw_data['option']['max-length'] <= 180)">
+                    <label class="col-md-4 form-control-label">
+                        検索高速化(インデックス）
+                        <div><small class="text-gray-dark">※高速化される代わりにデータのサイズが追加で使用されます。</small></div>
+                    </label>
+                    <div class="col-md-8 checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['index']"
+                                   value="true"> 検索高速化（インデックス）する
+                        </label>
+                    </div>
+                </div>
+                <!--
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        集計用パラメータ
+                        <div><small class="text-gray-dark">キーと値を設定することで、集計に使用可能です。例：（key=カテゴリ,value=動物と設定しておくと、カテゴリ毎のデータ集計が可能です）</small></div>
+                    </label>
+                    <div class="col-md-8 checkbox">
+                        <ng-container *ngFor="let summary_param of this.data.raw_data['option']['summary_params']; let i = index;">
+                            <div style="margin-bottom:10px" class="row">
+                                <div class="col-md-1">
+                                    <label>
+                                        <button class="btn btn-danger pull-left btn-sm btn mt-1" (click)="delSummaryParam(i)"><i class="fa fa-minus"></i></button>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    KEY:<br> <input type="text" [(ngModel)]="summary_param['key']">
+                                </div>
+                                <div class="col-md-5">
+                                    VALUE:<br> <input type="text" [(ngModel)]="summary_param['value']">
+                                </div>
+
+                            </div>
+                        </ng-container>
+                        <br style="clear: both">
+                        <label>
+                            <button class="btn btn-success pull-left btn-md btn-sm" (click)="addSummaryParam()"><i class="fa fa-plus"></i></button>
+                        </label>
+                    </div>
+                </div>
+                -->
+            </ng-container>
+            <ng-container *ngIf="type==='file'">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        ブラウザで表示する（画像/PDF/動画)
+                    </label>
+                    <div class="col-md-8">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['show_file']"
+                                       value="true"> 有効
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="form-group row admin-forms" *ngIf="type=='select_other_table'">
+                <label class="col-md-4 form-control-label">
+                    一覧画面にて、詳細画面へリンクしない
+                </label>
+                <div class="col-md-8">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" [(ngModel)]="this.data.raw_data['option']['no_detail_link']"
+                                   value="true"> 詳細画面へリンクしない
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <ng-container *ngIf="this.data.raw_data['option']['is_child_form']">
+                <div class="form-group row admin-forms ">
+                    <label class="col-md-4 form-control-label">
+                        親レコード作成時にデフォルトで開く
+                    </label>
+                    <div class="col-md-8">
+                        <table>
+                            <tr>
+                                <td><input [min]="0" OnlyNumber class="form-control width-max-100 ml-1" [(ngModel)]="this.data.raw_data['option']['open_empty_record']" [object]="data.raw_data" [key]="'num_min'"></td>
+                                <td class="text-nowrap">個</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="form-group row admin-forms" *ngIf="['relation_table'].indexOf(type)===-1">
+                <label class="col-md-4 form-control-label">
+                    項目の固有ID(API用機能)
+                    <i class="fa fa-question-circle" aria-hidden="true" ngbTooltip="APIのrequest, responseにてfield_idの箇所が、ここで設定した固有IDが使用されます。" container="body"></i>
+                </label>
+                <div class="col-md-8">
+                    <input id="unique_id" [(ngModel)]="data.raw_data['unique_id']" type="text" placeholder="デフォルト(field__XX)" class="form-control">
+                </div>
+            </div>
+            <!--
+            <ng-container *ngIf="['image','file'].indexOf(type)>=0">
+                <div class="form-group row admin-forms">
+                    <label class="col-md-4 form-control-label">
+                        web上に公開
+                    </label>
+                    <div class="col-md-8 radio">
+                        <label>
+                            <input name="{{data['field']}}_web_public" type="radio" [(ngModel)]="this.data.raw_data['option']['public']"
+                                   value="true" checked="checked">公開
+                        </label>
+                        <br/>
+                        <label>
+                            <input name="{{data['field']}}_web_public" type="radio" [(ngModel)]="this.data.raw_data['option']['public']"
+                                   value="false">非公開
+                        </label>
+                    </div>
+                </div>
+            </ng-container>
+            -->
+        </div>
+    </ng-container>
+    <!-- 固定テキストのとき表示条件のみ設定可能 -->
+    <ng-container *ngIf="type=='fixed_html'">
+        <div class="form-group row admin-forms">
+            <label class="col-md-4 form-control-label">
+                表示条件設定
+            </label>
+            <div class="col-md-8">
+                <conditions-form [table]="getTableName()"
+                    [default_condition_json]="this.data.raw_data['show_condition_json']"
+                    (valueChanged)="onChangeConditionJson($event,'show_condition_json')" [ignore_type_a]="['image','file']"
+                    [ignore_field_name_a]="['id']"></conditions-form>
+            </div>
+        </div>
+    </ng-container>
+</ng-container>

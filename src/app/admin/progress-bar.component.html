@@ -1,0 +1,9 @@
+<div class="progress-container" *ngIf="isVisible" (mousedown)="onMouseDown($event)">
+    <div class="progress-header">
+        <span>Uploading...</span>
+        <span>{{ progress }}%</span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progress"></div>
+    </div>
+</div>

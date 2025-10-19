@@ -1,0 +1,81 @@
+<div class="modal-dialog modal-default" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                申請
+
+            </h4>
+            <button type="button" class="close" (click)="close()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row" *ngIf="isLoadTemplate()">
+                <div class="col-md-12 font-weight-bold mb-2">
+                    ワークフローテンプレート<i class="fa fa-info-circle ml-1" [ngbTooltip]="'テーブル設定であらかじめ設定されたワークフローテンプレートを使用する場合は選択して下さい。'"></i>
+                </div>
+                <div class="col-md-12">
+                    <ng-select appendTo="body" ng-required="true" class="custom form-control" [hidden]="loading"
+                        [items]="template_names" [searchWhileComposing]="false" [virtualScroll]="true" bindLabel="label"
+                        bindValue="value" [(ngModel)]="selectedTemplateName" (change)="onTemplateNameChanged()"></ng-select>
+
+                </div>
+            </div>
+            <div class="row mt-4 mb-3">
+                <div class="col-md-12 font-weight-bold mb-2" *ngIf="isLoadTemplate()">
+                    申請に使用するメイン組織<i class="fa fa-info-circle ml-1" [ngbTooltip]="'「自身の組織」を承認で使用する場合に使われる組織を選択して下さい。'"></i>
+                </div>
+                <div class="col-md-12" *ngIf="isLoadTemplate()">
+                    <division-forms-field [default_division_id]="main_division_id" [use_ids]="division_id_a"
+                        (valueChanged)="divisionChanged($event)"></division-forms-field>
+                </div>
+            </div>
+            <div *ngIf="loading;then loading_block else loaded_block"></div>
+            <ng-template #loading_block>
+                <div class="sk-circle">
+                    <div class="loader">Loading...</div>
+                </div>
+            </ng-template>
+            <ng-template #loaded_block>
+                <div class="row">
+                    <div class="col-md-12 font-weight-bold mb-2">
+                        承認ルート
+                    </div>
+                    <div class="col-md-12 mb-3">
+                    <span *ngIf="isWorkflowTemplateExist() && !isWorkflowTemplatePathExist();else workflowTemplateExist">
+                        合致するワークフローテンプレートの条件がないため、申請できません
+                    </span>
+                        <ng-template #workflowTemplateExist>
+                            <workflow-setting [table]="table_info.table" [disabled]="isWorkflowTemplateExist()" [workflow]="isWorkflowTemplateExist()?workflow_template.workflow:workflow" [table_info]="table_info"
+                                              (valueChanged)="onWorkflowChanged($event)" [mode]="mode" [canAddTemplate]="canAddWorkflowtemplate()" [fieldOptions]="workflow_field_options"></workflow-setting>
+                        </ng-template>
+                    </div>
+
+                    <hr class="col-md-12 mt-4 mb-4">
+
+                    <div *ngIf="!isWorkflowTemplateExist() || canAddWorkflowtemplate()" class="col-md-12 text-center" style="margin-top:10px;" (click)="add()">
+                        <button class="btn btn-success"><i class="fa fa-plus"></i>承認フロー追加</button>
+                    </div>
+
+                    <div class="col-md-12 font-weight-bold mt-4">
+                        申請コメント（任意）
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="col-md-12 row">
+                            <div class="col-md-12 pl-0">
+                                <textarea class="form-control" [(ngModel)]="workflow_comment" (change)="changed()" appTextareaAutoresize></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </ng-template>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="close()">キャンセル</button>
+            <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="isWorkflowTemplateExist() && !isWorkflowTemplatePathExist()" [ladda]="sending">申請する</button>
+        </div>
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

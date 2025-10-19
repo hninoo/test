@@ -1,0 +1,20 @@
+<div *ngIf="loading;else Loaded">
+    <div class="loader_small">Loading...</div>
+</div>
+<ng-template #Loaded>
+    <select [(ngModel)]="position_id" (change)="onChange()" class="form-control" [disabled]="disabled">
+        <option value=""
+                *ngIf="!required && !add_all">
+            選択して下さい
+        </option>
+        <option value="0" *ngIf="add_all">
+            すべての役職
+        </option>
+        <option *ngFor="let value of added_values" value="{{value.value}}">
+            {{value.label}}
+        </option>
+        <option *ngFor="let data of data_a"
+                value="{{data.raw_data['id']}}">{{data.raw_data['name']}}
+        </option>
+    </select>
+</ng-template>

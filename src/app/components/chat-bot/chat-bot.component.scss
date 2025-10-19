@@ -1,0 +1,411 @@
+.chat-button {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #20a8d8;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 9999999;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: #1985ac;
+        transform: scale(1.05);
+    }
+
+    &.open {
+        background-color: #f86c6b;
+
+        &:hover {
+            background-color: #f63e3e;
+        }
+    }
+
+    i {
+        font-size: 20px;
+    }
+}
+
+.chat-box {
+    position: fixed;
+    bottom: 70px;
+    right: 10px;
+    width: 400px;
+    height: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 9999999;
+    transform: scale(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
+    overflow: hidden;
+
+    &.open {
+        transform: scale(1);
+    }
+
+    &.open-no-animation {
+        transform: scale(1);
+        transition: none;
+    }
+
+    .chat-box-header {
+        padding: 15px;
+        background-color: #2f353a;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .chat-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .close-button {
+            cursor: pointer;
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .chat-box-body {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+
+            .chat-bot-message {
+                margin-bottom: 15px;
+                display: flex;
+                align-items: flex-start;
+                max-width: 85%;
+
+                .chat-bot-message-icon {
+                    margin-right: 8px;
+                    min-width: 30px;
+
+                    .bot-icon {
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        object-fit: contain;
+                    }
+
+                    .user-icon {
+                        width: 30px;
+                        height: 30px;
+                        background-color: #20a8d8;
+                        color: white;
+                        border-radius: 50%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 16px;
+                    }
+                }
+
+                .chat-bot-message-content {
+                    padding: 10px;
+                    border-radius: 5px;
+                    word-break: break-word;
+                    font-size: 14px;
+                }
+
+                &.chat-bot-user-message {
+                    align-self: flex-end;
+                    flex-direction: row-reverse;
+
+                    .chat-bot-message-icon {
+                        margin-right: 0;
+                        margin-left: 8px;
+                    }
+
+                    .chat-bot-message-content {
+                        background-color: #20a8d8;
+                        color: white;
+                    }
+                }
+
+                &.chat-bot-ai-message {
+                    align-self: flex-start;
+
+                    .chat-bot-message-content {
+                        background-color: #f0f3f5;
+                        color: #2f353a;
+
+                        // リスト要素のインデント調整
+                        ul, ol {
+                            padding-left: 1.2rem;
+                            margin: 0.5rem 0;
+                        }
+
+                        li {
+                            margin-bottom: 0.25rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .chat-box-footer {
+        padding: 10px;
+        border-top: 1px solid #f0f3f5;
+        display: flex;
+        position: relative;
+
+        textarea {
+            flex: 1;
+            border: 1px solid #c8ced3;
+            border-radius: 3px;
+            padding: 8px;
+            padding-bottom: 25px; // 文字数カウンター用のスペース
+            resize: none;
+            outline: none;
+            font-size: 14px;
+
+            &:focus {
+                border-color: #20a8d8;
+            }
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 15px;
+            right: 63px;
+            font-size: 11px;
+            color: #999;
+            pointer-events: none;
+        }
+
+        .send-button {
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            background-color: #20a8d8;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #1985ac;
+            }
+
+            &:disabled {
+                background-color: #c8ced3;
+                cursor: not-allowed;
+            }
+
+            i {
+                font-size: 16px;
+            }
+        }
+    }
+}
+
+// ボタンUI要素のスタイル
+.chat-bot-ui-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.chat-bot-ui-button {
+    background-color: #e0e0e0;
+    border: none;
+    border-radius: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #d0d0d0;
+    }
+
+    &:active {
+        background-color: #c0c0c0;
+    }
+}
+
+// チェックボックスUI要素のスタイル
+.chat-bot-ui-checkboxes {
+    margin-top: 10px;
+}
+
+.chat-bot-ui-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+
+    input[type="checkbox"] {
+        margin-right: 8px;
+    }
+
+    label {
+        cursor: pointer;
+        font-size: 14px;
+    }
+}
+
+// プルダウンUI要素のスタイル
+.chat-bot-ui-pulldown {
+    margin-top: 10px;
+
+    select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+
+        &:focus {
+            border-color: #0084ff;
+            outline: none;
+        }
+    }
+}
+
+// 考え中バルーンのスタイル
+.thinking-bubble {
+    background-color: #f0f3f5 !important;
+    color: #666 !important;
+
+    i.fa-spinner {
+        margin-right: 5px;
+        color: #20a8d8;
+    }
+}
+
+// 反映済みテキストのスタイル
+.chat-bot-ui-applied {
+    background-color: #f0f0f0;
+    border-radius: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #555555;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+// ファイルアクション用のスタイル
+.chat-file-actions {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.chat-file-actions-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.chat-file-action-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .file-icon {
+            color: #007bff;
+            margin-right: 8px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .file-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #212529;
+            word-break: break-all;
+        }
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        .btn {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+
+            i {
+                margin-right: 4px;
+                font-size: 11px;
+            }
+
+            // レコード表示ボタンの色（薄い灰色）
+            &.btn-secondary {
+                background-color: #868e96;
+                border-color: #868e96;
+                color: white;
+
+                &:hover {
+                    background-color: #727b84;
+                    border-color: #6c757d;
+                }
+            }
+
+            // アイコンのみのボタン用の調整
+            &.btn-outline-primary,
+            &.btn-outline-info {
+                min-width: 36px;
+                padding: 6px 8px;
+
+                i {
+                    margin: 0;
+                    font-size: 14px;
+                }
+            }
+
+            // 見るボタンの色調整
+            &.btn-outline-info {
+                color: #17a2b8;
+                border-color: #17a2b8;
+
+                &:hover {
+                    color: white;
+                    background-color: #17a2b8;
+                    border-color: #17a2b8;
+                }
+            }
+        }
+    }
+}

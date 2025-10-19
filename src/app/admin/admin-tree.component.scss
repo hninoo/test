@@ -1,0 +1,101 @@
+.admin-tree{
+    list-style: none;
+    padding-left: 0;
+    background-color: #fff;
+    &__item{
+        width: 100%;
+        border-top: 1px solid #dddddd;
+        overflow: hidden;
+    }
+    &__item:empty{
+        display: none;
+    }
+    &__dataset{
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0.25rem 0;
+        line-height: 2.0rem;
+    }
+    &__dir-name{
+        padding: 0.5rem 0 0.5rem 1.2rem;
+        display: flex;
+        align-items: center;
+    }
+    &__check{
+        width: 20px;
+    }
+    &__name{
+        flex: 1 0 auto;
+        //width: 100%;
+    }
+    &__btn{
+        width: 180px;
+    }
+    &__dir{
+        position: relative;
+        &.open{
+            > .admin-tree__lower-menus{
+                max-height: 20000px;
+            }
+            >.admin-tree__dir-toggle{
+                i::before{
+                    content: "\f147" !important;
+                }
+            }
+        }
+    }
+    &__dir-toggle{
+        position: absolute;
+        top: 0.8rem;
+        left: 0;
+        cursor: pointer;
+        >i{
+            &::before{
+                font-family: FontAwesome;
+                content: "\f196" !important;
+                transition: .3s;
+                font-size: 20px;
+            }
+        }
+    }
+    &__lower-menus{
+        transition: max-height .3s ease-in-out;
+        max-height: 0;
+        padding-left: 1.0rem;
+    }
+    &.empty_tree{
+        height: 50px;
+    }
+}
+.admin-tree__dir-name button {
+    margin-left: 20px;
+}
+.cdk-drag-preview {
+    list-style: none;
+}
+.drop-inside {
+    border: 1px solid #00f;
+}
+
+.drop-before {
+    border-top: 1px solid #00f;
+}
+
+.drop-after {
+    border-bottom: 1px solid #00f;
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.cdk-drag-placeholder {
+  opacity: 1;
+  background-color: #d2d2d2;
+//   border: 3px dotted gray;
+  padding-left: 5px;
+}
+.drag-preview{
+    width: 40%;
+    padding-left: 5px;
+}

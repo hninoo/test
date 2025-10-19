@@ -1,0 +1,10 @@
+<ng-container>
+    <div *ngIf="forms.byFieldName(key)!=undefined">
+        <b>{{get_child_table_name()}}{{forms.byFieldName(key).label}}</b>: {{get_value(key, value)}}</div>
+    <div *ngIf="extend_search_forms != undefined && extend_search_forms.byFieldName(key)!=undefined">
+        <b>{{get_child_table_name()}}{{extend_search_forms.byFieldName(key).label}}</b>: {{value}}</div>
+    <div *ngIf="is_start(key) && forms.byFieldName(key.replace('_start',''))!=undefined">
+        <b>{{get_child_table_name()}}{{forms.byFieldName(key.replace("_start", "")).label}}(FROM)</b>: {{value}}</div>
+    <div *ngIf="is_end(key) && forms.byFieldName(key.replace('_end',''))">
+        <b>{{get_child_table_name()}}{{forms.byFieldName(key.replace("_end", "")).label}}(TO)</b>: {{value}}</div>
+</ng-container>

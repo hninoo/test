@@ -1,0 +1,466 @@
+.sticky-table-wrapper {
+    max-height: calc(100vh - 170px);
+    overflow: visible;
+    display: block;
+
+    .pc-list-view {
+        table-layout: auto;
+
+        th, td {
+            white-space: nowrap;
+            position: relative;
+            vertical-align: middle;
+        }
+    }
+}
+
+
+@media (max-width: 480px) {
+    .sticky-table-wrapper {
+        //max-height: calc(73vh);
+    }
+
+    #table-card-header {
+        padding: 0.75rem 0.25rem;
+    }
+}
+
+/* Media Query for Tablets Ipads portrait mode */
+@media (min-width: 481px) and (max-width: 1024px) {
+    .sticky-table-wrapper {
+        //max-height: calc(79vh);
+    }
+}
+
+/* Media Query for Laptops and Desktops */
+@media (min-width: 1025px) {
+    .sticky-table-wrapper {
+        //max-height: calc(calc(80vh));;
+    }
+}
+
+
+.pc-list-view {
+    table-layout: fixed;
+
+    tr {
+        height: 30px;
+    }
+
+    th, td {
+        padding: 0.3rem 0.75rem;
+        word-break: break-all;
+        // position: relative;
+        border: none !important;
+        outline: 0.5px solid #e1e6ef;
+        @include media-breakpoint-down(md) {
+            padding: 0.3rem 0.3rem;
+        }
+
+        .fa-sort-desc, .fa-sort-asc {
+            margin-left: 5px;
+        }
+
+        select.form-control {
+            min-width: 100px;
+        }
+    }
+
+    th {
+        -webkit-user-select: none; /* Chrome, Safari, Opera */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by most modern browsers */
+
+        position: sticky !important;
+        top: 0;
+        z-index: 2;
+        border-top: none;
+        background-color: #ffffff;
+
+        &.pc-list-view__manage {
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+    }
+
+    .td_first_child_sticky {
+        position: sticky !important;
+        left: 0;
+        width: 5em;
+        z-index: 3;
+        background-color: #ffffff;
+        border-right: 3px;
+    }
+
+
+    .header_first_child_sticky {
+        position: sticky;
+        left: 0;
+        top: 0;
+        z-index: 4;
+        width: 5em;
+        border-top: none;
+        background-color: #ffffff;
+
+        &.pc-list-view__manage {
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+    }
+
+    .workflow_header_sticky {
+        position: sticky;
+        left: 37px;
+        top: 0;
+        z-index: 3;
+        width: 5em;
+        border-top: none;
+        background-color: #ffffff;
+
+        &.pc-list-view__manage {
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+    }
+
+    .sticky {
+        position: sticky !important;
+        z-index: 2;
+        background: white;
+        left: 37px;
+    }
+
+    &__checkbox {
+        width: 40px;
+        @include media-breakpoint-down(md) {
+            width: 22px;
+        }
+
+        input[type=checkbox] {
+            vertical-align: middle;
+        }
+    }
+
+    &__order {
+        width: 85px;
+    }
+
+    &__manage-sp {
+        width: 42px;
+    }
+
+    &__manage {
+        width: 115px;
+        min-width: 115px;
+        position: sticky !important;
+        right: 0;
+        text-align: right;
+    }
+
+    &__scroll-arrow {
+        display: inline-block;
+        width: 30px;
+        text-align: center;
+        //background-color: rgba(255,255,255,0.7);
+    }
+
+    &__btns {
+        font-size: 0;
+        position: sticky !important;
+        right: 0;
+
+        .btn {
+            width: 30px;
+        }
+
+        &.disable-float {
+            position: relative !important;
+        }
+    }
+
+    .image-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        img {
+            display: block;
+            height: 70px;
+            width: 70px;
+            object-fit: cover;
+            margin: 5px;
+            border: 1px solid #eee;
+        }
+
+        .filename {
+            /* オーバーした要素を非表示にする*/
+            overflow: hidden;
+
+            /* 改行を半角スペースに変換することで、1行にする */
+            white-space: nowrap;
+
+            /* 幅を指定しないとテキストの長さによって要素の幅が変わるため指定 */
+            width: 70px;
+
+            /* オーバーしたテキストを３点リーダーにする */
+            text-overflow: ellipsis;
+        }
+    }
+
+    &__cell-inner {
+        //max-width: 220px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.pc-detail-view {
+    .image-container {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        &::after {
+            content: "";
+            display: block;
+            width: 200px;
+            margin: 5px;
+        }
+
+        img {
+            display: block;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            margin: 5px;
+            border: 1px solid #eee;
+        }
+    }
+
+}
+
+.multi_col_view {
+    .table-admin-view {
+        &__1row {
+            margin-bottom: 3px;
+        }
+
+        &__field-row {
+            margin: 3px;
+
+        }
+
+    }
+
+}
+
+admin-view-table.view-children {
+    padding: 7px 21px;
+}
+
+.table-admin-view {
+    border: none;
+
+    &__1row {
+        //margin-bottom:10px;
+    }
+
+    &__field-row {
+        display: flex;
+        flex: 1;
+        border: $table-border-width solid $table-border-color;
+        height: auto;
+        min-height: 100%;
+        margin: 0 0 -1px;
+        //margin: 3px;
+    }
+
+    &__field-name {
+        // width: 25%;
+        min-width: 100px;
+        background-color: $table-bg-accent;
+        padding: 0.5rem 0.7rem;
+        max-width: 200px;
+
+        flex: 0.25;
+        word-wrap: break-word;
+    }
+
+    &__field-value {
+        word-break: break-all;
+        padding: 0.5rem 0.7rem;
+        flex: 1;
+    }
+
+    &__image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
+
+.table-responsive {
+    @include media-breakpoint-down(md) {
+        display: table;
+    }
+}
+
+.btn-box button {
+    margin: 0.5rem 0;
+
+    &:not(:last-child) {
+        margin-right: 1.0rem;
+    }
+}
+
+.table-admin-view {
+    td {
+        word-break: break-all;
+    }
+}
+
+
+.search-input input {
+    height: 27px;
+    margin: 4px;
+}
+
+.condition {
+    border: 1px solid #aaa;
+    border-radius: 10px;
+    padding: 3px 10px;
+    background: #fafafa;
+
+    .delete {
+        position: absolute;
+        top: -5px;
+        right: 8px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+}
+
+
+.variable-container {
+    /* border-radius: 20px; */
+    margin-bottom: 10px;
+    padding: 2px;
+    border: 1px solid #aaa;
+
+    .title {
+        border-right: 1px solid #aaa;
+        font-size: 17px;
+        font-weight: bold;
+
+    }
+}
+
+.btn-zip {
+    position: absolute;;
+    right: 2px;
+    bottom: 2px;
+}
+
+.sort-asc {
+    display: inline-block;
+    height: 18px;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.sort-desc {
+    display: inline-flex;
+    align-content: center
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.pc-list-view {
+    thead tr {
+        outline: 2px solid #e1e6ef;
+    }
+}
+
+
+.table-workflow-detail {
+    .workflow_status {
+        border-radius: 10px;
+        padding: 2px 7px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    td, th {
+        padding: 4px;
+    }
+
+    button {
+        cursor: default;
+    }
+}
+
+
+.navigation-phone {
+    position: fixed;
+    bottom: 5px;
+    width: 300px;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, 0%);
+
+    ul {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        background: white;
+        border: 1px solid #20a8d8;
+        opacity: 0.9;
+        border-radius: 14px;
+
+        li {
+            margin-right: 0.125rem;
+
+            &.current {
+                padding-top: 8px !important;
+            }
+
+            padding-top: 5px !important;;
+
+            a:hover {
+                background: none;
+            }
+
+            &.pagination-next, &.pagination-previous {
+                a {
+                    margin-top: -5px !important;
+                }
+            }
+        }
+    }
+}
+
+.card-header {
+    padding-bottom: 0 !important;
+}
+
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#pfc-thead-normal-header {
+    position: sticky;
+    top: 0px;
+    z-index: 100;
+}
+
+#list-table-container {
+    display: block;
+    overflow: visible;
+    width: 100%;
+}
+
+.no-sticky {
+    max-height: 100% !important;;
+}

@@ -1,0 +1,22 @@
+.select-wrap{
+    position: relative;
+}
+.select-wrap .ng-select.custom.ng-select-multiple ::ng-deep .ng-select-container .ng-value-container .ng-input{
+    display: none;
+}
+.select-wrap .ng-select.custom.ng-select-multiple.ng-select-opened ::ng-deep .ng-select-container .ng-value-container .ng-input{
+    display: block;
+}
+.select-wrap ::ng-deep ng-dropdown-panel{
+    min-width: inherit!important;
+    width: 100%!important;
+}
+.select-wrap ::ng-deep ng-dropdown-panel .ng-dropdown-panel-items{
+    /* overflow-x: scroll; */
+}
+.select-wrap ::ng-deep ng-dropdown-panel .scrollable-content{
+    /* width: 100%; */
+}
+.select-wrap .ng-select.custom ::ng-deep div.ng-value{
+    white-space:normal!important;
+}

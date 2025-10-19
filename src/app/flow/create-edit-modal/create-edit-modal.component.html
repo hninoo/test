@@ -1,0 +1,59 @@
+<div bsModal [config]="{backdrop: 'static', keyboard: false}" #modal='bs-modal' class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-primary modal-lg" role="document" *ngIf="block && block.type == Block.TYPE_CREATE">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">データ追加設定</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <p>指定されたフィールド値でデータが追加されます。</p>
+                </div>
+
+                <!-- 対象テーブル選択（CopyOtherTableBlockと同じng-selectを使用） -->
+                <div class="form-group mb-3">
+                    <label>追加先テーブル:</label>
+                    <div class="ng-select-fieldset">
+                        <label *ngIf="!select_null || is_select_open" class="floating-label">テーブルを選択してください</label>
+                        <ng-select
+                            appendTo="body"
+                            ng-required="true"
+                            [items]="target_table_a"
+                            [searchWhileComposing]="false"
+                            bindLabel="view_label"
+                            bindValue="table"
+                            [(ngModel)]="block.target_table"
+                            class="form-control"
+                            (change)="targetTableChanged($event)"
+                            (focus)="is_select_open = true"
+                            (blur)="is_select_open = false"
+                            [placeholder]="select_null && !is_select_open ? 'テーブルを選択してください' : ''">
+                        </ng-select>
+                    </div>
+                </div>
+
+                <!-- フィールド値設定 -->
+                <ng-container *ngIf="target_table_info">
+                    <div class="form-group">
+                        <h5>{{ target_table_info.getLabel() }} - フィールド値設定:</h5>
+                        <select-field-and-value
+                            [table_info]="target_table_info"
+                            [form_and_values]="block.form_and_values"
+                            [add_default]="true"
+                            (valueChange)="onChangeCreateValue($event)">
+                        </select-field-and-value>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="!target_table_info && block.target_table">
+                    <div class="alert alert-info">
+                        テーブル情報を読み込み中...
+                    </div>
+                </ng-container>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="modal.hide()">キャンセル</button>
+                <button type="button" class="btn btn-success" (click)="save()" [disabled]="!block.target_table">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

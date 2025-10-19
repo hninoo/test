@@ -1,0 +1,19 @@
+<table class="table table-bordered mb-0 table-admin-view">
+    <tr>
+        <ng-container *ngFor="let field of fields">
+            <th *ngIf="field.show_list" class="table-admin-view__field-name">{{forms.byFieldName(field.Field).label}}</th>
+        </ng-container>
+        <!--<th class="table-admin-view__field-name">詳細</th> -->
+    </tr>
+    <tr *ngFor="let data of data_a">
+        <ng-container *ngFor="let field of fields">
+            <td *ngIf="field.show_list">{{data.view_data[field.Field]}}</td>
+        </ng-container>
+        <!--
+        <td>
+            <button class="btn btn-primary btn-sm" type="button" (click)="view(data)"><i class="fa fa-search-plus"></i>
+            </button>
+        </td>
+        -->
+    </tr>
+</table>

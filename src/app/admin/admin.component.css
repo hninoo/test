@@ -1,0 +1,131 @@
+#pc-list-view #table-card-header{
+    position: relative;
+    z-index: 999;
+}
+.t2-border {
+    outline: 1px solid red;
+    outline-offset: 10px;
+}
+
+.t2-image-1 {
+    height: 260px;
+    width: 350px;
+}
+
+.button-right {
+    margin: 0 0 0 auto;
+}
+
+.card-bottom1 {
+    margin-bottom: 0.5rem;
+}
+
+.tutorial-2-modal {
+    width: 50px !important;
+}
+
+.table-name {
+    text-align: center;
+    padding: 10px;
+}
+
+.margin-left0 {
+    margin-left: 0px;
+}
+
+.mat-table {
+    width: 100%;
+}
+
+.resizing {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: col-resize;
+}
+
+/* .mat-cell {
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+} */
+.mat-header-cell {
+    position: relative;
+}
+
+.resize-holder {
+    cursor: col-resize;
+    width: 20px;
+    height: 100%;
+    position: absolute;
+    right: -10px;
+    top: 0;
+    z-index: 1;
+}
+
+.mat-header-cell {
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+
+}
+
+@media (min-width: 500px) {
+    .sp_display {
+        display: none;
+    }
+}
+
+.file-input {
+    display: none;
+}
+
+.auth-modal {
+    z-index: 10000;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blinking {
+    animation: blink 3s infinite;
+}
+
+.btn-expense {
+    color:green;
+    border: 1px solid green;
+    background-color: #C0F060;
+    width: auto;
+
+}
+/* ::ng-deep .table-scrolling .stickyScrolling .sticky-header {
+    position: relative;
+    margin-left: 0px !important;
+} */
+
+.edit_mode_btn{
+    margin-bottom: 0.45em;
+}
+
+/* 検索変数UI用スタイル */
+.variable-container {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.variable-item {
+    min-width: 250px;
+}
+
+.variable-title {
+    min-width: 80px;
+    font-weight: 500;
+}
+
+.variable-value {
+    flex: 1;
+    min-width: 150px;
+}

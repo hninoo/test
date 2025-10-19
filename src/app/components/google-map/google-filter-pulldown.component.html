@@ -1,0 +1,41 @@
+<div *ngIf="filters.length > 0" class="btn-group mr-lg-0 ml-2 mb-2" dropdown placement="bottom-left" container="body">
+    <button dropdownToggle type="button"
+            class="btn btn-sm btn-default dropdown-toggle btn-filter"
+            aria-controls="dropdown-basic">
+        <i class="fa fa-map"></i>
+        <span class="filter-label pl-1">{{getFilterDisplayName()}}</span>
+        <span class="caret"></span>
+    </button>
+    <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu" role="menu"
+        aria-labelledby="button-basic" [ngStyle]="{'max-height':'390px', 'overflow-y':'auto'}">
+        
+        <!-- 現在表示中のフィルター操作 -->
+        <ng-container *ngIf="currentFilter">
+            <li role="menuitem" *ngIf="currentFilter.editable">
+                <a class="dropdown-item" href="javascript:void(0)" (click)="editFilter()">
+                    <i class="fa fa-pencil"></i>表示中のフィルターを編集
+                </a>
+            </li>
+            <li role="menuitem" *ngIf="currentFilter.editable">
+                <a class="dropdown-item" href="javascript:void(0)" (click)="deleteFilter(currentFilter.id)">
+                    <i class="fa fa-trash-o"></i>表示中のフィルターを削除
+                </a>
+            </li>
+            <li role="menuitem">
+                <a class="dropdown-item" href="javascript:void(0)" (click)="resetFilter()">
+                    <i class="fa fa-times"></i>フィルターを解除
+                </a>
+            </li>
+            <li class="divider dropdown-divider"></li>
+        </ng-container>
+
+        <!-- フィルター選択リスト -->
+        <ng-container *ngFor="let filter of filters">
+            <li role="menuitem">
+                <a class="dropdown-item" href="javascript:void(0)" (click)="selectFilter(filter)">
+                    {{ filter.name }}
+                </a>
+            </li>
+        </ng-container>
+    </ul>
+</div> 

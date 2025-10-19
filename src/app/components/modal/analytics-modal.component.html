@@ -1,0 +1,38 @@
+<div bsModal #analyticsAiModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-default" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    AnalyticsAI(beta)
+                </h4>
+            </div>            
+                <div class="modal-body">
+                    <ul>
+                        <li>「対象項目」のデータから、顧客の「感情」「緊急度」をAIが解析します。</li>
+                        <li>フィードバック分類, フィードバック分類2にデータを入れておけば、「対象項目」の意味が最も近いデータが「分類1」,「分類2」に割り当てられます。</li>
+                        <li>「要約」の欄には、「対象項目」の内容がAIによって要約されます。</li>
+                        <li>うまくAIが解析できなかった項目には何も入力されない場合があります。</li>
+                        <li>しばらく時間がかかります。リクエストログのメニューからステータスが確認出来ます</li>
+                        <li>テーブルの項目名を変更するとうまく分析できなくなるので、項目名は変更しないでください。</li>
+                    </ul>
+                    <div class="flex align-items-center ml-4">
+                        <span class="mr-2">対象項目:</span>
+                        <select class="form-control" [(ngModel)]="target_field" style="width: auto;">
+                            <ng-container *ngFor="let field of fields">
+                                <option *ngIf="isConditionField(table_info,field)" value="{{field.Field}}">
+                                    {{field.Comment}}
+                                </option>
+                            </ng-container>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="hide()">キャンセル</button>
+                    <button type="button" class="btn btn-primary" (click)="submit()" [ladda]="sending">実行する</button>
+                </div>
+        </div>
+
+    </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+

@@ -1,0 +1,48 @@
+<div class="field-select-dragdrop" style="">
+    <div class="todo-container ">
+        <h4>
+            <span *ngIf="type=='display';else isDuplicate">
+                {{ unselected_header }}
+            </span>
+            <ng-template #isDuplicate>
+                複製しない項目
+            </ng-template>
+            <i class="fa fa-arrow-right pull-right" *ngIf="dd_unselected_fields.length>0" (click)="moveAllFieldDisplay()"></i>
+
+        </h4>
+
+        <div
+            cdkDropList
+            #todoList="cdkDropList"
+            [cdkDropListData]="dd_unselected_fields"
+            [cdkDropListConnectedTo]="[doneList]"
+            class="field-list"
+            (cdkDropListDropped)="drop($event)">
+            <div class="field-item" *ngFor="let field of dd_unselected_fields" cdkDrag>{{field.Comment}}</div>
+        </div>
+    </div>
+
+    <div class="todo-container">
+        <h4>
+            <span *ngIf="type=='display';else isDuplicate2">
+                {{ selected_header }}
+            </span>
+            <ng-template #isDuplicate2>
+                複製する項目
+            </ng-template>
+
+            <i class="fa fa-arrow-left pull-right" *ngIf="dd_selected_fields.length>0" (click)="moveAllFieldNotDisplay()"></i>
+        </h4>
+
+        <div
+            cdkDropList
+            #doneList="cdkDropList"
+            [cdkDropListData]="dd_selected_fields"
+            [cdkDropListConnectedTo]="[todoList]"
+            class="field-list"
+            (cdkDropListDropped)="drop($event)">
+            <div class="field-item" *ngFor="let field of dd_selected_fields" cdkDrag>{{field.Comment}}</div>
+        </div>
+    </div>
+
+</div>

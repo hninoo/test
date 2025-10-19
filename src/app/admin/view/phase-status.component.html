@@ -1,0 +1,46 @@
+<div class="phase-container">
+    <svg *ngIf="now_phase_obj" (click)="scrollLeft()" width="40" height="56" viewBox="0 0 40 56" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect x="39.5" y="55.5" width="39" height="55" rx="1.5" transform="rotate(-180 39.5 55.5)" fill="white" />
+        <path d="M25 40L22.539 40L13 28L15.4611 28L25 40Z" fill="#707070" />
+        <path d="M25 16L22.539 16L13 28L15.461 28L25 16Z" fill="#707070" />
+        <rect x="39.5" y="55.5" width="39" height="55" rx="1.5" transform="rotate(-180 39.5 55.5)" stroke="#E2E6EE" />
+    </svg>
+
+    <div class="phase-status" *ngIf="now_phase_obj" #scrollable>
+        <span *ngFor="let item of phase_list" class="item arrow-label" (click)="updatePhase(item)"
+              [ngClass]="{
+                    'past-phase': item.order < now_phase_obj.order,
+                    'current-phase': item.order === now_phase_obj.order,
+                    'future-phase': item.order > now_phase_obj.order,
+                    'last-phase': phase_list.length === item.order
+                }" ngbTooltip="{{item.tips}}" matTooltipClass="test">
+            <div *ngIf="item.order < now_phase_obj.order">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
+                    <path
+                        d="M12 22.5C17.5228 22.5 22 18.0228 22 12.5C22 6.97715 17.5228 2.5 12 2.5C6.47715 2.5 2 6.97715 2 12.5C2 18.0228 6.47715 22.5 12 22.5Z"
+                        fill="#4EA7D3" />
+                    <path
+                        d="M16.5466 11.5868L15.8466 12.2935L11.6733 16.4601H11.2266L6.7933 12.0268L6.8733 11.9468C7.0116 11.8218 7.16638 11.7164 7.3333 11.6335C7.41672 11.5868 7.50365 11.5467 7.5933 11.5135H7.68664L7.99997 11.4001H8.0733C8.41958 11.3473 8.77344 11.3771 9.10598 11.4872C9.43852 11.5972 9.7403 11.7844 9.98664 12.0335L11.3333 13.4001C11.3458 13.4143 11.3612 13.4257 11.3784 13.4335C11.3957 13.4412 11.4144 13.4453 11.4333 13.4453C11.4522 13.4453 11.4709 13.4412 11.4882 13.4335C11.5054 13.4257 11.5208 13.4143 11.5333 13.4001L15.8333 9.11347L16.5333 8.4068L16.6666 8.50013C16.7851 8.63478 16.888 8.78238 16.9733 8.94013C17.1982 9.36804 17.2782 9.85736 17.2013 10.3346C17.1243 10.8118 16.8946 11.2512 16.5466 11.5868Z"
+                        fill="white" />
+                </svg>
+            </div>
+            <div>
+                <div class="name">
+                    {{ item.phase }}
+
+                </div>
+                <div class="probability">
+                    {{ item.probability }}
+                </div>
+            </div>
+        </span>
+    </div>
+    <svg *ngIf="now_phase_obj" (click)="scrollRight()" width="40" height="56" viewBox="0 0 40 56" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect x="0.5" y="0.5" width="39" height="55" rx="1.5" fill="white" />
+        <path d="M15 16H17.461L27 28H24.539L15 16Z" fill="#707070" />
+        <path d="M15 40H17.461L27 28H24.539L15 40Z" fill="#707070" />
+        <rect x="0.5" y="0.5" width="39" height="55" rx="1.5" stroke="#E2E6EE" />
+    </svg>
+</div>

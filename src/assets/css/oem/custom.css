@@ -1,0 +1,261 @@
+@charset "UTF-8";
+
+/**
+    OEM用のカスタムCSS
+ */
+  /** メニュー内グループ */
+  .sidebar-fixed .sidebar {
+    z-index: 1000;
+    margin-top: 15px;
+    position: fixed;
+    width: 250px;
+    height: 100%;
+    background-color: #faf9d8;
+    color: #9a762b;
+}
+/* .nav-menus__link.-nowrap[_ngcontent-fbm-c76] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-color: #faf9d8;
+    color: #9a762b;
+} */
+  /** メニュー内テーブル */
+  .nav-menus__link span {
+      color: #9a762b;
+  }
+
+  .nav-menus__link:hover span {
+    color: desired_color;
+}
+
+
+  .nav-menus__link i {
+      color: #9a762b;
+  }
+
+  .nav-menus__link.-nowrap:hover {
+      background-color: #C29436;
+  }
+
+  .nav-menus__link.-nowrap.active {
+      background-color: #C29436;
+  }
+
+  .nav-menus__link.-nowrap.active span {
+      color: #FFFFFF;
+  }
+  .nav-menus__link.-nowrap:hover span {
+      color: #FFFFFF;
+  }
+
+  .navbar .header_extend h5{
+      font-family: "Helvetica Neue", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "Arial", "Meiryo", sans-serif;
+  }
+/**
+  サイドバー
+ */
+
+
+.app-body .sidebar {
+    flex: 0 0 250px;
+    order: -1;
+}
+
+/* ダッシュボード */
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    font-family: "Helvetica Neue", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", "Arial", "Meiryo", sans-serif;
+    border: 1px solid #faf9d8;
+}
+.card-header {
+    padding-bottom: 0!important;
+    background-color: #ffffff
+}
+  /** ヘッダー */
+.app-header.navbar div.navbar-brand {
+    background-image: url('http://comachilab.jp/blog/wp-content/uploads/2023/05/candy.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    color: #FFFFFF;
+    text-align: center;
+    font-weight: 700;
+    background-color: #FFFFFF;
+    padding-top: 15px;
+}
+
+/* 文字消した */
+.app-header.navbar a.navbar-brand {
+    color: rgba(0, 0, 0, 0);
+}
+
+/* 虫メガネ消した */
+.app-header.navbar i {
+    color: rgba(0, 0, 0, 0);
+}
+
+
+
+
+  /** ボディ*/
+body {
+    font-family: -apple-system,system-ui,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #333333;
+    background-color: #ffffff;
+}
+ /** リンクの色*/
+a {
+  color: #C29436;
+  text-decoration: none;
+}
+ /** リンクの色（ホバー時）*/
+ a:hover {
+    color: #cca046;
+    text-decoration: underline; /* 下線を追加する場合 */
+}
+/**/
+
+ button.btn-info {
+    color: #ffffff; /* テキストの色を指定してください */
+    background-color: #C29436; /* 背景色を指定してください */
+    border: none;
+}
+
+.btn-outline-info {
+    color: #C29436; 
+    background-image: none;
+    background-color: transparent;
+    border-color: #C29436; 
+}
+.btn-outline-info:hover {
+    color: #ffffff; 
+    background-image: none;
+    background-color: #C29436; 
+    border-color: #C29436;
+}
+button.btn-primary {
+    color: #ffffff; /* テキストの色を指定してください */
+    background-color: #C29436; /* 背景色を指定してください */
+    border: none;
+}
+button.btn-primary:hover {
+    color: #C29436; /* テキストの色を指定してください */
+    background-color: #faf9d8; /* 背景色を指定してください */
+    border: none;
+    border-color: none;
+}
+
+/* 項目を追加するボタン */
+.btn-success {
+    color: #fff;
+    background-color: #8bcc99; 
+    border-color: #689973;
+    font-weight: bold;
+}
+.btn-success:hover {
+    color: #fff;
+    background-color: #689973;
+    border-color: #689973;
+    font-weight: bold;
+}
+
+/* 警告ボタン */
+button.btn-warning {
+    background-color: #faf9d8;
+    color: #dcad42;
+    border: none;
+}
+
+/* 削除ボタン */
+button.btn-danger {
+    background-color: #f9d8d8;
+    color: #e7a092;
+    border: none;
+}
+
+button.btn-outline-primary {
+    border-color: #C29436;
+    color: #C29436;
+}
+button.btn-outline-primary:hover {
+    border-color: #C29436;
+    background-color: #C29436;
+    color: #ffffff
+}
+
+
+/* テーブルの項目名 */
+a.pc-table-head {
+    border-color: #C29436;
+    color: #333333;  
+}
+/* テーブル設定画面の項目欄 */
+.overSetting .back, .overSetting .border {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border-color: #C29436;
+}
+/* テーブル設定画面の項目アイコン */
+/* 歯車マーク */
+.overSetting .icon-container i.fa-gear {
+    right: 60px;
+    color: #649fc0
+}
+/* クイックボタン */
+.quick-button.active {
+    background: #faf9d8;
+    border-color:  #C29436;
+    color: #C29436;
+}   
+/* ゴミ箱マーク */
+.overSetting .icon-container i.fa-trash {
+    right: 35px;
+    color: #f9d8d8
+}
+/* ページ送り */
+.ngx-pagination .current {
+    padding: 0.1875rem 0.625rem;
+    background:  #8bcc99; 
+    color: #fefefe;
+    cursor: default;
+}
+.pagination-next {
+    display: inline-block;
+    padding: 0.1875rem 0.625rem;
+    color: #888;
+    cursor: not-allowed;
+  }
+.ngx-pagination .disabled {
+    padding: 0.1875rem 0.625rem;
+    color: #8bcc99; 
+    cursor: default;
+}
+.table-admin-view__field-name {
+    min-width: 100px;
+    background-color: #faf9d8;
+    padding: 0.5rem 0.7rem;
+    max-width: 200px;
+    flex: 0.25;
+    word-wrap: break-word;
+}
+
+.dropdown-item:hover {
+    position: relative;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e1e6ef;
+    background-color: #faf9d8;
+}
+/* 警告モーダル */
+.modal-danger .modal-header {
+    color: #fff;
+    background-color: #e7a092
+}

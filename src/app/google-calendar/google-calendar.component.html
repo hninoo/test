@@ -1,0 +1,18 @@
+<div *ngIf="show_google_calendar">
+    <div class="event-list">
+        <div class="event" [ngClass]="j % 2 === 0 ? 'bg-white' : 'bg-gray'"
+            *ngFor="let event of calendar_events | keyvalue; let j = index"
+            (click)="handleEventClick(c_data, event.value)">
+            <div class="badge-container">
+                <div class="google-badge"></div>
+                <div class="number-badge">31</div>
+            </div>
+            <div class="event-details">
+                <div class="event-name">{{ event.value.summary }}</div>
+                <div class="event-time">
+                    {{ event.value.period }} {{ event.value.start_end }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

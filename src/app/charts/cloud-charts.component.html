@@ -1,0 +1,43 @@
+<div class="card">
+    <div class="card-header"><i class="fa fa-line-chart"></i>
+        <ng-container *ngIf="add_link;else NotAddLink;">
+            <a href="javascript:void(0)" (click)="goToTable()"> {{title}}{{chart['title']}}</a>
+        </ng-container>
+        <ng-template #NotAddLink>
+            {{title}}{{chart['title']}}
+        </ng-template>
+
+        <i *ngIf="dashboard && dashboard.has_edit_grant && onClickDelete"
+           class="fa fa-trash pull-right text-danger trash-icon dashboard-content-icon" (click)="onClickDelete.emit()"></i>
+        <div *ngIf="onClickEdit && customFilter && customFilter.editable" class="pull-right mr-2">
+            <i class="dashboard-content-icon fa fa-gear" aria-hidden="true"
+               style="color:gray;"
+               (click)="onClickEdit.emit()"></i>
+        </div>
+        <ng-container *ngIf="type!='table'">
+            <div class="pull-right  mr-2" *ngIf="isShowPaging()">
+                <button class="btn btn-sm btn-default" (click)="changePage(page-1)"><i class="fa fa-angle-double-left"></i></button>
+                <button class="btn btn-sm btn-default" (click)="changePage(page+1)"><i class="fa fa-angle-double-right"></i></button>
+            </div>
+            <div class="pull-right">
+                {{date_str}}&nbsp;&nbsp;
+            </div>
+        </ng-container>
+    </div>
+    <div class="card-block">
+
+        <!--        <div class="pull-right" *ngIf="customFilter.id!=null && parent">-->
+        <!--            <i class="fa fa-gear" aria-hidden="true" style="font-size: 22px;cursor: pointer;color:gray"-->
+        <!--                (click)="parent.showEditModal(customFilter.id,customFilter)"></i>-->
+        <!--            &nbsp;<i class="fa fa-trash" aria-hidden="true" style="font-size: 22px;cursor: pointer;color:#ff838e"-->
+        <!--                *ngIf="parent" (click)="parent.deleteChartModal(customFilter)"></i>-->
+        <!--        </div>-->
+        <div class="chart-wrapper">
+            <canvas #myChart [hidden]="chartJsObj==null"></canvas>
+            <div [hidden]="chartJsObj!=null && !display_text" class="loader">Loading...</div>
+            <div [hidden]="chartJsObj!=null && display_text" class="align-middle"
+                 style="padding: 20px; text-align: center; font-size: 30px;">{{display_text}}
+            </div>
+        </div>
+    </div>
+</div>

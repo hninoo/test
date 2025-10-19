@@ -1,0 +1,30 @@
+<div class="app flex-row align-items-center" id="login">
+    <div class="container">
+        <div class="row justify-content-center" style="margin-top: 30vh;">
+            <div class="col-md-6">
+                <div class="card-group mb-0">
+                    <div class="card p-4">
+                        <div class="card-block">
+                            <h1>{{label}}</h1>
+                            <form [formGroup]="myForm" (ngSubmit)="confirm(myForm.value)">
+                                <div class="input-group mb-4">
+                                    <span class="input-group-addon"><i class="icon-lock"></i></span>
+                                    <input id="otp" type="text" class="form-control" placeholder="One Time Password"
+                                           [formControl]="myForm.controls['otp']">
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-primary px-4">送信</button>
+                                    </div>
+                                    <div class="col-12" style="text-align: right">
+                                        <a href="/admin/login">ログイン画面に戻る</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

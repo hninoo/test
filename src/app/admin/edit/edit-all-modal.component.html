@@ -1,0 +1,43 @@
+<div bsModal #editAllModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" [config]="{ backdrop: 'static' }"
+     aria-hidden="true">
+    <div class="modal-dialog modal-warning"
+         role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    一括編集
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p *ngIf="!isAllData() && !checked_id_a.length && customFilter && customFilter.id"> {{ count }}件のデータが一括更新されます。</p>
+                    <p *ngIf="!isAllData() &&checked_id_a.length && (checked_id_a.length <= 10) && !checked_all">idが{{ checked_id_a.join(', ') }}のデータが一括更新されます。</p>
+                    <p *ngIf="!isAllData() &&checked_id_a.length && (checked_id_a.length > 10) && !checked_all">id {{ checked_id_a.slice(0, 10).join(', ') }}.. など、{{ checked_id_a.length }}
+                        件のデータが一括更新されます
+                    <p *ngIf="!isAllData() &&checked_all">{{ count - unchecked_id_a.length }}件のデータが一括更新されます
+                    </p>
+                    <p *ngIf="isAllData()" style="font-size: 1.2em; font-weight: bold; color: red;">全データが更新されます</p>
+                    <div class="p-2">
+                        <div *ngIf="customFilter && !customFilter.id" style="color:red">
+                            ※フィルタ適用中のレコードのみ一括編集されます。<br>
+                        </div>
+                        ※権限のあるデータのみ一括編集されます。<br>
+                        ※編集中でロックされているデータは更新されません。その場合はログに記録されます。<br>
+                        ※元には戻せません<br>
+                        <ng-container *ngIf="customFilter && customFilter.id">
+                            <span class="text-danger">※フィルタが適用されているデータのみ更新されます</span>
+                        </ng-container>
+                    </div>
+                </div>
+                <select-field-and-value [table_info]="table_info" [include_multi]="false" (valueChange)="onChange($event)"></select-field-and-value>
+            </div>
+            <div class="modal-footer">
+                <button type="button" [ladda]='false' class="btn btn-secondary btn-ladda" (click)="close()">キャンセル</button>
+                <button type="button" [ladda]='false' class="btn btn-success btn-ladda" (click)="update()">更新</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!--<confirm-modal bsModal #confirmUpdateModal="bs-modal" [text]="'もとに戻せません。全'+count+'件のデータを更新してよろしいですか？'"></confirm-modal>-->

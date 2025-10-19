@@ -1,0 +1,61 @@
+<div *ngIf="loading;then loading_block"></div>
+<ng-template #loading_block>
+    <div class="loader">Loading...</div>
+</ng-template>
+<div class="animated fadeIn" [hidden]="loading">
+    <div class="row">
+        <div class="col-sm-6 col-lg-6">
+            <app-storage-charts [default_storage]="default_storage" [db_gb]="db_gb" [s3_gb]="s3_gb" [db_size]="db_size" [total_size_GB]="total_size_GB" [s3_size]="s3_size"></app-storage-charts>
+        </div>
+        <ng-container *ngIf="_share.isUserLoginContractType();else NotUserLogin">
+            <div class="col-sm-6 col-lg-6">
+                <app-login-user-charts [total_user]="total_user" [current_user]="current_login_user"></app-login-user-charts>
+            </div>
+        </ng-container>
+        <ng-template #NotUserLogin>
+            <div class="col-sm-6 col-lg-6">
+                <app-user-charts [total_user]="total_user" [current_user]="current_user"></app-user-charts>
+            </div>
+        </ng-template>
+        <div class="col-sm-6 col-lg-6">
+            <app-table-num-charts [table_num]="table_num" [max_table_num]="max_table_num"></app-table-num-charts>
+        </div>
+
+        <div class="col-sm-6 col-lg-6">
+            <app-notification-count-charts [notify_num]="notify_num" [notify_limit]="notify_limit"></app-notification-count-charts>
+        </div>
+
+        <div class="col-sm-6 col-lg-6">
+            <app-api-log-charts [apiLogData]="apiLogData"></app-api-log-charts>
+        </div>
+
+    </div>
+
+    <div class="row" *ngIf="this.s3_size_by_table">
+        <div class="col-sm-12 col-lg-12">
+            <h3>テーブル別サイズ</h3>
+            <table class="table table-striped table-bordered  table-responsive" style="background: white">
+                <thead>
+                <tr>
+                    <th>テーブル名</th>
+                    <th>DBサイズ</th>
+                    <th>ファイルサイズ</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let table of _share.exist_table_a">
+                    <td>{{ table.getLabel() }}</td>
+                    <td>{{ formatSize(this.db_size_by_table[table.table] * 1024 * 1024) }}</td>
+                    <td>{{ formatSize(this.s3_size_by_table[table.table]) }}</td>
+                </tr>
+                <!-- other -->
+                <tr>
+                    <td>その他</td>
+                    <td>{{ formatSize(this.db_size_by_table['other']) }}</td>
+                    <td>{{ formatSize(this.s3_size_by_table['other']) }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

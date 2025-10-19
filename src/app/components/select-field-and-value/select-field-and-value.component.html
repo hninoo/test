@@ -1,0 +1,58 @@
+<div class="">
+    <ng-container *ngIf="table_info!=null">
+        <button class="btn btn-success btn-sm" (click)="addField()"><i class="fa fa-plus mr-1"></i>項目を追加</button>
+
+        <div class="row mt-2">
+            <ng-container *ngFor="let form_value of form_and_values;let i=index">
+                <div class="col-md-12 row p-1 pl-3 pr-3">
+                    <div class="col-md-1">
+                        <button class="btn btn-danger pull-left btn-sm btn mt-2" (click)="delete(i)"><i class="fa fa-minus"></i></button>
+                    </div>
+                    <div class="col-md-4 select-wrap">
+                        <!-- <select style="width:100%" class="form-control" (change)="change()" [(ngModel)]="form_value.form">
+                            <ng-container *ngFor="let form of table_info.getEditableFormArray(true)">
+                                <option [ngValue]="form">{{form.label}}</option>
+                            </ng-container>
+                        </select> -->
+
+                        <div class="ng-select-fieldset">
+                            <label *ngIf="form_value.form || is_select_open" class="floating-label">フィールドを選択</label>
+                            <ng-select
+                                [(ngModel)]="form_value.form"
+                                (change)="change()"
+                                class="custom form-control"
+                                style="width:100%;"
+                                appendTo=".select-wrap"
+                                (focus)="is_select_open = true"
+                                (blur)="is_select_open = false"
+                                [placeholder]="!form_value.form && !is_select_open ? 'フィールドを選択' : ''"
+                            >
+                                <ng-option *ngFor="let form of getAvailableFieldsForIndex(i)"
+                                    [value]="form"
+                                >
+                                    {{form.label}}
+                                </ng-option>
+                            </ng-select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <ng-container *ngIf="form_value.form">
+
+                            <admin-forms [table_info]="table_info" [fields]="table_info.fields" [forms]="table_info.forms" [data]="data"
+                                         [only_field_name]="form_value.form.field.Field"
+                                         [error_a]="error_a"
+                                         [show_field_label]="false"
+                                         (valueChanged)="onValueChanged($event,form_value)"
+                            ></admin-forms>
+                        </ng-container>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+    </ng-container>
+
+</div>
+
+
