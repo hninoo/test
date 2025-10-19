@@ -1104,6 +1104,131 @@ export class FormsFieldComponent implements OnInit, OnChanges {
         this.onChange(null, val)
     }
 
+    /**
+     * Utility method to ensure Froala popup structure is correct
+     * Ensures fr-popup fr-desktop fr-ltr fr-active div contains fr-link-insert-layer fr-layer fr-active
+     */
+    private ensureFroalaPopupStructure() {
+        setTimeout(() => {
+            const popup = $('.fr-popup.fr-desktop.fr-ltr.fr-active');
+            if (popup.length > 0) {
+                // Ensure popup is appended to body
+                if (popup.parent().get(0) !== document.body) {
+                    popup.appendTo('body');
+                }
+                
+                // Ensure the fr-link-insert-layer exists
+                let linkLayer = popup.find('.fr-link-insert-layer.fr-layer.fr-active');
+                if (linkLayer.length === 0) {
+                    linkLayer = $('<div class="fr-link-insert-layer fr-layer fr-active"></div>');
+                    popup.append(linkLayer);
+                }
+                
+                // Ensure proper styling
+                popup.css({
+                    'position': 'absolute',
+                    'z-index': '9999',
+                    'display': 'block'
+                });
+            }
+        }, 50);
+    }
+
+    /**
+     * Get Froala editor options with popup fix for mixed single/multi field mode
+     * Fixes issue where fr-popup fr-desktop fr-ltr fr-active div is not appended
+     * when clicking linkEdit in mixed field mode scenarios
+     */
+    getFroalaOptionWithPopupFix() {
+        let option = this._share.getFroalaOption('full', this.table_info.table, this.IS_PUBLIC_FORM ? 'iframe-form' : '.app-body');
+        
+        // Create a deep copy to avoid modifying the shared option
+        option = JSON.parse(JSON.stringify(option));
+        
+        // Fix for popup append issue in mixed single/multi field mode
+        // Ensure popups are always appended to body for consistent behavior
+        option.scrollableContainer = 'body';
+        
+        // Add event handlers to ensure proper popup creation and structure
+        if (!option.events) {
+            option.events = {};
+        }
+        
+        const originalEvents = option.events;
+        
+        option.events = Object.assign({}, originalEvents, {
+            'initialized': function () {
+                // Store reference to editor instance for popup management
+                const editor = this;
+                
+                // Override the popup show method to ensure proper structure
+                const originalShow = editor.popups.show;
+                editor.popups.show = function(id, left, top, height) {
+                    const result = originalShow.call(this, id, left, top, height);
+                    
+                    if (id === 'link.edit') {
+                        // Use utility method to ensure popup structure
+                        editor.ensureFroalaPopupStructure = editor.ensureFroalaPopupStructure || function() {
+                            setTimeout(() => {
+                                const popup = $('.fr-popup.fr-desktop.fr-ltr.fr-active');
+                                if (popup.length > 0) {
+                                    // Force append to body if not already there
+                                    if (popup.parent().get(0) !== document.body) {
+                                        popup.appendTo('body');
+                                    }
+                                    
+                                    // Ensure the fr-link-insert-layer exists and is active
+                                    let linkLayer = popup.find('.fr-link-insert-layer.fr-layer.fr-active');
+                                    if (linkLayer.length === 0) {
+                                        // Create the complete layer structure
+                                        linkLayer = $('<div class="fr-link-insert-layer fr-layer fr-active"></div>');
+                                        popup.append(linkLayer);
+                                    }
+                                    
+                                    // Ensure proper styling and visibility
+                                    popup.css({
+                                        'position': 'absolute',
+                                        'z-index': '9999',
+                                        'display': 'block'
+                                    });
+                                }
+                            }, 10);
+                        };
+                        
+                        editor.ensureFroalaPopupStructure();
+                    }
+                    
+                    return result;
+                };
+                
+                // Call original initialized event if it exists
+                if (originalEvents && originalEvents['initialized']) {
+                    originalEvents['initialized'].call(this);
+                }
+            },
+            'commands.after': function (cmd) {
+                // Handle link edit command specifically
+                if (cmd === 'linkEdit') {
+                    const editor = this;
+                    setTimeout(() => {
+                        editor.popups.show('link.edit', null, null, null);
+                        // Ensure popup structure after showing
+                        if (editor.ensureFroalaPopupStructure) {
+                            editor.ensureFroalaPopupStructure();
+                        }
+                    }, 0);
+                }
+                
+                // Call original event handler if it exists
+                if (originalEvents && originalEvents['commands.after']) {
+                    originalEvents['commands.after'].call(this, cmd);
+                }
+            }
+        });
+        
+        return option;
+    }
+
     restrictDecimal($event: any) {
         let val: string = $event.target.value;
 
