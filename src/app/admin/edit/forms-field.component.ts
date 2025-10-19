@@ -2121,7 +2121,7 @@ export class FormsFieldComponent implements OnInit, OnChanges {
             const script = document.createElement('script');
             script.id = 'google-maps-script';
             // APIキーはDBから取得に変更
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCDTg-EGCLpO3AfEyyPhQedqWhqWM1xU3s';
+            script.src = '';
             script.async = true;
             script.defer = true;
 
