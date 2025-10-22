@@ -164,19 +164,24 @@ class CrossTableService {
 								$fy_start_month = $chart_params['fields'][0]['term_month_start'];
 							}
 
-							// Calculate the fiscal year range to exclude
-							// Current year is 2025, so -1 year fy would be 2024-04 to 2025-03 (if fy_start_month = 4)
-							$current_year = date('Y');
-							$fy_year = $current_year - 1; // Previous fiscal year
+							// Calculate the fiscal year range to exclude for "noteq -1 year fy"
+							// Current year 2025, fy_start_month=4: -1 year fy = 2024-04 to 2025-03
+							// Since it's "noteq", we need to EXCLUDE this range from headers
 							
-							$fy_start = new \DateTime(sprintf('%d-%02d-01', $fy_year, $fy_start_month));
-							$fy_end = clone $fy_start;
-							$fy_end->modify('+11 months'); // End of fiscal year (11 months later)
+							$current_year = 2025; // Current year
+							$prev_fy_start_year = $current_year - 1; // 2024
+							
+							$fy_start = new \DateTime(sprintf('%d-%02d-01', $prev_fy_start_year, $fy_start_month)); // 2024-04-01
+							$fy_end = new \DateTime(sprintf('%d-%02d-01', $current_year, $fy_start_month)); // 2025-04-01
+							$fy_end->modify('-1 day'); // 2025-03-31
 							
 							$fy_noteq_range = [
 								'start' => $fy_start,
 								'end' => $fy_end
 							];
+							
+							// Debug: Log the exclusion range
+							error_log("FY NOTEQ RANGE: Excluding " . $fy_start->format('Y-m-d') . " to " . $fy_end->format('Y-m-d'));
 							break;
 						}
 					}
