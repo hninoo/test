@@ -23,7 +23,17 @@ class CrossTableService {
 	}
 
 	public function setSearchConditions($search) {
-		$this->search_conditions = $search;
+		info("setSearchConditions input: " . json_encode($search));
+		
+		// If search is a JSON string, parse it
+		if (is_string($search)) {
+			info("Search is a JSON string, parsing...");
+			$this->search_conditions = json_decode($search, true);
+		} else {
+			$this->search_conditions = $search;
+		}
+		
+		info("Final search_conditions: " . json_encode($this->search_conditions));
 		return $this;
 	}
 
@@ -149,6 +159,7 @@ class CrossTableService {
 
 		// Detect fiscal year "noteq" condition directly from search parameters
 		$fy_noteq_range = null;
+		info("Starting fiscal year detection with search_conditions: " . json_encode($this->search_conditions));
 		
 		// Handle both formats: condition_json string or direct condition_hash_a array
 		$condition_json = null;
