@@ -141,8 +141,42 @@ class CrossTableService {
 				return [[], $x1_sub_a, 0];
 			}
 
-			// Detect fiscal year "noteq" condition by analyzing search conditions
-			$fy_noteq_range = $this->detectFiscalYearNoteqRange($chart_params);
+			// Detect fiscal year "noteq" condition directly from search parameters
+			$fy_noteq_range = null;
+			$search = $chart_params['search'] ?? null;
+			if ($search && isset($search['condition_json'])) {
+				$condition_json = json_decode($search['condition_json'], true);
+				if ($condition_json && isset($condition_json['condition_hash_a'])) {
+					// Look for noteq condition with "-1 year fy" value
+					foreach ($condition_json['condition_hash_a'] as $condition) {
+						if (isset($condition['condition']) && $condition['condition'] === 'noteq' &&
+							isset($condition['value']) && $condition['value'] === '-1 year fy' &&
+							isset($condition['date_relative_value']) && $condition['date_relative_value'] === true) {
+							
+							// Get fiscal year start month from chart params
+							$fy_start_month = 4; // Default April start
+							if (isset($chart_params['fields'][0]['term_month_start'])) {
+								$fy_start_month = $chart_params['fields'][0]['term_month_start'];
+							}
+
+							// Calculate the fiscal year range to exclude
+							// Current year is 2025, so -1 year fy would be 2024-04 to 2025-03 (if fy_start_month = 4)
+							$current_year = date('Y');
+							$fy_year = $current_year - 1; // Previous fiscal year
+							
+							$fy_start = new \DateTime(sprintf('%d-%02d-01', $fy_year, $fy_start_month));
+							$fy_end = clone $fy_start;
+							$fy_end->modify('+11 months'); // End of fiscal year (11 months later)
+							
+							$fy_noteq_range = [
+								'start' => $fy_start,
+								'end' => $fy_end
+							];
+							break;
+						}
+					}
+				}
+			}
 			
 			$no_fill = isset($chart_params['options']['fill']) && $chart_params['options']['fill'] === false;
 			$first_dt = null;
@@ -358,50 +392,4 @@ class CrossTableService {
 		return [$crossRecord_a, $x1_sub_a, $count];
 	}
 
-	/**
-	 * Detect fiscal year "noteq" condition from search parameters
-	 * Returns the date range that should be excluded from headers
-	 */
-	private function detectFiscalYearNoteqRange($chart_params) {
-		// Check if there's a search condition with "noteq" and "-1 year fy"
-		$search = $chart_params['search'] ?? null;
-		if (!$search || !isset($search['condition_json'])) {
-			return null;
-		}
-
-		$condition_json = json_decode($search['condition_json'], true);
-		if (!$condition_json || !isset($condition_json['condition_hash_a'])) {
-			return null;
-		}
-
-		// Look for noteq condition with "-1 year fy" value
-		foreach ($condition_json['condition_hash_a'] as $condition) {
-			if (isset($condition['condition']) && $condition['condition'] === 'noteq' &&
-				isset($condition['value']) && $condition['value'] === '-1 year fy' &&
-				isset($condition['date_relative_value']) && $condition['date_relative_value'] === true) {
-				
-				// Get fiscal year start month from chart params
-				$fy_start_month = 4; // Default April start
-				if (isset($chart_params['fields'][0]['term_month_start'])) {
-					$fy_start_month = $chart_params['fields'][0]['term_month_start'];
-				}
-
-				// Calculate the fiscal year range to exclude
-				// Current year is 2025, so -1 year fy would be 2024-04 to 2025-03 (if fy_start_month = 4)
-				$current_year = date('Y');
-				$fy_year = $current_year - 1; // Previous fiscal year
-				
-				$fy_start = new \DateTime(sprintf('%d-%02d-01', $fy_year, $fy_start_month));
-				$fy_end = clone $fy_start;
-				$fy_end->modify('+11 months'); // End of fiscal year (11 months later)
-				
-				return [
-					'start' => $fy_start,
-					'end' => $fy_end
-				];
-			}
-		}
-
-		return null;
-	}
 }
