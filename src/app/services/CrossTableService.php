@@ -183,7 +183,7 @@ class CrossTableService {
 							];
 							
 							// Debug: Log the exclusion range
-							error_log("FY NOTEQ RANGE: Excluding " . $fy_start->format('Y-m-d') . " to " . $fy_end->format('Y-m-d'));
+							info("FY NOTEQ RANGE: Excluding " . $fy_start->format('Y-m-d') . " to " . $fy_end->format('Y-m-d'));
 							break;
 						}
 					}
@@ -219,28 +219,30 @@ class CrossTableService {
 					foreach ($months as $month) {
 						$month_dt = new \DateTime($month);
 						// Debug logging
-						error_log("Checking month: " . $month . " (" . $month_dt->format('Y-m-d') . ") against range " . 
+						info("Checking month: " . $month . " (" . $month_dt->format('Y-m-d') . ") against range " . 
 								 $fy_noteq_range['start']->format('Y-m-d') . " to " . $fy_noteq_range['end']->format('Y-m-d'));
 						
 						// Before fiscal year: dates that are strictly before gap_start
 						if ($month_dt < $fy_noteq_range['start']) {
 							$before_fy[] = $month;
-							error_log("  -> BEFORE FY: Added to before_fy");
+							info("  -> BEFORE FY: Added to before_fy");
 						} 
 						// After fiscal year: dates that are greater than gap_end
 						elseif ($month_dt > $fy_noteq_range['end']) {
 							$after_fy[] = $month;
-							error_log("  -> AFTER FY: Added to after_fy");
+							info("  -> AFTER FY: Added to after_fy");
 						} else {
-							error_log("  -> EXCLUDED: Within FY range, skipping");
+							info("  -> EXCLUDED: Within FY range, skipping");
 						}
 					}
 					
 					if (!empty($before_fy)) {
 						$segments[] = [$before_fy[0], $before_fy[count($before_fy)-1]];
+						info("BEFORE FY SEGMENT: " . $before_fy[0] . " to " . $before_fy[count($before_fy)-1]);
 					}
 					if (!empty($after_fy)) {
 						$segments[] = [$after_fy[0], $after_fy[count($after_fy)-1]];
+						info("AFTER FY SEGMENT: " . $after_fy[0] . " to " . $after_fy[count($after_fy)-1]);
 					}
 				} else {
 					// Original gap detection logic when no fiscal year noteq
@@ -276,10 +278,13 @@ class CrossTableService {
 					$cursor = new \DateTime($start_m);
 					$end_dt = new \DateTime($end_m);
 					while ($cursor <= $end_dt) {
-						$x1_sub_a[] = $cursor->format($view_format);
+						$header = $cursor->format($view_format);
+						$x1_sub_a[] = $header;
+						info("ADDING HEADER: " . $header);
 						$cursor->modify('+1 month');
 					}
 				}
+				info("FINAL HEADERS: " . json_encode($x1_sub_a));
 			} else {
 				// Handle fiscal year time condition to set the full date range
 				$time_condition = $chart_params['time_condition'] ?? null;
