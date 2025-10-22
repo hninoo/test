@@ -16,18 +16,24 @@ class CrossTableService {
 
 	private string $table_name;
 	private int $GAP_THRESHOLD_MONTHS = 60;
+	private $search_conditions = null;
 
 	public function __construct(string $table_name) {
 		$this->table_name = $table_name;
 	}
 
-	public function getCrossTableData($resultset_a, $chart_params, $page = 1, $sort_params = [], $search = null) {
+	public function setSearchConditions($search) {
+		$this->search_conditions = $search;
+		return $this;
+	}
+
+	public function getCrossTableData($resultset_a, $chart_params, $page = 1, $sort_params = []) {
 		$result_hash = [];
 		//FIXME:only cross table
 		/**
 		 * @var array<CrossTableRecord> $crossRecord_a
 		 */
-		[$crossRecord_a, $x1_sub_a, $count] = $this->getRecordsAndHeaders($resultset_a, $chart_params, $page, $search);
+		[$crossRecord_a, $x1_sub_a, $count] = $this->getRecordsAndHeaders($resultset_a, $chart_params, $page);
 		$result_hash['count'] = $count;
 		$result_hash['cross_data_a'] = $crossRecord_a;
 		$result_hash['cross_horizontal_header_a'] = $x1_sub_a;
@@ -108,7 +114,7 @@ class CrossTableService {
 	 * @return void
 	 * @throws \Exception
 	 */
-	private function getRecordsAndHeaders(array $record_a, $chart_params, int $page = 1, $search = null) {
+	private function getRecordsAndHeaders(array $record_a, $chart_params, int $page = 1) {
 
 		$fields = $chart_params['fields'];
 		$summary_a = $chart_params['summary_a'];
@@ -143,8 +149,8 @@ class CrossTableService {
 
 		// Detect fiscal year "noteq" condition directly from search parameters
 		$fy_noteq_range = null;
-			if ($search && isset($search['condition_json'])) {
-				$condition_json = json_decode($search['condition_json'], true);
+		if ($this->search_conditions && isset($this->search_conditions['condition_json'])) {
+				$condition_json = json_decode($this->search_conditions['condition_json'], true);
 				if ($condition_json && isset($condition_json['condition_hash_a'])) {
 					// Look for noteq condition with "-1 year fy" value
 					foreach ($condition_json['condition_hash_a'] as $condition) {
