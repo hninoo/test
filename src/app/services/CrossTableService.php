@@ -158,6 +158,8 @@ class CrossTableService {
 							isset($condition['value']) && $condition['value'] === '-1 year fy' &&
 							isset($condition['date_relative_value']) && $condition['date_relative_value'] === true) {
 							
+							error_log("DETECTED: noteq -1 year fy condition found!");
+							
 							// Get fiscal year start month from chart params
 							$fy_start_month = 4; // Default April start
 							if (isset($chart_params['fields'][0]['term_month_start'])) {
@@ -216,15 +218,22 @@ class CrossTableService {
 					
 					foreach ($months as $month) {
 						$month_dt = new \DateTime($month);
+						// Debug logging
+						error_log("Checking month: " . $month . " (" . $month_dt->format('Y-m-d') . ") against range " . 
+								 $fy_noteq_range['start']->format('Y-m-d') . " to " . $fy_noteq_range['end']->format('Y-m-d'));
+						
 						// Before fiscal year: dates that are strictly before gap_start
 						if ($month_dt < $fy_noteq_range['start']) {
 							$before_fy[] = $month;
+							error_log("  -> BEFORE FY: Added to before_fy");
 						} 
 						// After fiscal year: dates that are greater than gap_end
 						elseif ($month_dt > $fy_noteq_range['end']) {
 							$after_fy[] = $month;
+							error_log("  -> AFTER FY: Added to after_fy");
+						} else {
+							error_log("  -> EXCLUDED: Within FY range, skipping");
 						}
-						// Skip months within the fiscal year noteq range
 					}
 					
 					if (!empty($before_fy)) {
@@ -321,6 +330,7 @@ class CrossTableService {
 					if ($fy_noteq_range !== null) {
 						$current_month_start = new \DateTime($start_dt->format('Y-m-01'));
 						if ($current_month_start >= $fy_noteq_range['start'] && $current_month_start <= $fy_noteq_range['end']) {
+							error_log("FILL MODE: Skipping " . $current_month_start->format('Y-m-d') . " (within FY exclusion range)");
 							$start_dt->modify('+ 1' . $horizontal_field['term']);
 							continue;
 						}
