@@ -149,11 +149,24 @@ class CrossTableService {
 
 		// Detect fiscal year "noteq" condition directly from search parameters
 		$fy_noteq_range = null;
-		if ($this->search_conditions && isset($this->search_conditions['condition_json'])) {
+		
+		// Handle both formats: condition_json string or direct condition_hash_a array
+		$condition_json = null;
+		if ($this->search_conditions) {
+			if (isset($this->search_conditions['condition_json'])) {
+				// Format 1: condition_json is a JSON string
 				info("Raw condition_json: " . $this->search_conditions['condition_json']);
 				$condition_json = json_decode($this->search_conditions['condition_json'], true);
-				info("Parsed condition_json: " . json_encode($condition_json));
-				if ($condition_json && isset($condition_json['condition_hash_a'])) {
+			} elseif (isset($this->search_conditions['condition_hash_a'])) {
+				// Format 2: condition_hash_a is already parsed
+				info("Direct condition_hash_a found");
+				$condition_json = $this->search_conditions;
+			}
+			info("Final parsed condition_json: " . json_encode($condition_json));
+		}
+		
+		if ($condition_json) {
+			if (isset($condition_json['condition_hash_a'])) {
 					info("Found condition_hash_a with " . count($condition_json['condition_hash_a']) . " conditions");
 					// Look for noteq condition with "-1 year fy" value
 					foreach ($condition_json['condition_hash_a'] as $index => $condition) {
