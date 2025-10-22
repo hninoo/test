@@ -21,13 +21,13 @@ class CrossTableService {
 		$this->table_name = $table_name;
 	}
 
-	public function getCrossTableData($resultset_a, $chart_params, $page = 1, $sort_params = []) {
+	public function getCrossTableData($resultset_a, $chart_params, $page = 1, $sort_params = [], $search = null) {
 		$result_hash = [];
 		//FIXME:only cross table
 		/**
 		 * @var array<CrossTableRecord> $crossRecord_a
 		 */
-		[$crossRecord_a, $x1_sub_a, $count] = $this->getRecordsAndHeaders($resultset_a, $chart_params, $page);
+		[$crossRecord_a, $x1_sub_a, $count] = $this->getRecordsAndHeaders($resultset_a, $chart_params, $page, $search);
 		$result_hash['count'] = $count;
 		$result_hash['cross_data_a'] = $crossRecord_a;
 		$result_hash['cross_horizontal_header_a'] = $x1_sub_a;
@@ -108,7 +108,7 @@ class CrossTableService {
 	 * @return void
 	 * @throws \Exception
 	 */
-	private function getRecordsAndHeaders(array $record_a, $chart_params, int $page = 1) {
+	private function getRecordsAndHeaders(array $record_a, $chart_params, int $page = 1, $search = null) {
 
 		$fields = $chart_params['fields'];
 		$summary_a = $chart_params['summary_a'];
@@ -141,9 +141,8 @@ class CrossTableService {
 				return [[], $x1_sub_a, 0];
 			}
 
-			// Detect fiscal year "noteq" condition directly from search parameters
-			$fy_noteq_range = null;
-			$search = $chart_params['search'] ?? null;
+		// Detect fiscal year "noteq" condition directly from search parameters
+		$fy_noteq_range = null;
 			if ($search && isset($search['condition_json'])) {
 				$condition_json = json_decode($search['condition_json'], true);
 				if ($condition_json && isset($condition_json['condition_hash_a'])) {
