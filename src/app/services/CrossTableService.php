@@ -150,15 +150,25 @@ class CrossTableService {
 		// Detect fiscal year "noteq" condition directly from search parameters
 		$fy_noteq_range = null;
 		if ($this->search_conditions && isset($this->search_conditions['condition_json'])) {
+				info("Raw condition_json: " . $this->search_conditions['condition_json']);
 				$condition_json = json_decode($this->search_conditions['condition_json'], true);
+				info("Parsed condition_json: " . json_encode($condition_json));
 				if ($condition_json && isset($condition_json['condition_hash_a'])) {
+					info("Found condition_hash_a with " . count($condition_json['condition_hash_a']) . " conditions");
 					// Look for noteq condition with "-1 year fy" value
-					foreach ($condition_json['condition_hash_a'] as $condition) {
-						if (isset($condition['condition']) && $condition['condition'] === 'noteq' &&
-							isset($condition['value']) && $condition['value'] === '-1 year fy' &&
-							isset($condition['date_relative_value']) && $condition['date_relative_value'] === true) {
-							
-							error_log("DETECTED: noteq -1 year fy condition found!");
+					foreach ($condition_json['condition_hash_a'] as $index => $condition) {
+						info("Checking condition $index: " . json_encode($condition));
+						
+						$has_condition = isset($condition['condition']) && $condition['condition'] === 'noteq';
+						$has_value = isset($condition['value']) && $condition['value'] === '-1 year fy';
+						$has_date_relative = isset($condition['date_relative_value']) && $condition['date_relative_value'] === true;
+						
+						info("Condition checks - condition: " . ($has_condition ? 'YES' : 'NO') . 
+							 ", value: " . ($has_value ? 'YES' : 'NO') . 
+							 ", date_relative: " . ($has_date_relative ? 'YES' : 'NO'));
+						
+						if ($has_condition && $has_value && $has_date_relative) {
+							info("DETECTED: noteq -1 year fy condition found!");
 							
 							// Get fiscal year start month from chart params
 							$fy_start_month = 4; // Default April start
@@ -185,8 +195,12 @@ class CrossTableService {
 							// Debug: Log the exclusion range
 							info("FY NOTEQ RANGE: Excluding " . $fy_start->format('Y-m-d') . " to " . $fy_end->format('Y-m-d'));
 							break;
+						} else {
+							info("Condition not matched, skipping...");
 						}
 					}
+				} else {
+					info("No condition_hash_a found or condition_json is null");
 				}
 			}
 			
