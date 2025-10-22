@@ -28,8 +28,16 @@ class CrossTableService {
 		// If search is a JSON string, parse it
 		if (is_string($search)) {
 			info("Search is a JSON string, parsing...");
-			$this->search_conditions = json_decode($search, true);
+			$parsed = json_decode($search, true);
+			if (json_last_error() === JSON_ERROR_NONE) {
+				$this->search_conditions = $parsed;
+				info("JSON parsing successful");
+			} else {
+				info("JSON parsing failed: " . json_last_error_msg());
+				$this->search_conditions = $search; // Keep as string if parsing fails
+			}
 		} else {
+			info("Search is not a string, using as-is");
 			$this->search_conditions = $search;
 		}
 		
@@ -161,10 +169,20 @@ class CrossTableService {
 		$fy_noteq_range = null;
 		info("Starting fiscal year detection with search_conditions: " . json_encode($this->search_conditions));
 		
-		// Handle both formats: condition_json string or direct condition_hash_a array
+		// Handle multiple formats: JSON string, condition_json, or direct condition_hash_a array
 		$condition_json = null;
 		if ($this->search_conditions) {
-			if (isset($this->search_conditions['condition_json'])) {
+			// Check if search_conditions itself is a JSON string
+			if (is_string($this->search_conditions)) {
+				info("search_conditions is a JSON string, parsing...");
+				$parsed = json_decode($this->search_conditions, true);
+				if (json_last_error() === JSON_ERROR_NONE) {
+					$condition_json = $parsed;
+					info("Successfully parsed JSON string");
+				} else {
+					info("Failed to parse JSON: " . json_last_error_msg());
+				}
+			} elseif (isset($this->search_conditions['condition_json'])) {
 				// Format 1: condition_json is a JSON string
 				info("Found condition_json string, parsing...");
 				$condition_json = json_decode($this->search_conditions['condition_json'], true);
