@@ -1,0 +1,86 @@
+# Example Docker Compose configuration
+# Rename this file to docker-compose.yml to use it
+
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  pfc_mysql:
+    image: mysql:8.0
+    container_name: pfc-docker-base-pfc_mysql-1
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pfc_database
+      MYSQL_USER: pfc_user
+      MYSQL_PASSWORD: pfc_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - pfc_network
+    restart: unless-stopped
+
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    container_name: pfc-docker-base-redis-1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pfc_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # PHP/Apache Work Container
+  pfc_work:
+    image: php:8.1-apache
+    container_name: pfc-docker-base-pfc_work-1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src:/var/www/html
+      - ./apache/conf:/etc/apache2/sites-available
+    networks:
+      - pfc_network
+    depends_on:
+      - pfc_mysql
+      - redis
+    restart: unless-stopped
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+
+  # phpMyAdmin Service (optional - uncomment to use)
+  # pfc_phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   container_name: pfc-docker-base-pfc_phpmyadmin-1
+  #   environment:
+  #     PMA_HOST: pfc_mysql
+  #     PMA_PORT: 3306
+  #     PMA_USER: root
+  #     PMA_PASSWORD: rootpassword
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #   ports:
+  #     - "8080:80"
+  #   networks:
+  #     - pfc_network
+  #   depends_on:
+  #     - pfc_mysql
+  #   restart: unless-stopped
+
+# Networks
+networks:
+  pfc_network:
+    driver: bridge
+    name: pfc-docker-base_default
+
+# Volumes
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
