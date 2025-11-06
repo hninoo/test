@@ -45,7 +45,7 @@ export class FullLayoutComponent implements OnInit {
     @ViewChild('adminJsonImport') AdminJsonImport: any;
 
     public labelText = '';
-    public myControl: FormControl = new FormControl();
+    public myControl: FormControl = new FormControl('');
     public options = [];
     public filteredOptions: Observable<Object[]>;
     uploadProgress: number = 0;
@@ -133,8 +133,9 @@ export class FullLayoutComponent implements OnInit {
 
         this.filteredOptions = this.myControl.valueChanges.pipe(
             startWith(''),
-            map(val => val.length >= 1 ? this.filter(val): []),
-            tap(val => this.value = val)
+            map(val => typeof val === 'string' ? val : ''),
+            map(val => val.length >= 1 ? this.filter(val) : []),
+            tap(options => this.value = options)
         );
 
         // this.fn = (evt: KeyboardEvent) => {
