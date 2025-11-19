@@ -17,11 +17,13 @@
                         class="custom form-control"
                         appendTo="body"
                         [items]="availableDatabases"
+                        bindLabel="label"
+                        bindValue="value"
                         [searchable]="true"
                         [clearable]="false"
                         [disabled]="isCreating"
                         [(ngModel)]="selectedSourceDb"
-                        (change)="onDatabaseChange($event)"
+                        (ngModelChange)="onDatabaseChange($event)"
                         placeholder="データベースを選択">
                     </ng-select>
                 </div>

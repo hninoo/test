@@ -43,6 +43,14 @@ export interface DeleteTmpDatabaseResponse {
     message: string;
 }
 
+export interface DatabaseInfo {
+    value: string;
+    label: string;
+    db_name?: string;
+    target_environment?: string;
+    [key: string]: any;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -96,10 +104,13 @@ export class TmpDatabaseService {
     /**
      * 利用可能なDB一覧を取得
      */
-    getAvailableDatabases(): Observable<string[]> {
+    getAvailableDatabases(): Observable<DatabaseInfo[]> {
         return this._connect.get('/admin/available-databases').map(response => {
             console.log('Available databases response:', response);
-            return response.databases;
+            const databases = response?.databases || [];
+            return databases
+                .map((db: DatabaseInfo | string) => this.normalizeDatabaseInfo(db))
+                .filter((db: DatabaseInfo) => !!db.value);
         });
     }
 
@@ -108,5 +119,23 @@ export class TmpDatabaseService {
      */
     getDebugInfo(dbName: string): Observable<any> {
         return this._connect.get(`/admin/tmp-database-debug/${dbName}`);
+    }
+
+    private normalizeDatabaseInfo(db: DatabaseInfo | string): DatabaseInfo {
+        if (typeof db === 'string') {
+            return {
+                value: db,
+                label: db
+            };
+        }
+
+        const value = db.value || db.db_name || db.label || db.display || '';
+        const label = db.label || db.display || db.db_name || db.value || value;
+
+        return {
+            ...db,
+            value,
+            label
+        };
     }
 }
