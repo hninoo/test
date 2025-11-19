@@ -1,8 +1,10 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import {TmpDatabaseService, TmpDatabase, CreateTmpDatabaseResponse} from '../services/tmp-database.service';
+import {
+    TmpDatabaseService,
+    TmpDatabase,
+    CreateTmpDatabaseResponse,
+    DatabaseInfo
+} from '../services/tmp-database.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../components/confirm-dialog.component';
@@ -16,7 +18,7 @@ import {DebugDialogComponent} from './debug-dialog.component';
 })
 export class TmpDatabaseComponent implements OnInit, OnDestroy {
     tmpDatabases: TmpDatabase[] = [];
-    availableDatabases: string[] = [];
+    availableDatabases: DatabaseInfo[] = [];
     isLoading = false;
     isCreating = false;  // 作成中の状態を別管理
     selectedSourceDb = '';
@@ -133,12 +135,15 @@ export class TmpDatabaseComponent implements OnInit, OnDestroy {
     /**
      * DB選択時の処理
      */
-    onDatabaseChange(db: string): void {
+    onDatabaseChange(db: string | DatabaseInfo | null): void {
+        const dbName = this.normalizeDbValue(db);
+
         // Copy対象テーブルの選択をリセット
         this.selectedTables = [];
 
-        if (db) {
-            this.loadDatabaseDatasets(db);
+        if (dbName) {
+            this.selectedSourceDb = dbName;
+            this.loadDatabaseDatasets(dbName);
         } else {
             this.datasets = [];
         }
@@ -151,9 +156,13 @@ export class TmpDatabaseComponent implements OnInit, OnDestroy {
         this.tmpDbService.getAvailableDatabases().subscribe({
             next: (databases) => {
                 this.availableDatabases = databases;
-                if (databases.length > 0) {
-                    this.selectedSourceDb = databases[0];
-                    this.onDatabaseChange(databases[0]);
+                if (this.availableDatabases.length > 0) {
+                    const firstDb = this.availableDatabases[0]?.value;
+                    this.selectedSourceDb = firstDb || '';
+                    this.onDatabaseChange(firstDb || null);
+                } else {
+                    this.selectedSourceDb = '';
+                    this.datasets = [];
                 }
             },
             error: (error) => {
@@ -420,5 +429,17 @@ export class TmpDatabaseComponent implements OnInit, OnDestroy {
         }, reloadInterval);
 
         console.log('Auto-reload timer set for 25 minutes interval');
+    }
+
+    private normalizeDbValue(db: string | DatabaseInfo | null | undefined): string {
+        if (!db) {
+            return '';
+        }
+
+        if (typeof db === 'string') {
+            return db;
+        }
+
+        return db.value || db.db_name || '';
     }
 }
