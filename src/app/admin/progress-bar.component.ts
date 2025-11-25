@@ -20,7 +20,11 @@ export class ProgressBarComponent implements OnChanges, AfterViewInit {
     if (changes['progress'] && changes['progress'].currentValue !== undefined) {
       const newProgress = changes['progress'].currentValue;
       if (newProgress > 0 && newProgress < 100) {
+        const wasHidden = !this.isVisible;
         this.isVisible = true;
+        if (wasHidden) {
+          setTimeout(() => this.loadPosition());
+        }
       }
       if (newProgress >= 100) {
         setTimeout(() => {
@@ -35,11 +39,14 @@ export class ProgressBarComponent implements OnChanges, AfterViewInit {
   }
 
   onMouseDown(event: MouseEvent) {
+    const container = this.getProgressContainer();
+    if (!container) return;
+
     this.isDragging = true;
     this.startX = event.clientX;
     this.startY = event.clientY;
 
-    const rect = this.el.nativeElement.querySelector('.progress-container').getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     this.offsetX = this.startX - rect.left;
     this.offsetY = this.startY - rect.top;
 
@@ -50,11 +57,14 @@ export class ProgressBarComponent implements OnChanges, AfterViewInit {
   onMouseMove(event: MouseEvent) {
     if (!this.isDragging) return;
 
+    const container = this.getProgressContainer();
+    if (!container) return;
+
     const newX = event.clientX - this.offsetX;
     const newY = event.clientY - this.offsetY;
 
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.progress-container'), 'left', `${newX}px`);
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.progress-container'), 'top', `${newY}px`);
+    this.renderer.setStyle(container, 'left', `${newX}px`);
+    this.renderer.setStyle(container, 'top', `${newY}px`);
   }
 
   onMouseUp() {
@@ -63,16 +73,28 @@ export class ProgressBarComponent implements OnChanges, AfterViewInit {
   }
 
   savePosition() {
-    const rect = this.el.nativeElement.querySelector('.progress-container').getBoundingClientRect();
+    const container = this.getProgressContainer();
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
     localStorage.setItem('progressBarPosition', JSON.stringify({ left: rect.left, top: rect.top }));
   }
 
   loadPosition() {
+    const container = this.getProgressContainer();
+    if (!container) {
+      return;
+    }
+
     const position = localStorage.getItem('progressBarPosition');
     if (position) {
       const { left, top } = JSON.parse(position);
-      this.renderer.setStyle(this.el.nativeElement.querySelector('.progress-container'), 'left', `${left}px`);
-      this.renderer.setStyle(this.el.nativeElement.querySelector('.progress-container'), 'top', `${top}px`);
+      this.renderer.setStyle(container, 'left', `${left}px`);
+      this.renderer.setStyle(container, 'top', `${top}px`);
     }
+  }
+
+  private getProgressContainer(): HTMLElement | null {
+    return this.el.nativeElement.querySelector('.progress-container');
   }
 }
